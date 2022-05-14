@@ -36,7 +36,7 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           path: "src/pages",
           // 指定 pages 的路由路径，因为 blog 作为主页了
-          routeBasePath: "/pages",
+          routeBasePath: "./pages",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
