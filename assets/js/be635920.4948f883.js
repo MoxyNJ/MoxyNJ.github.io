@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkuizuo_cn=self.webpackChunkkuizuo_cn||[]).push([[1192],{71005:function(s){s.exports=JSON.parse('{"allTagsPath":"/tags","name":"springboot","count":2,"permalink":"/tags/springboot"}')}}]);

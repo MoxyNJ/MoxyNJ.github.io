@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkuizuo_cn=self.webpackChunkkuizuo_cn||[]).push([[998],{60332:function(u){u.exports=JSON.parse('{"allTagsPath":"/tags","name":"github","count":2,"permalink":"/tags/github"}')}}]);

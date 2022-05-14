@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[7585],{21557:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"RPC","count":1,"permalink":"/tags/rpc"}')}}]);

@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkuizuo_cn=self.webpackChunkkuizuo_cn||[]).push([[1443],{92306:function(a){a.exports=JSON.parse('{"allTagsPath":"/tags","name":"\u7f8e\u5316","count":1,"permalink":"/tags/\u7f8e\u5316"}')}}]);

@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkuizuo_cn=self.webpackChunkkuizuo_cn||[]).push([[932],{66975:function(a){a.exports=JSON.parse('{"allTagsPath":"/tags","name":"ast","count":2,"permalink":"/tags/ast"}')}}]);

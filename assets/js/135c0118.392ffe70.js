@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkuizuo_cn=self.webpackChunkkuizuo_cn||[]).push([[8056],{94027:function(a){a.exports=JSON.parse('{"allTagsPath":"/tags","name":"\u6d4f\u89c8\u5668","count":1,"permalink":"/tags/\u6d4f\u89c8\u5668"}')}}]);

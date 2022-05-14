@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkkuizuo_cn=self.webpackChunkkuizuo_cn||[]).push([[9880],{21252:function(a){a.exports=JSON.parse('{"allTagsPath":"/tags","name":"Jetbrains","count":2,"permalink":"/tags/jetbrains"}')}}]);

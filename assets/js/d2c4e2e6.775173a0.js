@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[5097],{36086:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"vue","count":6,"permalink":"/tags/vue"}')}}]);

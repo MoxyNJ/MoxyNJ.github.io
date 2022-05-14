@@ -1,6 +1,6 @@
 {
-  "name": "愧怍的小站",
-  "short_name": "愧怍的小站",
+  "name": "Ninjee的篮子",
+  "short_name": "Ninjee的篮子",
   "theme_color": "#2196f3",
   "background_color": "#424242",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "related_applications": [
     {
       "platform": "webapp",
-      "url": "https://kuizuo.cn/manifest.json"
+      "url": "https://moxynj.github.io/manifest.json"
     }
   ],
   "icons": [

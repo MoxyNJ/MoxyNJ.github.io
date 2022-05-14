@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[1192],{71005:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"springboot","count":2,"permalink":"/tags/springboot"}')}}]);

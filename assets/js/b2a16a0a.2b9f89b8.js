@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[1540],{87278:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"gitlab","count":1,"permalink":"/tags/gitlab"}')}}]);
