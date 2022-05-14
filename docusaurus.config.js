@@ -12,7 +12,7 @@ const config = {
   url: "https://moxynj.github.io/", // 当前页面的URL
   baseUrl: "/", // 默认的主页地址
   organizationName: "Ninjee", // GitHub user name.
-  projectName: "Ninjee.github.io", // repo name.
+  projectName: "MoxyNJ.github.io", // repo name.
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
