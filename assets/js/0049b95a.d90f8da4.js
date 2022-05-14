@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkkuizuo_cn=self.webpackChunkkuizuo_cn||[]).push([[1801],{67228:function(e){e.exports=JSON.parse('{"permalink":"/tags/vite","page":1,"postsPerPage":10,"totalPages":1,"totalCount":3,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);
