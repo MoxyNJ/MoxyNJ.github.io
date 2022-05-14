@@ -8,14 +8,15 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "Ninjee 在这里",
   tagline: "📖 吾日三省吾身，思否、码否、饭否", // 标题下的文字
-  url: "https://Ninjee.github.io", // 当前页面的URL
+
+  url: "https://moxynj.github.io/", // 当前页面的URL
   baseUrl: "/", // 默认的主页地址
+  organizationName: "Ninjee", // GitHub user name.
+  projectName: "Ninjee.github.io", // repo name.
+
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  // GitHub pages deployment config.
-  organizationName: "Ninjee", // GitHub user name.
-  projectName: "Ninjee.github.io", // repo name.
   // 国际化
   i18n: {
     defaultLocale: "zh-Hans",
