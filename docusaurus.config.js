@@ -18,25 +18,28 @@ const config = {
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   // 国际化
-  i18n: {
-    defaultLocale: "zh-Hans",
-    locales: ["zh-Hans"],
-  },
+  // i18n: {
+  //   defaultLocale: "zh-Hans",
+  //   locales: ["zh-Hans"],
+  // },
   presets: [
     [
       "classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
-        blog: {
-          // blog作为主页
-          routeBasePath: "/",
-          path: "./blog",
-        },
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          path: "src/pages",
-          // 指定 pages 的路由路径，因为 blog 作为主页了
-          routeBasePath: "./pages",
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          editUrl:
+            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+        },
+        blog: {
+          showReadingTime: true,
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          editUrl:
+            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
