@@ -1,0 +1,23 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.blogPostTitle {
+  font-size: 3rem;
+}
+
+.blogPostDate {
+  font-size: 0.9rem;
+}
+
+.readMore {
+  margin-top: 1.4em;
+  padding: 0.75em 2em;
+  background: linear-gradient(90deg, var(--ifm-color-primary) 11.3%, var(--ifm-color-primary-light) 161.54%);
+  border-radius: 8px;
+  box-shadow: 0 0 32px rgb(0 105 165 / 35%);
+  color: #fff;
+}

@@ -11,14 +11,21 @@ jobs:
         uses: actions/checkout@master
         with:
           persist-credentials: false
-      - name: Install and Build
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+
+      - name: Build Project
         run: |
-          npm install
-          npm run-script build
+          yarn install
+          yarn run build
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: gh-pages
           FOLDER: build
-          BUILD_SCRIPT: npm install && npm run build
+          BUILD_SCRIPT: yarn install && yarn run build
