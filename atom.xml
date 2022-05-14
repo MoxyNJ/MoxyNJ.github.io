@@ -7,7 +7,7 @@
     <link rel="alternate" href="https://moxynj.github.io/"/>
     <subtitle>Ninjee的前端篮子 Blog</subtitle>
     <icon>https://moxynj.github.io/img/favicon.ico</icon>
-    <rights>Copyright © 2022 ninjee Built with Docusaurus.&lt;p&gt;&lt;a href="http://beian.miit.gov.cn/" class="footer_lin"&gt;footer&lt;/a&gt;&lt;/p&gt;</rights>
+    <rights>&lt;p&gt;Copyright © 2022 ninjee Built with Docusaurus.&lt;/p&gt;</rights>
     <entry>
         <title type="html"><![CDATA[Vercel部署Serverless]]></title>
         <id>/git/develop/Vercel部署Serverless</id>
