@@ -31,7 +31,7 @@ const config = {
       ],
       hideableSidebar: true,
       navbar: {
-        title: "胡桃墨",
+        title: "Ninjee",
         logo: {
           alt: "ninjee",
           src: "img/ninjee-icon.png",

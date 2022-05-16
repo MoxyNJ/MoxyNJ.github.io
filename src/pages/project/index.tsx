@@ -27,7 +27,7 @@ import { useHistory, useLocation } from "@docusaurus/router";
 import styles from "./styles.module.css";
 
 const TITLE = "项目展示";
-const DESCRIPTION = "以下项目均由本人开发，均可自由使用，部分开源。";
+const DESCRIPTION = "这里是我的项目经验，分享我制作的项目。";
 const GITHUB_URL = "https://github.com/MoxyNJ";
 
 type ProjectState = {

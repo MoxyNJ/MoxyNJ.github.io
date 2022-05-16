@@ -5,7 +5,7 @@ import Translate, { translate } from "@docusaurus/Translate";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Link from "@docusaurus/Link";
 
-import HeroMain from "./img/hero_main.svg";
+import HeroMain from "./img/hero_main1.svg";
 
 import GithubIcon from "@site/static/icons/github.svg";
 import JuejinIcon from "@site/static/icons/juejin.svg";
@@ -20,7 +20,7 @@ import Button from "../Button";
 
 import styles from "./styles.module.css";
 
-function Hero() {
+const Hero = (): JSX.Element => {
   const {
     // 当前语言
     i18n: { currentLocale },
@@ -41,21 +41,21 @@ function Hero() {
     <animated.div className={styles.hero}>
       <div className={styles.bloghome__intro}>
         <animated.div style={animatedTexts[0]} className={styles.hero_text}>
-          Hello! 我是
-          <span className={styles.intro__name}> Ninjee</span>
+          Hi, 我是
+          <span className={styles.intro__name}> Ninjee </span>
         </animated.div>
         <animated.p style={animatedTexts[1]}>
           <Translate
             id="homepage.hero.text"
             description="hero text"
             values={{
-              blogs: (
-                <Link to="#homepage_blogs">
+              algorithm: (
+                <Link to="/docs/code/algorithm">
                   <Translate
-                    id="hompage.hero.text.blog"
-                    description="Blog link label"
+                    id="hompage.hero.text.algorithm"
+                    description="algorithm link label"
                   >
-                    技术博客
+                    算法
                   </Translate>
                 </Link>
               ),
@@ -70,24 +70,25 @@ function Hero() {
                 </Link>
               ),
               links: (
-                <Link to="/">
+                <Link to="/docs/frontEnd/javascript">
                   <Translate
                     id="hompage.hero.text.link"
                     description="Link link label"
                   >
-                    资源导航
+                    前端知识集锦
                   </Translate>
                 </Link>
               ),
             }}
           >
-            {`在这里你能了解到各类实战开发的所遇到的问题，帮助你在学习的过程了解最新的技术栈，并希望我的个人经历对你有所启发。`}
+            {`见到你很高兴，推荐：{algorithm}、{project} 以及 {links}。
+            在这里，记录了我学习过程中的所见所感所想，希望对自己、对你都有所帮助，也欢迎和我交流。`}
           </Translate>
         </animated.p>
         {/* {currentLocale === 'zh-CN' && (
           <animated.p style={animatedTexts[3]}>
             <Translate id='homepage.qqgroup1' description='qq group1'>
-              QQ 群：5478458
+              QQ 群：x
             </Translate>
           </animated.p>
         )} */}
@@ -103,7 +104,7 @@ function Hero() {
       <HeroMainImage />
     </animated.div>
   );
-}
+};
 
 function SocialLinks({ animatedProps, ...props }) {
   return (
@@ -114,14 +115,14 @@ function SocialLinks({ animatedProps, ...props }) {
       <a href="https://github.com/MoxyNJ" target="_blank">
         <GithubIcon />
       </a>
-      <a href="/" target="_blank">
+      <a href="https://juejin.cn/user/2005151873514024" target="_blank">
         <JuejinIcon />
       </a>
       {/* <a href="/" target="_blank">
         <CsdnIcon />
       </a> */}
       <a
-        href="https://wpa.qq.com/msgrd?v=3&amp;uin=911993023&amp;site=qq"
+        href="https://qm.qq.com/cgi-bin/qm/qr?k=XM2DFpRCmjKNtcVedXyQdclrLbByU0Vr&noverify=0"
         target="_blank"
       >
         <QqIcon />
