@@ -127,18 +127,18 @@ const config = {
         style: "dark",
         links: [
           {
-            title: "学习",
+            title: "分享",
             items: [
               {
-                label: "技术博客",
-                to: "/#homepage_blogs",
+                label: "前端",
+                to: "docs/frontEnd/javascript",
               },
               {
-                label: "技术笔记",
-                to: "docs/skill",
+                label: "算法笔记",
+                to: "docs/code/algorithm",
               },
               {
-                label: "实战项目",
+                label: "我的项目",
                 to: "project",
               },
             ],
@@ -146,10 +146,6 @@ const config = {
           {
             title: "社交媒体",
             items: [
-              {
-                label: "首页",
-                to: "/",
-              },
               {
                 label: "关于我",
                 to: "/about",
@@ -165,11 +161,11 @@ const config = {
             ],
           },
           {
-            title: "友情链接",
+            title: "Blog",
             items: [
               {
-                label: "峰华前端工程师",
-                to: "https://zxuqian.cn/",
+                label: "Ninjee 的前端篮子",
+                to: "/",
               },
             ],
           },
