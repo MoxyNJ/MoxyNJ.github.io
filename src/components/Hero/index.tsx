@@ -5,8 +5,7 @@ import Translate, { translate } from "@docusaurus/Translate";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Link from "@docusaurus/Link";
 
-import HeroMain from "./img/hero_main1.svg";
-import Pic from "./img/main.png"
+import HeroMain from "./img/work.svg";
 
 import GithubIcon from "@site/static/icons/github.svg";
 import JuejinIcon from "@site/static/icons/juejin.svg";
@@ -76,7 +75,7 @@ const Hero = (): JSX.Element => {
                     id="hompage.hero.text.link"
                     description="Link link label"
                   >
-                    实战项目
+                    我的项目
                   </Translate>
                 </Link>
               ),
@@ -141,8 +140,7 @@ function SocialLinks({ animatedProps, ...props }) {
 function HeroMainImage() {
   return (
     <div className={styles.bloghome__image}>
-      {/* <HeroMain />    // 需要一个 svg 替换*/}
-    <img src={Pic}/>
+      <HeroMain style={{padding: "30px"}}/>
     </div>
   );
 }

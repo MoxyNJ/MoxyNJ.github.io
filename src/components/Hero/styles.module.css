@@ -211,18 +211,3 @@ html[data-theme="dark"] .bloghome__intro>p {
     transform: rotateY(360deg);
   }
 }
-
-.bbox {
-  overflow: hidden;
-}
-
-.bgi {
-  border: 1px solid;
-  background-image: url(./img/t1.png);
-
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
-  background-color: #464646;
-}
