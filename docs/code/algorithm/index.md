@@ -1,7 +1,15 @@
 ---
-title: 目录
+id: introduction
+title: 算法
 sidebar_position: 0
+slug: /code/algorithm
+keywords:
+  - 算法
+  - algorithm
+  - LeetCode
+  - JavaScript
 ---
+
 ## 算法的相关内容
 
 - LeetCode 中每日一题的整理；
