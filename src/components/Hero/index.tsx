@@ -60,7 +60,7 @@ const Hero = (): JSX.Element => {
                 </Link>
               ),
               project: (
-                <Link to="/project">
+                <Link to="/docs/frontEnd/javascript">
                   <Translate
                     id="hompage.hero.text.project"
                     description="Project link label"
@@ -70,7 +70,7 @@ const Hero = (): JSX.Element => {
                 </Link>
               ),
               links: (
-                <Link to="/docs/frontEnd/javascript">
+                <Link to="/project">
                   <Translate
                     id="hompage.hero.text.link"
                     description="Link link label"
@@ -140,7 +140,7 @@ function SocialLinks({ animatedProps, ...props }) {
 function HeroMainImage() {
   return (
     <div className={styles.bloghome__image}>
-      <HeroMain style={{padding: "30px"}}/>
+      <HeroMain style={{ padding: "30px" }} />
     </div>
   );
 }
