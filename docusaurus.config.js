@@ -121,7 +121,7 @@ const config = {
       algolia: {
         apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
         appId: "AJRH2JRXVY",
-        indexName: "ninjeexxxx",
+        indexName: "ninjee",
       },
       footer: {
         style: "dark",
