@@ -4,44 +4,19 @@
         <title>ninjee</title>
         <link>https://moxynj.github.io/</link>
         <description>Ninjee的前端篮子 Blog</description>
-        <lastBuildDate>Wed, 16 Mar 2022 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 21 May 2022 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>zh</language>
         <copyright>&lt;p&gt;Copyright © 2022 ninjee Built with Docusaurus.&lt;/p&gt;</copyright>
         <item>
-            <title><![CDATA[SSE 服务器发送事件]]></title>
-            <link>https://moxynj.github.io/http/SSE 服务器发送事件</link>
-            <guid>/http/SSE 服务器发送事件</guid>
-            <pubDate>Wed, 16 Mar 2022 00:00:00 GMT</pubDate>
-            <description><![CDATA[先放一张 gif 图展示下效果]]></description>
-            <category>http</category>
-        </item>
-        <item>
-            <title><![CDATA[HTTP请求配置SSL证书]]></title>
-            <link>https://moxynj.github.io/http/HTTP请求配置SSL证书</link>
-            <guid>/http/HTTP请求配置SSL证书</guid>
-            <pubDate>Thu, 17 Feb 2022 00:00:00 GMT</pubDate>
-            <description><![CDATA[在学习安卓逆向的时候，遇到一个APP，服务端检测请求的SSL证书，需要提交SSL证书上去才能正常发送请求。而在开启抓包和协议复现的时候，请求是能正常发出去，但是服务器会返回400错误。于是便有了这篇文章来记录下。]]></description>
-            <category>http</category>
-            <category>ssl</category>
-        </item>
-        <item>
-            <title><![CDATA[HTTP请求之Content-Type]]></title>
-            <link>https://moxynj.github.io/http/HTTP请求之Content-Type</link>
-            <guid>/http/HTTP请求之Content-Type</guid>
-            <pubDate>Sat, 12 Dec 2020 00:00:00 GMT</pubDate>
-            <description><![CDATA[Content-type]]></description>
-            <category>http</category>
-        </item>
-        <item>
-            <title><![CDATA[浅谈HTTP]]></title>
+            <title><![CDATA[Gene]]></title>
             <link>https://moxynj.github.io/http/浅谈HTTP</link>
             <guid>/http/浅谈HTTP</guid>
-            <pubDate>Tue, 29 Sep 2020 00:00:00 GMT</pubDate>
-            <description><![CDATA[关于 HTTP 我不讲理论，只讲一下具体的用途。]]></description>
-            <category>http</category>
-            <category>逆向</category>
+            <pubDate>Sat, 21 May 2022 00:00:00 GMT</pubDate>
+            <description><![CDATA[这是一篇测试文章。]]></description>
+            <category>first</category>
+            <category>blog</category>
         </item>
     </channel>
 </rss>

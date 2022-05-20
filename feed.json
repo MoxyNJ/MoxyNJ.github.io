@@ -5,65 +5,19 @@
     "description": "Ninjee的前端篮子 Blog",
     "items": [
         {
-            "id": "/http/SSE 服务器发送事件",
-            "content_html": null,
-            "url": "https://moxynj.github.io/http/SSE 服务器发送事件",
-            "title": "SSE 服务器发送事件",
-            "summary": "先放一张 gif 图展示下效果",
-            "date_modified": "2022-03-16T00:00:00.000Z",
-            "author": {
-                "name": "Ninjee",
-                "url": "https://github.com/MoxyNJ"
-            },
-            "tags": [
-                "http"
-            ]
-        },
-        {
-            "id": "/http/HTTP请求配置SSL证书",
-            "content_html": null,
-            "url": "https://moxynj.github.io/http/HTTP请求配置SSL证书",
-            "title": "HTTP请求配置SSL证书",
-            "summary": "在学习安卓逆向的时候，遇到一个APP，服务端检测请求的SSL证书，需要提交SSL证书上去才能正常发送请求。而在开启抓包和协议复现的时候，请求是能正常发出去，但是服务器会返回400错误。于是便有了这篇文章来记录下。",
-            "date_modified": "2022-02-17T00:00:00.000Z",
-            "author": {
-                "name": "Ninjee",
-                "url": "https://github.com/MoxyNJ"
-            },
-            "tags": [
-                "http",
-                "ssl"
-            ]
-        },
-        {
-            "id": "/http/HTTP请求之Content-Type",
-            "content_html": null,
-            "url": "https://moxynj.github.io/http/HTTP请求之Content-Type",
-            "title": "HTTP请求之Content-Type",
-            "summary": "Content-type",
-            "date_modified": "2020-12-12T00:00:00.000Z",
-            "author": {
-                "name": "Ninjee",
-                "url": "https://github.com/MoxyNJ"
-            },
-            "tags": [
-                "http"
-            ]
-        },
-        {
             "id": "/http/浅谈HTTP",
             "content_html": null,
             "url": "https://moxynj.github.io/http/浅谈HTTP",
-            "title": "浅谈HTTP",
-            "summary": "关于 HTTP 我不讲理论，只讲一下具体的用途。",
-            "date_modified": "2020-09-29T00:00:00.000Z",
+            "title": "Gene",
+            "summary": "这是一篇测试文章。",
+            "date_modified": "2022-05-21T00:00:00.000Z",
             "author": {
                 "name": "Ninjee",
                 "url": "https://github.com/MoxyNJ"
             },
             "tags": [
-                "http",
-                "逆向"
+                "first",
+                "blog"
             ]
         }
     ]

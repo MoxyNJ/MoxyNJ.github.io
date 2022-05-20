@@ -2,60 +2,23 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://moxynj.github.io/</id>
     <title>ninjee</title>
-    <updated>2022-03-16T00:00:00.000Z</updated>
+    <updated>2022-05-21T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://moxynj.github.io/"/>
     <subtitle>Ninjee的前端篮子 Blog</subtitle>
     <icon>https://moxynj.github.io/img/favicon.ico</icon>
     <rights>&lt;p&gt;Copyright © 2022 ninjee Built with Docusaurus.&lt;/p&gt;</rights>
     <entry>
-        <title type="html"><![CDATA[SSE 服务器发送事件]]></title>
-        <id>/http/SSE 服务器发送事件</id>
-        <link href="https://moxynj.github.io/http/SSE 服务器发送事件"/>
-        <updated>2022-03-16T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[先放一张 gif 图展示下效果]]></summary>
-        <author>
-            <name>Ninjee</name>
-            <uri>https://github.com/MoxyNJ</uri>
-        </author>
-        <category label="http" term="http"/>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[HTTP请求配置SSL证书]]></title>
-        <id>/http/HTTP请求配置SSL证书</id>
-        <link href="https://moxynj.github.io/http/HTTP请求配置SSL证书"/>
-        <updated>2022-02-17T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[在学习安卓逆向的时候，遇到一个APP，服务端检测请求的SSL证书，需要提交SSL证书上去才能正常发送请求。而在开启抓包和协议复现的时候，请求是能正常发出去，但是服务器会返回400错误。于是便有了这篇文章来记录下。]]></summary>
-        <author>
-            <name>Ninjee</name>
-            <uri>https://github.com/MoxyNJ</uri>
-        </author>
-        <category label="http" term="http"/>
-        <category label="ssl" term="ssl"/>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[HTTP请求之Content-Type]]></title>
-        <id>/http/HTTP请求之Content-Type</id>
-        <link href="https://moxynj.github.io/http/HTTP请求之Content-Type"/>
-        <updated>2020-12-12T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Content-type]]></summary>
-        <author>
-            <name>Ninjee</name>
-            <uri>https://github.com/MoxyNJ</uri>
-        </author>
-        <category label="http" term="http"/>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[浅谈HTTP]]></title>
+        <title type="html"><![CDATA[Gene]]></title>
         <id>/http/浅谈HTTP</id>
         <link href="https://moxynj.github.io/http/浅谈HTTP"/>
-        <updated>2020-09-29T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[关于 HTTP 我不讲理论，只讲一下具体的用途。]]></summary>
+        <updated>2022-05-21T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[这是一篇测试文章。]]></summary>
         <author>
             <name>Ninjee</name>
             <uri>https://github.com/MoxyNJ</uri>
         </author>
-        <category label="http" term="http"/>
-        <category label="逆向" term="逆向"/>
+        <category label="first" term="first"/>
+        <category label="blog" term="blog"/>
     </entry>
 </feed>
