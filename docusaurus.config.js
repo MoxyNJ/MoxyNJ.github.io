@@ -119,9 +119,9 @@ const config = {
       },
       //TODO: algolia支持
       algolia: {
-        apiKey: "87223cb5a5ff37c4dbbb616812c65a59",
-        appId: "2NBW5YNFON",
-        indexName: "kuizuo",
+        apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
+        appId: "AJRH2JRXVY",
+        indexName: "ninjee",
       },
       footer: {
         style: "dark",
