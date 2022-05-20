@@ -165,7 +165,7 @@ const config = {
             items: [
               {
                 label: "Ninjee 的前端篮子",
-                to: "/",
+                to: "ninjee.co",
               },
             ],
           },
