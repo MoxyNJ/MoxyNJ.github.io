@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[9991],{51853:function(e){e.exports=JSON.parse('{"permalink":"/tags/jetbrains","page":1,"postsPerPage":10,"totalPages":1,"totalCount":2,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

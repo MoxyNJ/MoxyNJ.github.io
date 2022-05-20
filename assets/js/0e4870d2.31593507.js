@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[8512],{37225:function(e){e.exports=JSON.parse('{"permalink":"/tags/\u5f00\u53d1/page/2","page":2,"postsPerPage":10,"totalPages":2,"totalCount":11,"previousPage":"/tags/\u5f00\u53d1","blogDescription":"Blog","blogTitle":"Blog"}')}}]);

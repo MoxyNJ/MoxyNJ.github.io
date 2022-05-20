@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[1690],{35591:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"elasticsearch","count":1,"permalink":"/tags/elasticsearch"}')}}]);

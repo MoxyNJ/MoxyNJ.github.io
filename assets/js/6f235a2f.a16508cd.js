@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[6367],{11341:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"hook","count":1,"permalink":"/tags/hook"}')}}]);

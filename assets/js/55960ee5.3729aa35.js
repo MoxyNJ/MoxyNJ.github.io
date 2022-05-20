@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[4121],{8070:function(e){e.exports=JSON.parse('[{"name":"algorithm","permalink":"/docs/tags/algorithm","count":10},{"name":"everyday","permalink":"/docs/tags/everyday","count":2}]')}}]);

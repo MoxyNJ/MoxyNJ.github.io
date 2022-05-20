@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[5342],{35440:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"vercel","count":2,"permalink":"/tags/vercel"}')}}]);

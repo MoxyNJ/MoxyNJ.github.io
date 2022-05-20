@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[2097],{92346:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"admin","count":1,"permalink":"/tags/admin"}')}}]);

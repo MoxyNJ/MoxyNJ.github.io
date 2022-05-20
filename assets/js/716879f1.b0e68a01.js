@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[5585],{81193:function(e){e.exports=JSON.parse('{"allTagsPath":"/tags","name":"Gitalk","count":1,"permalink":"/tags/gitalk"}')}}]);
