@@ -122,6 +122,7 @@ const config = {
         // apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
         // appId: "AJRH2JRXVY",
         // indexName: "ninjee",
+        indexName: "ninjee",
         apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
         appId: "6H64QA8BXJ",
         siteId: "6e8c93fe-0e5c-42a1-8f48-bb69ed96977c",
