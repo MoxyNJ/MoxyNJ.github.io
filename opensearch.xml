@@ -4,8 +4,8 @@
   <ShortName>Ninjee的前端篮子</ShortName>
   <Description>Search Ninjee的前端篮子</Description>
   <InputEncoding>UTF-8</InputEncoding>
-  <Image width="16" height="16" type="image/x-icon">https://moxynj.github.io/img/favicon.ico</Image>
-  <Url type="text/html" method="get" template="https://moxynj.github.io/search?q={searchTerms}"/>
-  <Url type="application/opensearchdescription+xml" rel="self" template="https://moxynj.github.io/opensearch.xml" />
-  <moz:SearchForm>https://moxynj.github.io/</moz:SearchForm>
+  <Image width="16" height="16" type="image/x-icon">https://ninjee.netlify.app/img/favicon.ico</Image>
+  <Url type="text/html" method="get" template="https://ninjee.netlify.app/search?q={searchTerms}"/>
+  <Url type="application/opensearchdescription+xml" rel="self" template="https://ninjee.netlify.app/opensearch.xml" />
+  <moz:SearchForm>https://ninjee.netlify.app/</moz:SearchForm>
 </OpenSearchDescription>

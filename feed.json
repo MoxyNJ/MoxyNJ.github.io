@@ -1,13 +1,13 @@
 {
     "version": "https://jsonfeed.org/version/1",
     "title": "ninjee",
-    "home_page_url": "https://moxynj.github.io/",
+    "home_page_url": "https://ninjee.netlify.app/",
     "description": "Ninjee的前端篮子 Blog",
     "items": [
         {
             "id": "/http/浅谈HTTP",
             "content_html": null,
-            "url": "https://moxynj.github.io/http/浅谈HTTP",
+            "url": "https://ninjee.netlify.app/http/浅谈HTTP",
             "title": "Gene",
             "summary": "这是一篇测试文章。",
             "date_modified": "2022-05-21T00:00:00.000Z",

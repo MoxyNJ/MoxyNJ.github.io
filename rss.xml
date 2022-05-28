@@ -2,7 +2,7 @@
 <rss version="2.0">
     <channel>
         <title>ninjee</title>
-        <link>https://moxynj.github.io/</link>
+        <link>https://ninjee.netlify.app/</link>
         <description>Ninjee的前端篮子 Blog</description>
         <lastBuildDate>Sat, 21 May 2022 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
@@ -11,7 +11,7 @@
         <copyright>&lt;p&gt;Copyright © 2022 ninjee Built with Docusaurus.&lt;/p&gt;</copyright>
         <item>
             <title><![CDATA[Gene]]></title>
-            <link>https://moxynj.github.io/http/浅谈HTTP</link>
+            <link>https://ninjee.netlify.app/http/浅谈HTTP</link>
             <guid>/http/浅谈HTTP</guid>
             <pubDate>Sat, 21 May 2022 00:00:00 GMT</pubDate>
             <description><![CDATA[这是一篇测试文章。]]></description>
