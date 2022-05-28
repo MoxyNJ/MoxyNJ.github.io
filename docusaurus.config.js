@@ -94,23 +94,23 @@ const config = {
             items: [
               {
                 label: "计算机网络",
-                to: "docs/interview/internet/",
+                to: "docs/interview/internet",
               },
               {
                 label: "操作系统",
-                to: "docs/interview/os/",
+                to: "docs/interview/os",
               },
               {
                 label: "面经",
-                to: "docs/interview/experience/",
+                to: "docs/interview/experience",
               },
               {
                 label: "总结",
-                to: "docs/interview/summary/",
+                to: "docs/interview/summary",
               },
               {
                 label: "物联网",
-                to: "docs/interview/iot/",
+                to: "docs/interview/iot",
               },
             ],
           },
@@ -123,15 +123,17 @@ const config = {
       },
       //TODO: algolia支持
       algolia: {
-        apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
-        appId: "AJRH2JRXVY",
-        indexName: "ninjee",
-        // indexName: "netlify_6e8c93fe-0e5c-42a1-8f48-bb69ed96977c_master_all",
-        // apiKey: "ab5459a0712ffbe0dbd5e666660ea9a2",
-        // appId: "6H64QA8BXJ",
-        // siteId: "6e8c93fe-0e5c-42a1-8f48-bb69ed96977c",
-        // branch: "master",
-        // selector: "div#search",
+        // apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
+        // appId: "AJRH2JRXVY",
+        // indexName: "ninjee",
+        indexName: "netlify_6e8c93fe-0e5c-42a1-8f48-bb69ed96977c_master_all",
+        apiKey: "ab5459a0712ffbe0dbd5e666660ea9a2",
+        appId: "6H64QA8BXJ",
+        siteId: "6e8c93fe-0e5c-42a1-8f48-bb69ed96977c",
+        branch: "master",
+        selector: "div#search",
+        contextualSearch: false,
+        placeholder: "search",
       },
       footer: {
         style: "dark",
