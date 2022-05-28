@@ -6,7 +6,7 @@ const config = {
   title: "Ninjee的前端篮子",
   titleDelimiter: "-",
   // tagline: "📖 吾日三省吾身，思否、码否、饭否", // 标题下的文字
-  url: "https://moxynj.github.io/", // 当前页面的URL
+  url: "https://ninjee.netlify.app/", // 当前页面的URL
   baseUrl: "/", // 默认的主页地址
   organizationName: "Ninjee", // GitHub user name.
   projectName: "MoxyNJ.github.io", // repo name.
