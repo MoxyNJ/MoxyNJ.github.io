@@ -1,3 +1,10 @@
+---
+title: OKR
+sidebar_position: 3
+date: 2022-06-08
+tags: [OKR]
+---
+
 ## kafka
 
 - kafka消费的三种模式_kafka消费者的三种模式（最多/最少/恰好消费一次）
