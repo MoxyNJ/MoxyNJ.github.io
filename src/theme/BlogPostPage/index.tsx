@@ -45,7 +45,7 @@ function BlogPostPage(props: { content: any; sidebar: any; }) {
     clientSecret: "2454766509e11ab9e87e279443adfbdbbf5c0025",
     repo: "MoxyNJ.github.io",
     owner: "MoxyNJ",
-    admin: ["ninjee"],
+    admin: ["MoxyNJ"],
     id: title,
     title: title,
     labels: labels,
