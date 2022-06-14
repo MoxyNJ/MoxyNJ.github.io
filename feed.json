@@ -5,9 +5,9 @@
     "description": "Ninjee的前端篮子 Blog",
     "items": [
         {
-            "id": "/http/浅谈HTTP",
+            "id": "/new/demo",
             "content_html": null,
-            "url": "https://ninjee.netlify.app/http/浅谈HTTP",
+            "url": "https://ninjee.netlify.app/new/demo",
             "title": "Gene",
             "summary": "这是一篇测试文章。",
             "date_modified": "2022-05-21T00:00:00.000Z",

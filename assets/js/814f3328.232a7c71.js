@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[2535],{5641:function(e){e.exports=JSON.parse('{"title":"\u6700\u8fd1...","items":[{"title":"Gene","permalink":"/http/\u6d45\u8c08HTTP"}]}')}}]);
