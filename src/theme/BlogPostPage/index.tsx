@@ -1,4 +1,3 @@
-import React from "react";
 import BlogLayout from "@theme/BlogLayout";
 import BlogPostItem from "@theme/BlogPostItem";
 import BlogPostPaginator from "@theme/BlogPostPaginator";
@@ -11,7 +10,7 @@ import BrowserOnly from "@docusaurus/BrowserOnly";
 import "gitalk/dist/gitalk.css";
 import GitalkComponent from "gitalk/dist/gitalk-component";
 
-function BlogPostPage(props) {
+function BlogPostPage(props: { content: any; sidebar: any; }) {
   const { content: BlogPostContents, sidebar } = props;
   const {
     // TODO this frontmatter is not validated/normalized, it's the raw user-provided one. We should expose normalized one too!
@@ -40,12 +39,12 @@ function BlogPostPage(props) {
     siteConfig: { url: siteUrl },
   } = useDocusaurusContext();
 
-  const labels = tags.length > 0 ? tags.map((t) => t.label) : ["Gitalk", title];
+  const labels = tags.length > 0 ? tags.map((t: { label: any; }) => t.label) : ["Gitalk", title];
   const options = {
-    clientID: "3f390a6f6e979a76d1a1",
-    clientSecret: "e2cd29b8055fcc2265b2292387236c36857e21fc",
-    repo: "blog",
-    owner: "ninjee",
+    clientID: "c02501b952755e1911da",
+    clientSecret: "2454766509e11ab9e87e279443adfbdbbf5c0025",
+    repo: "MoxyNJ.github.io",
+    owner: "MoxyNJ",
     admin: ["ninjee"],
     id: title,
     title: title,
@@ -81,11 +80,11 @@ function BlogPostPage(props) {
         <meta property="article:published_time" content={date} />
 
         {/* TODO double check those article metas array syntaxes, see https://ogp.me/#array */}
-        {authors.some((author) => author.url) && (
+        {authors.some((author: { url: any; }) => author.url) && (
           <meta
             property="article:author"
             content={authors
-              .map((author) => author.url)
+              .map((author: { url: any; }) => author.url)
               .filter(Boolean)
               .join(",")}
           />
@@ -93,7 +92,7 @@ function BlogPostPage(props) {
         {tags.length > 0 && (
           <meta
             property="article:tag"
-            content={tags.map((tag) => tag.label).join(",")}
+            content={tags.map((tag: { label: any; }) => tag.label).join(",")}
           />
         )}
       </div>
