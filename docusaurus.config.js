@@ -123,9 +123,17 @@ const config = {
       },
       //TODO: algolia支持
       algolia: {
-        appId: "AJRH2JRXVY",
-        apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
-        indexName: "ninjee",
+        // 方案一：algolia 24小时更新
+        appId: "OITUMQ5615",
+        apiKey: "0387d1c184aea75952516c04bb8d66de",
+        indexName: "moxynj",
+        // container: '### REPLACE ME WITH A CONTAINER (e.g. div) ###',
+        // debug: false // Set debug to true if you want to inspect the modal
+        // 方案二：手动部署
+        // appId: "AJRH2JRXVY",
+        // apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
+        // indexName: "ninjee",
+        // 方案三：netlify 自动更新
         // indexName: "netlify_6e8c93fe-0e5c-42a1-8f48-bb69ed96977c_master_all",
         // apiKey: "ab5459a0712ffbe0dbd5e666660ea9a2",
         // appId: "6H64QA8BXJ",
