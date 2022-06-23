@@ -190,6 +190,122 @@ var trap = function (height) {
 
 
 
+## 6. Z 字形变换
+
+- [6. Z 字形变换](https://leetcode.cn/problems/zigzag-conversion/)
+- 0623，mid，normal
+- 字符串
+
+#### 方法一：二维数组
+
+自己的方法太差，直接 **忽略** 吧。
+
+从 numRows == 1, 2, 3, 4 找到规律。可以建立一个二维数组，按列递增把每一个字符串添加其中：
+
+```js
+//-- 示例 2 --//
+输入：s = "PAYPALISHIRING", numRows = 4
+输出："PINALSIGYAHRPI"
+解释：
+P     I    N
+A   L S  I G
+Y A   H R
+P     I
+```
+
+如果 numRows === 4 时，可以发现周期 t 有如下规律：
+
+- 第 0 列，二位数组的所有位置都被填满， t = numRows - 1；
+- 第 1 列，二位数组的 `arr[1][numRows - 2]` 也就是 `arr[1][t]` 被填入字符，t = numRows - 2；
+- 第 2 列，二位数组的 `arr[2][numRows - 3]` 也就是 `arr[1][t]` 被填入字符，t = numRows - 3； 
+- 第 3 列，二位数组的所有位置都被填满， t 重制为 numRows - 1；
+
+如此循环，直到 s 中所有字符填入其中即可。
+
+```js
+var convert = function (s, numRows) {
+  if (numRows === 1) return s;
+  // 建立二维数组，row = numRows
+  const arr = Array.from(new Array(numRows), () => []);
+  let char = 0;  // 字符
+  let j = 0;     // 数组的列
+  let t = numRows - 1;  // 周期：numRows - 1
+  while (char < s.length) {
+    // 全列都要写入
+    if (t === numRows - 1) {
+      for (let i = 0; i < numRows; i++) {
+        arr[i][j] = s[char];
+        char++;
+      }
+    } else {
+      // 一列只有一个写入
+      arr[t][j] = s[char];
+      char++;
+    }
+    // 初始化：下一次循环
+    t = t === 1 ? numRows - 1 : t - 1;
+    j++;
+  }
+  // 输出: 扁平化 + 拼接 -- flat、foreach、filter等,遍历时会过滤空值。
+  return arr.flat().join("");
+};
+```
+
+#### 方法二：一维数组
+
+事实上，结果要返回上题中二维数组的扁平化内容：
+
+```js
+//-- 示例 2 --//
+输入：s = "PAYPALISHIRING", numRows = 4
+输出："PINALSIGYAHRPI"
+解释：
+[
+  P     I    N
+  A   L S  I G
+	Y A   H R
+	P     I
+]
+
+// 调整为一维数组 
+dict = [str0, str1, str2, str3]
+// str0 = "PIN"
+// str1 = "ALSIG"
+// str2 = "YAHR"
+// str3 = "PI"
+```
+
+不是一个二维数组，而是 4 个一维数组也可以，不需要建立二位数组，也不需要中间有空余位置，满足 'z' 的形状，因为最终输出的字符串并不需要这些额外的信息。
+
+- 重点：
+
+如果 numRows 为 4， 依次放入 s 中的成员时，一维数组 dict 下标的变化是这样的：0, 1, 2, 3, 2, 1, 0 ... 在 [0, numRows - 1] 之间往返。
+
+所以，用 flag 表明下标 i 应当 +1，还是 -1：
+
+- 当 i == 0 时，下一步 i 应当累加，flag 设置为 +1；
+- 当 i == numRows - 1时，下一步 i 应当累减，flag 设置为 -1；
+
+```js
+var convert = function (s, numRows) {
+  if (numRows < 2) return s; // 一行直接返回
+
+  const dict = Array.from(new Array(numRows), () => "");
+  let i = 0;  // dict 下标
+  let flag = -1;
+
+  for (const char of s) {
+    dict[i] += char;
+    // i 遍历到头/尾，就重制flag
+    if (i === 0 || i === numRows - 1) flag = -flag;
+    i += flag;
+  }
+  return dict.join('');
+};
+```
+
+
+
 
 
 
