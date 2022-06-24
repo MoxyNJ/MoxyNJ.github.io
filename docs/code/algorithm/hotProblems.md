@@ -306,13 +306,103 @@ var convert = function (s, numRows) {
 
 
 
+## 7. 整数反转
+
+- [7. 整数反转](https://leetcode.cn/problems/reverse-integer/)
+- 0624，mid，quick
+- 字符串，取余
+
+#### 方法一：利用字符串
+
+我的方法
+
+审题清楚后，解决问题即可，注意先后顺序：
+
+- 整数反转：借助字符串，for 循环即可。
+- 负数：最先判断是否有负数，用 flag 标记，并裁剪字符串（`substring(startindex, endindex)`）。
+- 删除0：反转后，如果开头有 0，就裁剪字符串。
+- 添加符号：查看 flag 并添加符号；
+- 判断是否超过 64 位，转化为 number 后，判断是否超出大小。
+
+```js
+var reverse = function (x) {
+  let str = String(x);
+  let res = '';
+
+  // flag 判断负号
+  let flag = 0;
+  if (str[0] === '-') {
+    flag = 1;
+    str = str.substring(1);
+  }
+
+  // 反向重塑字符串
+  for (let i = 0; i < str.length; i++) {
+    res = '' + str[i] + res;
+  }
+
+  // 删去0
+  for (let i = 0; i < res.length; i++) {
+    if (res !== '0') break;
+    res = res.substring(i + 1);
+  }
+
+  // 添加负号，并转化为number
+  if (flag) res = '-' + res;
+  res = Number(res);
+
+  // 超出范围返回0
+  if (res < -1 * 2 ** 31 || res > 2 ** 31 - 1) res = 0;
+
+  return res;
+};
+```
+
+#### 方法二：取余
+
+```js
+%10 运算：得到数字的个位数；
+/10 运算：得到截去个位数的数字；
+
+1、将12345 % 10 得到5，之后将12345 / 10
+2、将1234 % 10 得到4，再将1234 / 10
+3、将123 % 10 得到3，再将123 / 10
+4、将12 % 10 得到2，再将12 / 10
+5、将1 % 10 得到1，再将1 / 10
+```
+
+需要注意的是，Js 中的除法运算 `/` 是带小数点的，所以要用 Math.floor 截断小数点。此时要考虑如果是负数，就需要 `Math.ceil` 或和上一个解法一样，用 flag 过滤掉负数。
+
+所以代码如下：
+
+```js
+var reverse = function (x) {
+  let res = 0;
+  const Max = 2 ** 31 - 1;
+  const Min = -1 * 2 ** 31;
+
+  while (x !== 0) {
+    //取个位数
+    const num = x % 10;
+    res = res * 10 + num;
+    // 判断是否超过上限
+    if (res < Min || res > Max) return 0;
+    // 截断小数点：负数是ceil，正数是floor    
+    x = x > 0 ? Math.floor(x / 10) : Math.ceil(x / 10);
+  }
+  return res;
+};
+```
 
 
 
 
 
+===== notion ===============================
 
+题库（记得点一下按频率排序）：https://leetcode.cn/company/bytedance/problemset/
 
+明天：https://leetcode.cn/problems/lru-cache/
 
 
 
