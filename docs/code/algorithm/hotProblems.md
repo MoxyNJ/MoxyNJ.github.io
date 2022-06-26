@@ -396,13 +396,106 @@ var reverse = function (x) {
 
 
 
+## 146. LRU 缓存
+
+- [146. LRU 缓存](https://leetcode.cn/problems/lru-cache/)
+- 0626，mid，normal
+- class 类、map结构、链表定义
+
+#### 方法一：map 结构
+
+利用 map 结构的特性：
+
+- map 的插入是有序的，新加入的排在队尾。
+- 遍历：
+  - `for (const item of map)` 可以从 旧 -> 新 的遍历出所有成员；
+  - `const iter = map.keys()` 可以返回一个迭代器，用 `iter.next().value` 获得最旧的值。
+
+所以，
+
+- get 函数的思路：调用 get 函数会刷新数字的生命周期，那么如果 map 中存在该数，就删掉，然后重新插入。这样该数字就放在最末尾。
+- get 函数的思路：调用 set 函数插入有几个情况：
+  - 如果 map 中已存在该 key，则需要更新对应的 value。需要删除掉旧成员 (key, value) 然后插入新的 (key, value)，让成员生命周期保持最新。
+  - 如果 map 中不存在 key，有两种情况：
+    - 如果 map 没有达到容量上限，那么直接插入即可，同时让 capacity 减 1；
+    - 如果 map 达到上限，删除 map 中第一个元素，然后再插入当前成员。
+      - 查找到第一个：`this.map.keys().next().value`
+
+```js
+/**
+ * @param {number} capacity
+ */
+var LRUCache = function (capacity) {
+  this.map = new Map();
+  // 登记容量上限，每当插入一个元素就让capacity--。到0时表明到达容量上限
+  this.capacity = capacity;  
+};
+
+/** 
+ * @param {number} key
+ * @return {number}
+ */
+LRUCache.prototype.get = function (key) {
+	// 不存在，返回 -1
+  if (!this.map.has(key)) return -1;  
+  // 存在，需要刷新生命周期，先删除，再重新插入原值
+  const value = this.map.get(key);
+  this.map.delete(key);
+  this.map.set(key, value);
+  return value;
+};
+
+/** 
+ * @param {number} key 
+ * @param {number} value
+ * @return {void}
+ */
+LRUCache.prototype.put = function (key, value) {
+  // 存在: 删除、插入、返回
+  if (this.map.has(key)) {
+    this.map.delete(key);
+    this.map.set(key, value);
+    return;
+  }
+  // 不存在: 先判断是容量-1，还是删除元素，最后插入
+  if (this.capacity) this.capacity--;  // 容量没超
+  else this.map.delete(this.map.keys().next().value); // 容量超了，删除
+  this.map.set(key, value);
+};
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * var obj = new LRUCache(capacity)
+ * var param_1 = obj.get(key)
+ * obj.put(key,value)
+ */
+```
+
+#### 方法二：链表｜原生操作
+
+[🔍](https://leetcode.cn/problems/lru-cache/solution/bu-yong-yu-yan-nei-jian-de-map-gua-dang-feng-zhuan/).
+
 
 
 ===== notion ===============================
 
 题库（记得点一下按频率排序）：https://leetcode.cn/company/bytedance/problemset/
 
-明天：https://leetcode.cn/problems/lru-cache/
+[143. 重排链表](https://leetcode.cn/problems/reorder-list/)
+
+[215. 数组中的第K个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
+
+[31. 下一个排列](https://leetcode.cn/problems/next-permutation/)
+
+[54. 螺旋矩阵](https://leetcode.cn/problems/spiral-matrix/)
+
+[200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/)
+
+[92. 反转链表 II](https://leetcode.cn/problems/reverse-linked-list-ii/)
+
+
+
+
 
 
 
