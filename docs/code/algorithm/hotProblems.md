@@ -477,11 +477,130 @@ LRUCache.prototype.put = function (key, value) {
 
 
 
+## 143. 重排链表
+
+- [143. 重排链表](https://leetcode.cn/problems/reorder-list/)
+- 0627， mid，normal
+- 链表操作
+
+#### 方法一：反转 + 合并
+
+总体思路：
+
+1. 新建一个链表：`dummyhead`，将原来的链表反转；
+   1. 反转的时候，用 num 记录链表的总长度。
+2. 新建一个链表：`newHead`，重排的链表就是 newHead；
+   1. p1 指向正序链表 head；
+   2. p2 指向反序链表 dummyhead；
+   3. point 指向合并后的重排链表 newHead；
+3. 进行合并，先合并 p1，再合并 p2。
+   - 每合并一个节点到 newHead 上，就让 num--。直到减少到 0，排列结束。
+
+```js
+var reorderList = function (head) {
+  // 反转
+  let dummyhead = new ListNode();
+  let point = head;
+  let num = 0;  // 记录链表的总长度
+  while (point !== null) {
+    const node = new ListNode(point.val);
+    node.next = dummyhead;
+    dummyhead = node;
+    point = point.next;
+    num++;
+  }
+  // console.log(dummyhead, num);
+
+  let newHead = new ListNode();
+  point = newHead;
+  let p1 = head;
+  let p2 = dummyhead;
+  while (num) {
+    point.next = p1; // 先插入正序链表
+    p1 = p1.next;
+    point = point.next;
+    num--;
+
+    if (!num) break;  // 如果此时 num 为 0，就提前结束
+    point.next = p2;  // 后插入反序链表
+    p2 = p2.next;
+    point = point.next;
+    num--;
+  }
+  point.next = null;
+  // console.log(newHead.next);
+};
+```
+
+#### 方法二：优化反转｜快慢指针
+
+上面的思路，对链表进行了完整的反转，而实际上我们只需要后半段合并。
+
+如何把链表分割为两半？
+
+- 快慢指针。遍历链表时，快指针走两步，慢指针走一步。当快指针走完的时，慢指针就正好在中点位置。
+
+上面的思路，没有原地反转，而是通过生成新节点操作，利用临时节点 tempNode 来实现原地反转。
+
+```js
+var reorderList = function (head) {
+  // 快慢指针找中点
+  let slow = head;
+  let fast = head;
+  // 注意这里的while循环判断：节点有5个，slow=3；节点有4个，slow=2；
+  while (fast.next !== null && fast.next.next !== null) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+
+  // 反转 slow
+  const reverseHead = reverseList(slow.next);
+  slow.next = null; // slow是重排后的尾节点，所以应指向null
+
+  let p1 = head;
+  let p2 = reverseHead;
+  // console.log(p1, p2);
+  // 相当于把p2中的节点插入到p1中
+  while (p2) {
+    const node1 = p2.next;  // 临时保存p2的后续节点
+    const node2 = p1.next;  // 临时保存p1的后续节点
+    // p1 -> p2 -> p1.next。p1 链表中插入一个p2节点
+    p1.next = p2;
+    p1.next.next = node2;
+    // 初始化 p1、p2
+    p1 = p1.next.next;
+    p2 = node1;
+  }
+
+  // 反转链表
+  function reverseList(head) {
+    if (!head) return null;
+    let tail = head; // 从尾添加节点
+    let point = head.next; // 从头遍历
+    tail.next = null; // tail是尾巴，结尾为null
+
+    while (point !== null) {
+      const tempNode = point.next; // 临时保存point的后续节点
+      point.next = tail;
+      tail = point;
+      point = tempNode; // point继续指向head中下一个节点
+    }
+    return tail;
+  }
+};
+```
+
+
+
+
+
+
+
 ===== notion ===============================
 
 题库（记得点一下按频率排序）：https://leetcode.cn/company/bytedance/problemset/
 
-[143. 重排链表](https://leetcode.cn/problems/reorder-list/)
+[92. 反转链表 II](https://leetcode.cn/problems/reverse-linked-list-ii/)
 
 [215. 数组中的第K个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
 
@@ -491,7 +610,7 @@ LRUCache.prototype.put = function (key, value) {
 
 [200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/)
 
-[92. 反转链表 II](https://leetcode.cn/problems/reverse-linked-list-ii/)
+
 
 
 
