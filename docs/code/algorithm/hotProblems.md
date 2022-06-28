@@ -592,9 +592,15 @@ var reorderList = function (head) {
 
 
 
+## 92. 反转链表 II
 
+- [92. 反转链表 II](https://leetcode.cn/problems/reverse-linked-list-ii/)
+- 0628，mid，answer
+- 链表操作，迭代和递归思想
 
-**背：递归链表反转**
+#### 方法一：递归
+
+**1：递归链表反转**
 
 思路 [🔍](https://leetcode.cn/problems/reverse-linked-list-ii/solution/bu-bu-chai-jie-ru-he-di-gui-di-fan-zhuan-lian-biao/)：
 
@@ -620,6 +626,156 @@ function reverse(head) {
 }
 ```
 
+**2：递归反转前n项链表**
+
+与1 直接反转链表相比，反转前 n 项链表要记录一下第 n + 1 项的位置，在 0 ~ n 个节点完成反转后，把现在已经在末尾的 head 节点后，接上第 n + 1 项链表。
+
+1. 函数定义：reverse，把以head为头节点的链表，其前n项反转后返回。
+2. base case：递归返回，当 n = 1 时，表明只反转一个节点，那直接返回这个节点，同时记录第 n + 1 个节点。这个节点要接在 head 的后面。
+3. 反转：递归只反转 head 第二个节点 head.next 到第 n 个节点截止（一共有 n-1 个）；
+4. 把 head 接到末尾节点上。
+   - 这里和之前不同。之前 `head.next = null` 因为 head 是链表的最后一个节点，所以 next 指向null；
+   - 而这里 head 只是参与反转的部分链表中最后一个节点，所以后面要接上第 n+1 个节点 `head.next = nextNode`
+
+```js
+function reverseN(head, n) {
+  // 全局变量，记录第n+1个节点
+  let nextNode = null;
+  return reverse(head, n);
+
+  // 【1定义】 reverse，把以head为头节点的链表，其前n项反转后返回。
+  function reverse(head, n) {
+    // 【2base case】递归截止、并找到第n+1个节点
+    if (n === 1) {
+      nextNode = head.next;
+      return next;
+    }
+    // 【3递归】
+    const reverseHead = reverse(head.next, n-1);
+    // 【4接上head】
+    head.next.next = head;
+    head.next = nextNode;  // 接上n+1个节点
+    return reverseHead;
+  }  
+}
+```
+
+**3：反转 m~n 区间内的节点**
+
+相比 2 中的反转前 n 个节点，我们只需要跳过前m项，然后转化为 “反转前x项链表” 问题即可。
+
+考虑如何转化：
+
+- 定义函数： reverseBetween(head, m, n) 表示将链表 head 中第 m～n 项反转，并返回 head 链表。
+  - 和之前的递归思路一样，每次递归都从 head.next 开始。那么 m 和 n 就变成 m-1 和 n-1。
+  - 当 m 最后等于 1 时，表明从当前节点开始开始反转，也就转化为反转前 (n-m) 项链表问题了。
+
+```js
+function reverseBetween(head, m, n) {
+  // base case
+  if (m === 1) return reverseN(head, n);
+
+	head.next = reverseBetween(head.next, m-1, n-1);
+  return head;
+}
+```
+
+最后的代码如下：
+
+```js
+var reverseBetween = function (head, left, right) {
+  // 反转前n项链表时，记录第n+1项的位置
+  let nextNode = null;
+
+  if (left === 1) return reverseN(head, right);
+  head.next = reverseBetween(head.next, left - 1, right - 1);
+  return head;
+};
+
+// 反转前n项链表：
+function reverseN(head, n) {
+  // base case
+  if (n === 1) {
+    nextNode = head.next;
+    return head;
+  }
+  // 迭代head.next
+  const reverseHead = reverseN(head.next, n - 1);
+  head.next.next = head;
+  head.next = nextNode;
+  return reverseHead;
+}
+```
+
+
+
+#### 方法二：迭代
+
+当时没做出来，是返回的时候没有用 dummyHead.next，而是直接返回了 head。但是我忘记了 head 作为头节点，也有可能参与反转，反转后 head 就不再是头指针了，而 dummyHead.next 是永远指向头指针的。
+
+迭代的思路比较朴素，有如下几个步骤：
+
+1. 找到 start 和 end。start.next 和 end 就是参与反转的子链表。
+2. 子链表反转后需要将头、尾接上原链表中，考虑：
+   - 不反转的开头节点（dymmyHead～start）--> 要反转的子链表（start.next～end） --> 不反转的尾节点（end.next～最后）。
+   - leftNode，rightNode：start.next 节点和 end.next 节点位置，用来在反转后拼接不反转的尾节点。
+   - 切断 end.next 不反转
+3. 反转子链表
+4. 拼接上开头和结尾。
+
+```js
+var reverseBetween = function (head, left, right) {
+  // 先找到 left 上一个节点 和 right 节点：start,end
+  // start.next 到 end(含) 就是要反转的节点。
+  const dummyHead = new ListNode();
+  dummyHead.next = head;
+
+  let start = dummyHead;
+  while (left > 1) {
+    start = start.next;
+    left--;
+    right--;
+  }
+
+  let end = start;
+  while (right > 0) {
+    end = end.next;
+    right--;
+  }
+  // console.log(start, end);
+
+  // 保存反转前链表关键节点的位置。方便反转后接上剩余不反转的子链表
+  const leftNode = start.next;   // start.next节点，在链表反转前，是待反转链表的头节点；在链表反转后就是反转链表的最后一个节点，要接上不反转的剩余节点;
+  const rightNode = end.next;     // end.next节点，是不反转的剩余节点的头节点，在链表反转后，接在 leftNode 后面。
+
+  // 切断链接, 切断末尾不反转的链表
+  end.next = null;
+
+  // 反转的子链表，接回到原来的链表中
+  start.next = reverseList(start.next);  // 反转后，接上反转子链表的开头；
+  leftNode.next = rightNode;  // 反转后，接上反转子链表的结尾；
+  return dummyHead.next;
+};
+
+// 反转链表迭代
+function reverseList(head) {
+  if (!head || !head.next) return head;
+  let point = head;
+  head = head.next;
+  point.next = null; // point当前指向的head，是反转后的最后一个节点，head.next应当为null
+
+  while (head) {
+    // 保存head的后续关系
+    const node = head.next;
+    // 提取head.next节点
+    head.next = point;
+    point = head;
+    head = node;
+  }
+  return point
+};
+```
+
 
 
 
@@ -627,8 +783,6 @@ function reverse(head) {
 ===== notion ===============================
 
 题库（记得点一下按频率排序）：https://leetcode.cn/company/bytedance/problemset/
-
-[92. 反转链表 II](https://leetcode.cn/problems/reverse-linked-list-ii/)
 
 [215. 数组中的第K个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
 
@@ -639,6 +793,12 @@ function reverse(head) {
 [200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/)
 
 
+
+### 1.链表的操作
+
+- 注意操作链表前，设置 dummyHead。然后在返回时，返回 dummyHead.next；
+- 快慢指针，可以找到链表的中点位置。
+- 反转链表，迭代和递归的思想都要掌握，及时复习（92. 反转链表 II）。
 
 
 
