@@ -594,6 +594,34 @@ var reorderList = function (head) {
 
 
 
+**背：递归链表反转**
+
+思路 [🔍](https://leetcode.cn/problems/reverse-linked-list-ii/solution/bu-bu-chai-jie-ru-he-di-gui-di-fan-zhuan-lian-biao/)：
+
+1. 明确 reverse 的定义：reverse会把head为头节点的链表反转，然后返回新的头节点；
+2. 明确 base case，如果只有一个节点了，就放回节点本身；
+3. 反转：递归只反转 head 第二个节点 head.next 到末尾；
+4. 把 head 接到末尾节点上。注意，这里比较绕：
+   - `head.next` 一直指向了链表第二个节点，而 `reverse(head.next)` 后，这个节点实际上处于反转后新链表（reverseHead）的末尾位置。所以此时 `	head.next` 指向了 reverseHead 最后一个节点。
+   - `head.next.next = head` 就是把  head 节点接在 reverseHead 最后一个节点上，实现完整的 reverse 链表。
+
+```js
+// 【1定义】reverse会把head为头节点的链表反转，然后返回新的头节点
+function reverse(head) {
+	//【2base case】如果head为最后一个节点，那么直接返回head。
+  if (head.next == null) return head;
+  
+  // 【3递归反转head.next】lastNode 是链表head.next到末尾反转后的开头。
+  const reverseHead = reverse(head.next);
+	// 【4接上head】递归反转没有包括head，现在要将head放到lastNode链表的最后一个节点。
+  head.next.next = head;  // head.next现在指向了lastNode链表的最后一个节点
+  head.next = null; // head现在是lastNode链表的最后一个节点了，让其next指向null
+  return reverseHead;
+}
+```
+
+
+
 
 
 ===== notion ===============================
