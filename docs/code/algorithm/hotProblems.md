@@ -779,12 +779,190 @@ function reverseList(head) {
 
 
 
+- [215. 数组中的第K个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
+- 0629，mid，quick
+- 排序（快速排序、堆排序）
+
+#### 方法一：暴力｜sort API
+
+时间复杂度：*O(NlogN)*，这里 N 是数组的长度，sort 使用快速排序。
+
+空间复杂度：*O(NlogN)*，「快速排序」的空间复杂度，为递归调用栈的高度。
+
+```js
+var findKthLargest = function (nums, k) {
+  nums.sort((x, y) => y - x);
+  return nums[k-1];
+};
+```
+
+#### 方法二：分治｜快速排序 
+
+[🔍](https://leetcode.cn/problems/kth-largest-element-in-an-array/solution/partitionfen-er-zhi-zhi-you-xian-dui-lie-java-dai-/)
+
+一个递增序列 arr，
+
+- arr.length - 1是第1个最大元素；
+- arr.length - 2 是第2个最大元素；
+- arr.length - k 是第k个最大元素。
+- 所以，我们要找的是递增序列 arr 中，下标 arr.length - k 的值。
+
+在快序排序中，partition 函数利用了 povit 作为基数，较小数放在左边，把较大数放在右边。
+
+- 如果 povit 的下标恰好 ===  nums.length - k，那么就直接找到了所要的值，不用把数列全部都排序一遍。
+- 如果 povit 的下标 < nums.length - k，那么所求的值在右侧，继续在 `[povit + 1, right]` 中找；
+- 如果 povit 的下标 > nums.length - k，那么所求的值在左侧，继续在 `[left, povit - 1]` 中找；
+
+```js
+var findKthLargest = function (nums, k) {
+  const left = 0;
+  const right = nums.length - 1;
+  const target = nums.length - k;
+
+  return find(nums, left, right);
+
+  function find(arr, left, right) {
+    const index = partition(arr, left, right);
+    // 讨论
+    if (index === target) return nums[index];
+    else if (index < target) return find(arr, index + 1, right);
+    else return find(arr, left, index - 1);
+  }
+};
+
+function partition(arr, left, right) {
+  // 随机选取基数pivot，并交换位置到第一个:index 为 pivot 的下标
+  let index = Math.floor((left + right) / 2);
+  [arr[index], arr[left]] = [arr[left], arr[index]];
+  const povit = arr[left];
+  index = left;
+  left++;
+
+  // 循环
+  while (left <= right) {
+    while (arr[left] < povit) left++;
+    while (arr[right] > povit) right--;
+
+    if (left <= right) {
+      [arr[left], arr[right]] = [arr[right], arr[left]];
+      left++;
+      right--;
+    }
+  }
+  // 修改基数的位置
+  [arr[index], arr[right]] = [arr[right], arr[index]];
+  return right;
+}
+```
+
+也可以把 find 函数改为迭代：
+
+```js
+var findKthLargest = function (nums, k) {
+  let left = 0;
+  let right = nums.length - 1;
+  const target = nums.length - k;
+
+  // 不断缩小 left 和 right
+  while (true) {
+    const index = partition(nums, left, right);
+    if (index === target) return nums[index];
+    else if (index < target) left = index + 1;
+    else right = index - 1;
+  }
+};
+```
+
+#### 方法三：优先队列
+
+https://leetcode.cn/problems/kth-largest-element-in-an-array/solution/partitionfen-er-zhi-zhi-you-xian-dui-lie-java-dai-/
+
+
+
+
+
+## 912. 排序数组
+
+- [912. 排序数组](https://leetcode.cn/problems/sort-an-array/)
+- 0629，mid，quick
+- 排序
+
+#### 方法一：快速排序
+
+快速排序的三个函数：
+
+- 主函数：用来确定排序数组的范围 `[left, right]`；
+- `quickSort`：将 `[left, right]` 范围的数组原地排序，不返回任何值；
+- `partation`：将 `[left, right]` 范围的数组以 `povit` 为基数，较小的放左边，较大的放右边。
+  1. 找基数。`povit` 不应当选择第一个 `left` 下标的值，而是尽可能随机，这里选择了中位数。
+  2. 换位置。选择好基数后，在 while 循环前，要把 povit 放到第一个位置，同时记录下标 index；
+  3. while 循环。让较小数放左边，较大数放右边。遇到位置不对的两个数字，交换位置。
+  4. 换位置。排好序后，把 povit 放回原位置；
+  5. 返回基数。
+
+为什么 `povit` 要随机选取？选择默认的第一个速度贼慢。
+
+- 第一个的值偏小的概率更大，所以 较小/较大值 并不能更好的平均且分开。
+
+```js
+var sortArray = function (nums) {
+  // 快速排序
+  let left = 0, right = nums.length - 1;
+  quickSort(nums, left, right);
+  return nums;
+
+  // 将 [left, right] 排序(切分)
+  function quickSort(nums, left, right) {
+    // base case
+    if (left >= right) return;
+
+    const pivotIndex = partition(nums, left, right);
+    quickSort(nums, left, pivotIndex - 1);
+    quickSort(nums, pivotIndex + 1, right);
+  }
+
+  // 将 [left, right] 左右归类，返回下标
+  function partition(arr, left, right) {
+    // 随机选取基数pivot，并交换位置到第一个:index 为 pivot 的下标
+    let index = Math.floor((left + right) / 2);
+    [arr[index], arr[left]] = [arr[left], arr[index]];
+    const povit = arr[left];
+    index = left;
+    left++;
+    
+    // 循环
+    while (left <= right) {
+      while (arr[left] < povit) left++;
+      while (arr[right] > povit) right--;
+
+      if (left <= right) {
+        [arr[left], arr[right]] = [arr[right], arr[left]];
+        left++;
+        right--;
+      }
+    }
+    // 修改基数的位置
+    [arr[index], arr[right]] = [arr[right], arr[index]];
+    return right;
+  }
+};
+```
+
+#### 方法二：桶排序
+
+#### 方法三：插入排序
+
+更多排序方法，见题解分享。
+
+
+
+
+
+##  notion
 
 ===== notion ===============================
 
 题库（记得点一下按频率排序）：https://leetcode.cn/company/bytedance/problemset/
-
-[215. 数组中的第K个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
 
 [31. 下一个排列](https://leetcode.cn/problems/next-permutation/)
 
@@ -803,7 +981,11 @@ function reverseList(head) {
 
 
 
+### 2. 排序
 
+复习 912. 排序数组的题解，找到自己要记忆的排序方法
+
+- 可以参考一下这个[链接🔗](https://github.com/DangoSky/algorithm/tree/master/Algorithm-notes#%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F)
 
 
 
