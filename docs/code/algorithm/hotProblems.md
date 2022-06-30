@@ -957,6 +957,12 @@ var sortArray = function (nums) {
 
 
 
+### 堆的相关知识
+
+小顶堆、大顶堆
+
+https://leetcode.cn/problems/kth-largest-element-in-an-array/solution/xie-gei-qian-duan-tong-xue-de-ti-jie-yi-kt5p2/
+
 
 
 ##  notion
