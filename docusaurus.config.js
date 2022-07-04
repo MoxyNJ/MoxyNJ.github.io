@@ -58,15 +58,15 @@ const config = {
             items: [
               {
                 label: "JavaScript",
-                to: "docs/frontEnd/javascript",
+                to: "docs/frontEnd/JavaScript",
               },
               {
                 label: "HTML & CSS",
-                to: "docs/frontEnd/htmlcss",
+                to: "docs/frontEnd/HTML&CSS",
               },
               {
                 label: "React",
-                to: "docs/frontEnd/react",
+                to: "docs/frontEnd/React",
               },
             ],
           },
@@ -151,7 +151,7 @@ const config = {
             items: [
               {
                 label: "前端",
-                to: "docs/frontEnd/javascript",
+                to: "docs/frontEnd/JavaScript",
               },
               {
                 label: "算法笔记",
