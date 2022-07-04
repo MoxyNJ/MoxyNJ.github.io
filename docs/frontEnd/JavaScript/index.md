@@ -1,6 +1,6 @@
 ---
 id: introduction
-title: JavaScript
+title: 概述
 sidebar_position: 0
 slug: /frontEnd/JavaScript
 keywords:
@@ -11,4 +11,10 @@ keywords:
   - js语法
 ---
 
-JavaScript 语法笔记📒
+这里记录 JavaScript 语法的相关笔记，主要包括：
+- JavaScript 的执行过程
+- JavaScript 的执行上下文
+- 作用域、闭包
+- this、箭头函数
+- 提升、暂时性死区
+- 未完待续...
