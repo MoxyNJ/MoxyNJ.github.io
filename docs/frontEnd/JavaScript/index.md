@@ -18,3 +18,15 @@ keywords:
 - this、箭头函数
 - 提升、暂时性死区
 - 未完待续...
+
+
+
+## 笔记引用
+
+- 《你不知道的 JavaScript》上、中、下
+- 《JavaScript 高级程序设计》第三版、第四版
+- 《JavaScript 权威指南》第七版
+- winter - 重学前端
+- 李兵 - 浏览器工作原理与实战
+- coderwhy - JavaScript 高级语法课
+- 其他网站：MDN、掘金、segmentfault、CSDN
