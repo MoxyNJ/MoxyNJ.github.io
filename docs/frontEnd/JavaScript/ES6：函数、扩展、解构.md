@@ -1,35 +1,4 @@
-# 3 函数
 
-JavaScript 函数有两个不同的内部方法：[[Call]] 和 [[Construct]]。当通过 new 关键字调用函数时，执行的是 [[Construct]] 函数，它负责创建一个通常被称作实例的新对象，然后再执行函数体，讲 this 绑定到实例上：如果不通过 new 关键字调用函数，则执行 [[Call]] 函数，从而直接执行代码中的函数体。
-
-具有 [[Construct]] 方法的函数被统称为构造函数。
-
-—— 第三章《函数》P54
-
-
-
-#### 元属性（Metaproperty）new.target
-
-为了解决判断函数是否通过 new 关键字调用的问题，ECMAScript6 引入了 new.target 这个元属性。
-
-元属性是指非对象的属性，其可以提供非对象目标的补充信息（例如 new）。当调用函数的 [[Construct]] 方法时，new.target 被赋值为 new 操作符的目标，通常是新创建对象实例，也就是函数体内 this 的构造函数；如果调用 [[Call]] 方法，则 new.target 的值为 undefined。
-
-有了这个元属性，可以通过检查 new.target 是否被定义过，从而安全低检测一个函数是否是通过 new 关键字调用的，就像这样：
-
-```js
-function Person(name) {
-    if (typeof new.target !== "undefined") {
-        this.name = name;
-    } else {
-        throw new Error("必须通过 new 关键字来调用 Person");
-    }
-}
-
-let person = new Person("Moxy");    // 
-let person2 = Person.call(person, "Moxy")  // 报错，没有用 new，new.target值为 undefined
-```
-
-—— 第三章《函数》P55
 
 
 
