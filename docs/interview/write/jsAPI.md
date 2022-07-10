@@ -98,7 +98,26 @@ var result = args
 
 ### 1.3 bind
 
-`var bar = func,bind()`
+```js
+// bar 作为返回参数，下次调用其内部 this 指向 obj
+const bar = func.bind(obj, arg1, arg2, ..)
+```
+
+1. 第一个参数作为 this 值；
+   - 若是基础类型，则要包装为包装对象，使用 `Object()` 可以根据不同基础类型进行包装。
+   - 若是 `null` 和 `undefined`，则 this 指向全局 `window`，node 环境下指向 undefined。	
+2. 剩余的参数作为返回函数 bar 的入参，待调用返回函数是自动传入。
+3. 如果 bar 在调用时用 `new bar()` 调用，那么有两个变化：
+   1. bind 绑定 this 失效，this 按照 `new` 关键字的设定，绑定实例化对象；
+   2. 实例化对象的原型指向原方法 `func` 的原型链上。
+
+bind方法返回的新方法，如果使用new实例化，那么原本通过bind绑定的this指向的对象会失效，this将指向到新实例化的对象上，且可以使用原方法原型链上的属性或方法。
+
+换句话说：一个 绑定函数 也能使用 new 操作符创建对象,这种行为就像把原函数当成构造器，thisArg 参数无效。也就是 new 操作符修改 this 指向的优先级更高。
+
+
+
+动态绑定技巧：
 
 - 对 `thisArg._fn = fn` 要动态绑定，即只有在调用 bar 时，才进行绑定，对 thisArg 对象的影响降低到最小化。
 - bind 有两种用法，mybind 这两种用法都要考虑到（下面代码）；
@@ -116,6 +135,31 @@ bar(arg1, arg2 ,arg3 ...);
 最后代码如下：
 
 ```js
+// ❗️考虑 new 的样式
+Function.prototype.mybind = function (thisArg, ...args) {
+  // 保留this引用（缓存this）
+  thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
+  const thisfn = this;
+  
+  // 定义绑定函数，不直接返回是因为需要函数名foo
+  const foo = function (...innerArgs) {
+    // new foo，不修改this指向，此时this为foo的实例化对象
+    if (this instanceof foo) {
+      return new thisfn(...args, ...innerArgs);
+    } 
+    // 普通函数调用，this指向thisArg对象
+    const fn = Symbol();
+    thisArg[fn] = thisfn;   // 动态绑定
+    const result = thisArg[fn](...args, ...innerArgs);
+    delete thisArg[fn];
+    return result;
+  };
+  return foo;  //返回函数
+};
+
+
+
+// ❗️不考虑 new 的样式：
 Function.prototype.mybind = function (thisArg, ...args) {
   // 保留this引用
   thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
@@ -133,6 +177,7 @@ Function.prototype.mybind = function (thisArg, ...args) {
 // test
 function sum(num1, num2, num3) {
   console.log(this, num1, num2, num3);
+  this.name = num1;
   return num1 + num2 + num3;
 }
 
@@ -144,5 +189,26 @@ bar(30);
 // 用法二
 var baz = sum.mybind(obj);
 baz(20, 10, 5);
+```
+
+
+
+## 2. 实现 currying
+
+实现函数的柯里化：详细讲解在 **JavaScript笔记—06-函数与函数式编程.md**。
+
+```js
+function currying(fn) {
+  // 递归 curried，接受所有参数
+  function curried(...args) {
+    // base case
+    if (fn.length <= args.length) return fn.call(this, ...args);
+    // 递归
+    return function(...args2) {
+      return curried.call(this, ...args, ...args2);
+    }
+  }
+  return curried;
+}
 ```
 
