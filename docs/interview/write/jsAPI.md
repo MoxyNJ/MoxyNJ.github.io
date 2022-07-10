@@ -5,48 +5,43 @@
 Function.prototype.mycall = function (thisArg, ...args){
   // this绑定
   thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
-	thisArg._fn = this;
+	const fn = Symbol();
+  thisArg[fn] = this;
   // func调用
-  var result = thisArg._fn(...args);
-  delete thisArg._fn;
+  const result = thisArg[fn](...args);
+  delete thisArg[fn];
 	// return
   return result;
 }
 
-// myapply
-Function.prototype.myapply = function (thisArg, args){
+// myapply，入参附默认值
+Function.prototype.myapply = function (thisArg, args = []){
   // this绑定
   thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
-	thisArg._fn = this;
+	const fn = Symbol();
+  thisArg[fn] = this;
   // func调用
-  var result = args
-  	? thisArg._fn(...args) 
-  	: thisArg._fn();
-  delete thisArg._fn;
+  const result = thisArg[fn](...args) 
+  delete thisArg[fn];
 	// return
   return result;
 }
 
 // mybind
 Function.prototype.mybind = function (thisArg, ...args) {
-  // this绑定
+  // 保留this引用
   thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
-	var fn = this;
+	const thisfn = this;
   // 返回绑定函数
-  return function (...newargs) {  
-    fn._fn = thisArg._fn // 动态绑定
-    var result = thisArg._fn(...args, ...newargs); 
-    delete thisArg._fn; 
+  return function (...newargs) { 
+    const fn = Symbol();  // 动态绑定
+    thisArg[fn] = thisfn;
+    const result = thisArg[fn](...args, ...newargs); 
+    delete thisArg[fn]; 
     return result;
   };
 };
 ```
-
-优化：
-
-- `thisArg` 中绑定 `_fn` 有可能会覆盖原有同名函数的定义。这里可以的思路有：
-  - 使用 uuid 命名 `_fn`；
-  - 使用 Symbol 命名 `_fn`；
 
 
 
@@ -122,14 +117,15 @@ bar(arg1, arg2 ,arg3 ...);
 
 ```js
 Function.prototype.mybind = function (thisArg, ...args) {
-  // this绑定
+  // 保留this引用
   thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
-	var fn = this;
+	const thisfn = this;
   // 返回绑定函数
   return function (...newargs) {  // 调用bar时传递的参数
-    fn._fn = thisArg._fn // 动态绑定，只有在调用时才进行绑定，
-    var result = thisArg._fn(...args, ...newargs); // 先保存执行result
-    delete thisArg._fn; // 解除绑定关系
+    const fn = Symbol(); 
+    thisArg[fn] = thisfn; // 动态绑定，只有在调用时才进行绑定
+    const result = thisArg[fn](...args, ...newargs); // 先保存执行result
+    delete thisArg[fn]; // 解除绑定关系
     return result; // 返回结果
   };
 };
