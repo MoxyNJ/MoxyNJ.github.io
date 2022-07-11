@@ -212,3 +212,58 @@ function currying(fn) {
 }
 ```
 
+
+
+## 3. 实现组合函数
+
+将可以连续执行的函数组合为一个函数：详细讲解在 **JavaScript笔记—06-函数与函数式编程.md**。
+
+```js
+// 下一个函数的结果，是上一个函数的入参：
+func3(func2(func1(10)));
+
+// 组合函数：
+const func = compose(func1, func2, func3);
+func(10);
+```
+
+实现如下：
+
+```js
+function compose(...fns) {
+  const len = fns.length;  // 统计共有几个函数需要组合
+  for (let i = 0; i < len; i++) {
+    if (typeof fns[i] !== 'function') {
+      throw new TypeError("Expected arguments are function");
+    }
+  }
+ 	// 递归执行所有fns 
+  return function (...args) {
+		let index = 0;
+    // 如果没有传入任何函数，则直接返回参数当作结果。
+    let result = len ? fns[index].call(this, ...args) : args;  
+    while (++index < len) {
+      result = fns[index].call(this, result);
+    }
+		return result;
+  }
+}
+
+
+// 测试：
+function add(num1, num2) {
+  return num1 + num2;
+}
+
+function double(num) {
+  return num * 2;
+}
+
+function square(num) {
+  return num ** 2;
+}
+
+const newFn = compose(add, double, square);
+const result = newFn(1, 2);  // 36
+```
+
