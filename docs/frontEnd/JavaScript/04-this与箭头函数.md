@@ -14,11 +14,15 @@ tags: [JavaScript]
 
 ![imgx](images/04-this%E4%B8%8E%E7%AE%AD%E5%A4%B4%E5%87%BD%E6%95%B0.assets/image-20210905222654919.png)
 
-全局执行上下文中的 `this`，默认指向 window 对象。而函数执行上下文中的 `this` 则根据函数调用的实际情况而发生改变。
-
 `this` 和声明位置没有关系，和作用域链没有关系，和词法作用域也没有关系；`this` 和调用位置，和调用栈也没有关系。 `this` 是由调用者决定的，确切的说。`this` 是由一套自有的规则决定的，只有按照它自有的规则，才能确定 `this` 的指向。
 
-**所以，作用域链、调用栈、`this` 是三套不同的规则体系。**
+**作用域链、调用栈、`this` 是三套不同的规则体系。**
+
+作用域链：与代码的结构和闭包有关，代码的结构决定了作用域的嵌套关系（全局、函数、块作用域）。
+
+调用栈：运行时产物。当函数被执行时，压入调用栈。函数执行完毕则出栈。
+
+`this`：函数的调用者决定。一个函数内有一个 `this` 变量，这个 `this` 指向一个对象。全局执行上下文中的 `this`，默认指向 window 对象；函数执行上下文中的 `this` ，根据函数调用的实际情况而发生改变。
 
 
 
@@ -274,7 +278,61 @@ bar.call(obj2)  	// 1
 
 
 
-## 4 思考
+## 4 setTimeout
+
+`setTimeout`，`interval` 等属于宏任务，其回掉函数会加入执行队列，等待下一次循环再依次执行，所以执行环境是全局。
+
+- 回掉函数中的 this 默认指向 `window`，严格模式下指向 `undefined`。
+
+setTimeout 的 this 绑定方法：
+
+- 外部作用域定义 that、箭头函数、apply 绑定。
+
+```js
+// 方法一：外部环境定义that
+let obj = {
+  name: "jay",
+  print: function () {
+    let that = this;
+    setTimeout(function() {
+      console.log(that.name)
+    },0);
+  }
+}; 
+
+// 方法二：箭头函数使用外部this
+let obj = {
+  name: "jay",
+  print: function () {
+    setTimeout(() => {
+      console.log(this.name)
+    },0);
+  }
+}; 
+
+// 方法三：apply绑定
+var name = "window";
+ function say(){
+  console.log(this.name);
+}
+
+let obj = {
+  name: "jay",
+  print: function(){
+    setTimeout(say.bind(this),0);
+    // 这里第一个参数是一个调用，会先调用 say.bind(this)，返回的值作为回掉函数
+  }
+}
+
+// test
+obj.print(); //jay
+```
+
+
+
+
+
+## 5 思考
 
 ### 问题1
 
