@@ -4,7 +4,7 @@
         <title>ninjee</title>
         <link>https://ninjee.netlify.app/</link>
         <description>Ninjee的前端篮子 Blog</description>
-        <lastBuildDate>Sat, 21 May 2022 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 21 Feb 2022 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>zh</language>
@@ -13,7 +13,7 @@
             <title><![CDATA[Gene]]></title>
             <link>https://ninjee.netlify.app/new/demo</link>
             <guid>/new/demo</guid>
-            <pubDate>Sat, 21 May 2022 00:00:00 GMT</pubDate>
+            <pubDate>Mon, 21 Feb 2022 00:00:00 GMT</pubDate>
             <description><![CDATA[这是一篇测试文章。]]></description>
             <category>first</category>
             <category>blog</category>
