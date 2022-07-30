@@ -1,6 +1,6 @@
 ---
 title: Gene
-date: 2022-05-21
+date: 2022-02-21
 authors: ninjee
 tags: [first, blog]
 ---
