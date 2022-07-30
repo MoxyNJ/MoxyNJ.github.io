@@ -28,6 +28,8 @@ Symbol 用来生成一个 **独一无二的值**。
 
 - **方括号读取**。用方括号获取 Symbol 对象 `obj[s1]`。
 
+- **不用能 new**。不能用 new 去创建，直接 `Symbol()` 创建。
+
 ```js
 // 1.Symbol 的独一无二
 const s1 = Symbol();
