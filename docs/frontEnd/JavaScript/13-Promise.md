@@ -130,6 +130,7 @@ promise.then(
 
 - **`resolve()` 返回的 `promise`，既可能完成，也可能拒绝，要根据传入参数而定。**
 - `reject()` 会返回一个拒绝的 `Promise`。
+- 在 executor 中，执行到 `resolve()` 或 `reject()` 后，executor 不会提前终止，而是把剩余的代码全部执行结束。
 
 
 
