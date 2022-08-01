@@ -21,6 +21,12 @@ keywords:
 
 
 
+第13、14、15 章涉及到异步编程知识：
+
+- promise、iterator、generator、async await。
+
+
+
 ## 笔记引用
 
 - 《你不知道的 JavaScript》上、中、下

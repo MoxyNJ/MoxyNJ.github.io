@@ -121,26 +121,18 @@ class MyPromise {
       onFinally()
     })
   }
+
+  static resolve(value) {
+    return new MyPromise((resolve) => resolve(value));
+  }
+  
+  static reject(reason) {
+    return new MyPromise((resolve, reject) => reject(reason));
+  }
 }
 
-const promise = new MyPromise((resolve, reject) => {
-  console.log("pending 状态");
-  setTimeout(() => {
-    reject("reject-1");
-    resolve("resolve-1");
-  }, 1000);
-});
+MyPromise.resolve('对了').then((res) => {console.log('resolve', res)});
+// resolve 对了
 
-promise.then(
-    (res) => {
-      console.log("成功1", res);
-      return "resolve-2";
-    },
-  ).catch(
-    (err) => {
-      console.log('catch 到错误：', err);
-    }
-  ).finally(
-    ()=> {
-      console.log('执行完毕！')
-  })
+MyPromise.reject('错了').then((res) => {}, (err) =>{console.log('reject', err)});
+// reject 错了

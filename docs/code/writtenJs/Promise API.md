@@ -482,4 +482,276 @@ promise.then(
 
 ## 2 Promise API
 
-### 
+### 2.1 类：resolve reject
+
+在 MyPromise 类中添加：
+
+```js
+static resolve(value) {
+	return new MyPromise((resolve) => resolve(value));
+}
+
+static reject(reason) {
+  return new MyPromise((resolve, reject) => reject(reason));
+}
+```
+
+测试:
+
+```js
+MyPromise.resolve('对了').then((res) => {console.log('resolve', res)});
+// resolve 对了
+
+MyPromise.reject('错了').then((res) => {}, (err) =>{console.log('reject', err)});
+// or
+MyPromise.reject('错了').catch((err) =>{console.log('reject', err)});
+// reject 错了
+```
+
+
+
+### 2.2 .all .allSettled
+
+all：全部 **成功** 后返回保存为数组返回，期间一旦有一个失败，直接返回失败结果。
+
+allSettled：全部 **决议** 后保存为 object 放入数组返回，保存成员的决议状态(fulfilled / rejected)
+
+
+
+确保结果返回的数组中，所有成员顺序和输入时不变：
+
+- 遍历 `promises` 时不能用 forEach，而是用 for 循环，通过下标方式添加到 values 数组中。这样保证顺序不会发生改变
+
+```js
+Promise.all([p1, p2, p3])
+.then(res => {
+  // 返回的结果 res 顺序也应当是：[p1, p2, p3]
+  console.log(res)
+})
+```
+
+最终代码如下：
+
+```js
+class MyPromise extends Promise {
+  constructor(values) {
+    super(values);
+  }
+  
+  static all(promises) {  
+    // 1. 传入的参数不一定是数组对象，可以是 iterator，Array.from 转化为 array
+    // 2. 每个成员必须是 promise，通过回调函数包装
+    promises = Array.from(promises, (promise) => MyPromise.resolve(promise));
+    const values = [];
+    let count = promises.length;
+    return new MyPromise((resolve, reject) => {
+      for (let i = 0; i < promises.length; i++) {
+        promise.then(
+          (res) => {
+            values.push(res);
+            // count === 0 时，返回 fulfilled 状态
+            if (!--count) resolve(values);
+          }
+          ,(err) => {
+            reject(err);
+          }
+        )
+      };
+    })
+  }
+  
+  // allSettled 最终状态一定是fulfilled
+  // 返回成员的不再是值，而是一个有status和value/reason属性的对象
+  // 最终在finally，把对象push到数组中
+  static allSettled(promises) {
+    promises = Array.from(promises, (promise) => MyPromise.resolve(promise));
+    const values = [];
+    let count = promises.length;
+    return new MyPromise((resolve, reject) => {
+      for (let i = 0; i < promises.length; i++) {
+        const result = {}
+        promises[i].then((res) => {
+          result.status = 'fulfilled';
+          result.value = res;
+        }, (err) => {
+          result.status = 'rejected';
+          result.reason = err;
+        }).finally(()=> {
+          values[i] = result;
+          // count === 0 时，返回 fulfilled 状态
+          if (!--count) resolve(values);
+        })
+      }
+    })
+  }
+}
+```
+
+代码测试：
+
+```js
+const p1 = new MyPromise((resolve, reject) => {
+  setTimeout(() => { resolve('p1 resolve') }, 0);
+})
+
+const p2 = new MyPromise((resolve, reject) => {
+  setTimeout(() => { resolve('p2 resolve') }, 100);
+})
+
+const p3= new MyPromise((resolve, reject) => {
+  setTimeout(() => { resolve('p3 resolve') }, 1000);
+})
+
+const p4 = new MyPromise((resolve, reject) => {
+  setTimeout(() => { reject('p4 reject') }, 101);
+})
+
+MyPromise.all([p1, p2, p3])
+  .then((res) => {
+  console.log('all resolved', res);
+}).catch((err) => {
+  console.log('someone err', err);
+})
+// a few moments later ...
+// all resolved (3) ['p1 resolve', 'p3 resolve', 'p2 resolve']
+
+MyPromise.all([p1, p2, p3, p4])
+  .then((res) => {
+  console.log('all resolved', res);
+}).catch((err) => {
+  console.log('someone err', err);
+})
+// someone err p4 reject
+
+// 3测试入参成员是非Promise时处理
+MyPromise.all([p1, p3, "heihei~"])
+.then((res) => {
+    console.log('all resolved', res);
+}).catch((err) => {
+    console.log('someone err', err);
+})
+// all resolved (3) ['heihei~', 'p1 resolve', 'p3 resolve']4
+
+
+// 4 allSettled 测试
+MyPromise.allSettled([p1, p2, p3, p4, 'heihei~'])
+.then((res) => {
+    console.log('all settled:', res);
+}).catch(err => console.log(err));
+// 输出如下：
+```
+
+![截屏2022-07-31 18.04.18](images/Promise%20API.assets/%E6%88%AA%E5%B1%8F2022-07-31%2018.04.18.png)
+
+
+
+### 2.3 .race .any
+
+race：返回第一个跨过终点线的 Promise 对象，而抛弃其他 Promise。
+
+any：返回第一个决议为 **成功** 的 Promise 对象，不关心 promise 的错误结果。
+
+- 如果全部失败，则返回特定的 reject 信息。
+- 同时, `err.errors` 保存了一个数组，内容是所有promise成员（都失败了）按序的失败信息。
+
+```js
+class MyPromise extends Promise {
+  constructor(value) {
+    super(value);
+  }
+
+  static race(promises) {
+    // 解决两个问题：迭代器转数组、普通值转promise对象
+    promises = Array.from(promises, (promises) => MyPromise.resolve(promises));
+    return new MyPromise((resolve, reject) => {
+      promises.forEach( promise => {
+        promise.then((res) => {
+          resolve(res);
+        }, (err) => {
+          reject(err);
+        })            
+      });
+    })
+  }
+
+
+  // 如果有一个成功，就直接返回成功
+  // 如果全部失败，则返回一个AggregateError，同时用 .errors 按序保存了所有错误信息
+  // 固只能用 for 循环来遍历 promises，以确保按序登记错误信息
+  static any(promises) {
+    promises = Array.from(promises, (promise) => MyPromise.resolve(promise));
+    return new MyPromise((resolve, reject) => {
+      const errValues = [];
+      let count = promises.length;
+      for (let i = 0; i < promises.length; i++) {
+        promises[i].then((res) => {
+          resolve(res);
+        }, (err) => {
+          errValues[i] = err;
+          if (!--count) {  // count === 0 时，全部promise决议完毕
+            const message = new AggregateError('All promises were rejected');
+            message.errors = errValues;
+            reject(message);
+          }
+        })
+      }
+    })
+  }
+}
+```
+
+
+
+
+
+测试：
+
+```js
+// p1 p2 p3 p4 和 2.2 的测试举例相同，不再赘述
+
+//* race测试
+// 谁先完成就返回谁（成功/失败都算）
+MyPromise.race([p2, p3, p4])
+.then((res) => {
+    console.log('res:', res);
+}).catch((err)=> {
+    console.log('err:', err);
+})
+// res: p2 resolve
+
+// 如果传入立即值，则直接返回
+MyPromise.race([p2, p3, p4, 'heihei~'])
+.then((res) => {
+    console.log('res:', res);
+}).catch((err)=> {
+    console.log('err:', err);
+})
+// res: heihei~
+
+//* any测试
+const p5 = new MyPromise((resolve, reject) => {
+    setTimeout(() => { reject('p5 reject') }, 3001);
+})
+
+MyPromise.any([p3, p4])
+.then((res) => {
+    console.log('res:', res);
+}).catch((err)=> {
+    console.log('err:', err);
+})
+// res: p3 resolves
+
+// 顺序相反
+MyPromise.any([p5, p4])
+.then((res) => {
+    console.log('res:', res);
+}).catch((err)=> {
+    console.log('err:', err);
+    console.log(err.errors);
+})
+//err: AggregateError: All promises were rejected 
+// (2) ['p5 reject', 'p4 reject']
+```
+
+
+
