@@ -14,7 +14,7 @@ tags: [JavaScript]
 - Gecko：早期被Netscape和Mozilla Firefox浏览器浏览器使用；
 - Trident：微软开发，被IE4~IE11浏览器使用，但是Edge浏览器已经转向Blink；
 - Webkit：苹果基于KHTML开发、开源的，用于Safari，Google Chrome之前也在使用；
-- Blink：是Webkit的一个分支，Google开发，目前应用于Google Chrom e、Edge、Opera等；
+- Blink：是Webkit的一个分支，Google开发，目前应用于Google Chrome、Edge、Opera等；
 
 
 
@@ -36,9 +36,9 @@ tags: [JavaScript]
 
 #### 1.2.1 常见的 JavaScript 引擎
 
-- **SpiderMonkey** (蜘蛛猴??)：第一款JavaScript引擎，由Brendan Eich开发（也就是JavaScript作者）； 
-- **JavaScriptCore**：WebKit中的 JavaScript 引擎，Apple公司开发； 
-- **V8**：Google 开发的强大JavaScript引擎，也帮助Chrome从众多浏览器中脱颖而出；
+- **SpiderMonkey** (蜘蛛猴?)：第一款 JavaScript 引擎，由 Brendan Eich 开发（也就是JavaScript作者）； 
+- **JavaScriptCore**：WebKit 中的 JavaScript 引擎，Apple 公司开发； 
+- **V8**：Google 开发的强大JavaScript引擎，也帮助 Chrome 从众多浏览器中脱颖而出；
 - Chakra：微软开发，用于IT浏览器； 
 
 

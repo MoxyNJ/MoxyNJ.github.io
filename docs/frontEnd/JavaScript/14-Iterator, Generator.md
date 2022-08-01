@@ -186,6 +186,8 @@ getData();
 
 ## 1 Async / await  异步编程
 
+async (asynchronous) 异步、psync (synchronous) 同步。
+
 ```js
 async function foo() {
     return 1 
@@ -194,11 +196,20 @@ async function foo() {
 
 如果函数前加入了 `async` 关键字，这个函数就成为了一个 Async。Async 通常和 Promise 配合使用，Async 进一步优化了 promise 的 `then` 调用链,使异步编程更舒适。
 
-`async` 函数的返回值，永远是一个 `promise`，且该 `promise` 是已决议的。
+执行中：
+
+- 异步函数的内部代码执行过程和普通的函数是一致的，默认情况下也是会被同步执行。
+- 异步函数内部，如果出现异常，并不影响函数外部作用域，而是会在异常处立即返回一个已决议的 rejected promise，并把异常原因返回。
+
+
+
+返回值：
+
+- `async` 函数的返回值，永远是一个 `promise`，且该 `promise` 是已决议的。
 
 - 如果 `return` 的是一个立即值，则包装为一个 rsolved promise 后返回；
 - 如果 `return` 的是一个 `promise`，则直接返回这个 `promise`。
-- 如果 `return` 的是一个 thenable，则会进行展开(执行)，得到一个立即值或 `promise`。
+- 如果 `return` 的是一个 thenable，则会展开 (执行 `then()` )，得到一个立即值或 `promise`。
 - 如果没有手动 `return`，且没有错误的情况下， 默认返回一个值为 `undefined` 的 resolved promise。
 - 如果没有手动 `return`，且有 `reject`，如果没有用 `try...catch` 捕获，就会返回这个 `rejected promise`。
 
@@ -210,8 +221,13 @@ async function foo() {
 
 `await... ` 表达式是一个暂停点，其右侧是一个 `promise`。当程序执行到 `await...`  时，`await` 会暂停函数的执行，直到 promise 状态变为 settled，然后以 promise 的结果继续执行。这个行为不会耗费任何 CPU 资源，因为 JavaScript 引擎可以同时处理其他任务：执行其他脚本，处理事件等。
 
-- `await` 实际上就是 `p.then()` 的语法糖。
-- **如果 `await` 后是一个立即值，则直接返回这个立即值，不会包装为 `promise` 。**
+- **完成自动解析**。`await` 实际上就是 `p.then()` 的语法糖（参考0.4 举例）。`await` 会把右侧的 `promise` 通过 `.then( res => res)` 把 res 提取出来，返回给 `await` 的左侧。
+  - 所以，如果 `await` 后是一个立即值，则直接返回这个立即值。
+
+- **错误顺延抛出**。`await` 只负责解析 resolved 的 promise，如果 promise 是一个 rejected 的，那当前 async 函数会立即 rejected，把 await 处的 rejeted promise 值，当作 async rejected 的值抛出。
+  - asnyc function 的返回值也是一个 promise。
+  - 如果不想顺延抛出，需要通过 try ... catch 捕获 await 右侧那个 rejected promise。
+
 
 
 
@@ -219,7 +235,7 @@ async function foo() {
 
 如果一个 promise 正常 `fulfilled`，`await promise` 返回的就是其结果，是一个已决议的 `promise`。
 
-如果这个 promise 是`rejected`，它将 `throw` 这个 `error` ，控制台中会显示一个未处理的 promise error：
+如果这个 promise 是 `rejected`，它将 `throw` 这个 `error` ，控制台中会显示一个未处理的 promise error：
 
 ```js
 async function foo() {
@@ -458,3 +474,6 @@ let range = {
 此时，我们可以使用异步 generator 来处理此类数据。
 
 值得注意的是，浏览器环境下，还有一个被称为 Streams 的 API，它提供了特殊的接口来处理此类数据流，转换数据、并将数据从一个数据流传递到另一个数据流（例如，从一个地方下载并立即发送到其他地方）。
+
+
+

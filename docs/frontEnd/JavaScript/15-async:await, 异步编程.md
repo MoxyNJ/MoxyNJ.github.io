@@ -743,7 +743,7 @@ async function foo() {
 `await... ` 表达式是一个暂停点，其右侧是一个 `promise`。当程序执行到 `await...`  时，`await` 会暂停函数的执行，直到 promise 状态变为 settled，然后以 promise 的结果继续执行。这个行为不会耗费任何 CPU 资源，因为 JavaScript 引擎可以同时处理其他任务：执行其他脚本，处理事件等。
 
 - `await` 实际上就是 `p.then()` 的语法糖。
-- **如果 `await` 后是一个立即值，则直接返回这个立即值，不会包装为 `promise` 。**
+- 即使 await 右侧是一个立即值，也会经过 `Promise.resolve()` 包裹一下，也是异步微任务。
 
 
 
