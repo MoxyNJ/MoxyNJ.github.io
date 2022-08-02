@@ -1,5 +1,6 @@
 // @ts-check
 const path = require("path");
+const record = "晋ICP备2021017941号-2";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -38,20 +39,21 @@ const config = {
           srcDark: "img/ninjee-icon.png",
         },
         items: [
-          {
-            label: "归档",
-            position: "right",
-            items: [
-              {
-                label: "标签",
-                to: "tags",
-              },
-              {
-                label: "最近...",
-                to: "archive",
-              },
-            ],
-          },
+          // 注释blog相关功能
+          // {
+          //   label: "归档",
+          //   position: "right",
+          //   items: [
+          //     {
+          //       label: "标签",
+          //       to: "tags",
+          //     },
+          //     {
+          //       label: "最近...",
+          //       to: "archive",
+          //     },
+          //   ],
+          // },
           {
             label: "前端知识",
             position: "right",
@@ -185,12 +187,12 @@ const config = {
             items: [
               {
                 label: "Ninjee 的前端篮子",
-                to: "ninjee.co",
+                to: "https://www.ninjee.co",
               },
             ],
           },
         ],
-        copyright: `<p>Copyright © ${new Date().getFullYear()} Ninjee Built with Docusaurus.</p>`,
+        copyright: `<p>Copyright © ${new Date().getFullYear()} Ninjee Built with Docusaurus.</p><p><a href="http://beian.miit.gov.cn/" >${record}</a></p>`,
       },
       prism: {
         theme: require("prism-react-renderer/themes/github"),
@@ -229,6 +231,7 @@ const config = {
             type: "all",
             title: "ninjee",
             copyright: `<p>Copyright © ${new Date().getFullYear()} ninjee Built with Docusaurus.</p>`,
+            //
           },
         },
         theme: {

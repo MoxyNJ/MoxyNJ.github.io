@@ -108,7 +108,7 @@ const Projects: Project[] = [
     title: "ninjee的前端篮子",
     description: "基于Docusaurus v2 静态网站生成器实现个人博客",
     preview: require("./showcase/blog.png"),
-    website: "https://https://moxynj.github.io/",
+    website: "https://www.ninjee.co",
     source: "https://github.com/MoxyNJ/MoxyNJ.github.io",
     tags: ["opensource", "design"],
   },
