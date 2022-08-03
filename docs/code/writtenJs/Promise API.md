@@ -1642,7 +1642,7 @@ clone(b);
 
 
 
-## 6 Java Script 基础
+## 6 Object 和 关键字
 
 ### 6.1 实现 new 🌟
 
@@ -1691,13 +1691,57 @@ p.constructor === Person.prototype.constructor		// true
 Person === Person.prototype.constructor		// true
 ```
 
-### 6.2 instanceof
+### 6.2 instanceof 🌟
 
 - https://juejin.cn/post/6946136940164939813#heading-4
 
-### 6.4 手写类型判断函数
+```js
+function instance_of(Case, Constructor) {
+    // 基本数据类型返回false
+    // 兼容一下函数对象
+    if ((typeof(Case) != 'object' && typeof(Case) != 'function') || Case == 'null') return false;
+    let CaseProto = Object.getPrototypeOf(Case);
+    while (true) {
+        // 查到原型链顶端，仍未查到，返回false
+        if (CaseProto == null) return false;
+        // 找到相同的原型
+        if (CaseProto === Constructor.prototype) return true;
+        CaseProto = Object.getPrototypeOf(CaseProto);
+    }
+}
+```
 
-- https://juejin.cn/post/6946136940164939813#heading-11
+
+
+### 6.3 手写类型判断函数 🌟
+
+```js
+function myTypeof(obj) {
+   return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
+}
+
+// slice(8, -1) 的来源：
+Object.prototype.toString.call([]);  
+// '[object Array]'，前面减掉 8 == 左括号 + object + 空格；后面减掉 1。
+```
+
+- 坑：为什么要用改方法？见自己写的：**类型判断** 文章。
+
+
+
+### 9.1 Object.create 🌟
+
+https://juejin.cn/post/6946136940164939813#heading-4
+
+
+
+### Object.is
+
+https://juejin.cn/post/6875152247714480136#heading-31
+
+### Object.assign
+
+https://juejin.cn/post/6875152247714480136#heading-31
 
 
 
@@ -1705,51 +1749,536 @@ Person === Person.prototype.constructor		// true
 
 - 继承的方法誊写过来
 
-### 6.3 Object.create()
-
-- https://juejin.cn/post/6946136940164939813#heading-4
 
 
+## 8 function 
 
-## 8 function 🌟
+### 8.1 柯里化 curry 🌟
 
-实现 call、bind、apply
+- 详细情况：06-函数与函数式编程.md
 
-- 自己写的誊写过来。
+```js
+function currying(fn) {
+  // 递归 curried，接受所有参数
+  function curried(...args) {
+    // base case
+    if (fn.length <= args.length) return fn.call(this, ...args);
+    // 接收其他参数
+    return function(...args2) {
+      // 递归，合并参数
+      return curried.call(this, ...args, ...args2);
+    }
+  }
+  return curried;
+}
+
+
+// 详细注释
+function currying(fn){
+  // 返回已柯里化函数
+	function curried(...args){
+		// args.length 传入参数的个数
+    // fn.length   函数形参的个数
+    // 判断当前已经接受到的参数个数，是否和函数本身需要的参数一致了
+    // base case 参数足够，则直接调用原函数，并返回值
+    if (args.length >= fn.length) {
+      return fn.call(this, ...args); // 防止外部调用fn时绑定过this，用.call调用，不丢失this指向
+    } 
+    // 参数不够，返回一个新函数接受剩余参数
+    return function(...otherArgs) {
+      // 递归调用curried，并把之前已经接收的参数添加
+      // 这里要return，因为并不知道当前参数是否足够，如果不够还会返回一个函数接受剩余的参数
+			return curried.call(this, ...args, ...otherArgs);
+    }
+  }
+  return curried;
+}
+
+
+// test
+function add(x, y, z) {
+  return x + y + z;
+}
+
+// 假如 curryAdd 最多有3个参数，但传递方式可以有如下情况：
+const curryAdd = currying(add);
+curryAdd(10, 20, 30);
+curryAdd(10, 20)(30);
+curryAdd(10)(20)(30);
+```
 
 
 
+### 8.2 call /apply / bind 🌟
+
+```js
+// mycall
+Function.prototype.mycall = function (thisArg, ...args){
+  // this绑定
+  thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
+	const fn = Symbol();
+  thisArg[fn] = this;
+  // func调用
+  const result = thisArg[fn](...args);
+  delete thisArg[fn];
+	// return
+  return result;
+}
+
+// myapply，入参附默认值
+Function.prototype.myapply = function (thisArg, args = []){
+  // this绑定
+  thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
+	const fn = Symbol();
+  thisArg[fn] = this;
+  // func调用
+  const result = thisArg[fn](...args) 
+  delete thisArg[fn];
+	// return
+  return result;
+}
+
+// mybind
+Function.prototype.mybind = function (thisArg, ...args) {
+  // 保留this引用
+  thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
+	const thisfn = this;
+  // 返回绑定函数
+  return function (...newargs) { 
+    const fn = Symbol();  // 动态绑定
+    thisArg[fn] = thisfn;
+    const result = thisArg[fn](...args, ...newargs); 
+    delete thisArg[fn]; 
+    return result;
+  };
+};
+```
 
 
 
+#### 1.1 call
+
+Js 中，call 是用 C++ 实现的，这里只考虑基本实现，不考虑边界问题：
+
+`func.call(thisArg, ...args)` 第一个参数传递一个用于绑定 this 的对象，具有以下特性：
+
+- 如果传递一个对象，需要把 func 的 this 指向这个对象 thisArg。这里 mycall 无法实现无副作用的指向对象，只能先在对象上添加一个 func 函数，然后用隐式调用  `thisArg.func` 来确定关系，最后用 delete 删除 thisArg 上添加的 func 函数。
+- 如果传递的是非对象，如：number、string、boolean 等基本数据类型，call 会进行包装，形成一个包装对象。mycall 通过 `object(thisArg)` 来把传递的非对象包装为一个对象。
+- 如果传递的是非对象，且为 `null / undefined`，ca ll 会默认指向 window（node环境是undefined）。这里 mycall 通过 `object(thisArg)` 会把  `null / undefined` 包装为空对象 `{}`。那么在执行包装前，要判断一下 thisArg 是否存在，如果不存在则绑定为 window。
+
+`func.call(thisArg, ...args)` 第二个以后的参数，是 func 的入参。mycall 直接用剩余运算符全部收集，然后在调用时全部展开即可 `...args`。
+
+代码如下
+
+```js
+// test
+func.mycall(obj, 10, 20);
+func.mycall();
+func.mycall(undefined, 10, 20);
+
+
+// 绑定在函数类原型上
+Function.prototype.mycall = function (thisArg, ...args){
+  // 1.获取需要执行的函数
+ 	var fn = this;   // function内的this，由于是隐式调用(func.mycall())，所以指向待执行函数func
+  var result = undefined;
+  
+  // 2.包装thisArg，如果为空则绑定window
+  thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
+  
+  // 3.调用待执行函数：添加属性、隐式调用、删除属性
+  thisArg._fn = fn;
+	result = thisArg._fn(...args);
+  delete thisArg._fn;
+  
+  // 4.返回函数执行结果
+  return result;
+}
+```
+
+#### 1.2 apply
+
+apply 和 call 大体一样，不同的是对 func 的入参格式处理，apply 第二个参数要传递一个数组，成员是所有的入参。所以，在 myapply 内执行 `thisArg._fn` 时，要判断数组是否存在，不存在则不传参数：
+
+```js
+// func调用，判断数组是否存在
+var result = args
+  ? thisArg._fn(...args) 
+  : thisArg._fn();
+```
+
+#### 1.3 bind
+
+```js
+// bar 作为返回参数，下次调用其内部 this 指向 obj
+const bar = func.bind(obj, arg1, arg2, ..)
+```
+
+1. 第一个参数作为 this 值；
+   - 若是基础类型，则要包装为包装对象，使用 `Object()` 可以根据不同基础类型进行包装。
+   - 若是 `null` 和 `undefined`，则 this 指向全局 `window`，node 环境下指向 undefined。	
+2. 剩余的参数作为返回函数 bar 的入参，待调用返回函数是自动传入。
+3. 如果 bar 在调用时用 `new bar()` 调用，那么有两个变化：
+   1. bind 绑定 this 失效，this 按照 `new` 关键字的设定，绑定实例化对象；
+   2. 实例化对象的原型指向原方法 `func` 的原型链上。
+
+bind方法返回的新方法，如果使用new实例化，那么原本通过bind绑定的this指向的对象会失效，this将指向到新实例化的对象上，且可以使用原方法原型链上的属性或方法。
+
+换句话说：一个 绑定函数 也能使用 new 操作符创建对象,这种行为就像把原函数当成构造器，thisArg 参数无效。也就是 new 操作符修改 this 指向的优先级更高。
+
+
+
+动态绑定技巧：
+
+- 对 `thisArg._fn = fn` 要动态绑定，即只有在调用 bar 时，才进行绑定，对 thisArg 对象的影响降低到最小化。
+- bind 有两种用法，mybind 这两种用法都要考虑到（下面代码）；
+
+```js
+// bind时，传入参
+var bar = func.bind(obj, arg1, arg2)；
+bar(arg3, ...);
+
+// bind时，不传入参
+var bar = func.bind(obj)；
+bar(arg1, arg2 ,arg3 ...);
+```
+
+最后代码如下：
+
+```js
+// ❗️考虑 new 的样式
+Function.prototype.mybind = function (thisArg, ...args) {
+  // 保留this引用（缓存this）
+  thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
+  const thisfn = this;
+  
+  // 定义绑定函数，不直接返回是因为需要函数名foo
+  const foo = function (...innerArgs) {
+    // new foo，不修改this指向，此时this为foo的实例化对象
+    if (this instanceof foo) {
+      return new thisfn(...args, ...innerArgs);
+    } 
+    // 普通函数调用，this指向thisArg对象
+    const fn = Symbol();
+    thisArg[fn] = thisfn;   // 动态绑定
+    const result = thisArg[fn](...args, ...innerArgs);
+    delete thisArg[fn];
+    return result;
+  };
+  return foo;  //返回函数
+};
+
+
+
+// ❗️不考虑 new 的样式：
+Function.prototype.mybind = function (thisArg, ...args) {
+  // 保留this引用
+  thisArg = thisArg !== null && thisArg !== undefined ? Object(thisArg) : window;
+	const thisfn = this;
+  // 返回绑定函数
+  return function (...newargs) {  // 调用bar时传递的参数
+    const fn = Symbol(); 
+    thisArg[fn] = thisfn; // 动态绑定，只有在调用时才进行绑定
+    const result = thisArg[fn](...args, ...newargs); // 先保存执行result
+    delete thisArg[fn]; // 解除绑定关系
+    return result; // 返回结果
+  };
+};
+
+// test
+function sum(num1, num2, num3) {
+  console.log(this, num1, num2, num3);
+  this.name = num1;
+  return num1 + num2 + num3;
+}
+
+var obj = { call: "moxy" };
+
+// 用法一
+var bar = sum.mybind(obj, 10, 20);
+bar(30);
+// 用法二
+var baz = sum.mybind(obj);
+baz(20, 10, 5);
+```
+
+
+
+### 8.3 组合函数
+
+将可以连续执行的函数组合为一个函数：详细 **JavaScript / 06-函数与函数式编程.md**。
+
+```js
+// 下一个函数的结果，是上一个函数的入参：
+func3(func2(func1(10)));
+
+// 组合函数：
+const func = compose(func1, func2, func3);
+func(10);
+```
+
+实现如下：
+
+```js
+function compose(...fns) {
+  const len = fns.length;  // 统计共有几个函数需要组合
+  for (let i = 0; i < len; i++) {
+    if (typeof fns[i] !== 'function') {
+      throw new TypeError("Expected arguments are function");
+    }
+  }
+ 	// 递归执行所有fns 
+  return function (...args) {
+		let index = 0;
+    // 如果没有传入任何函数，则直接返回参数当作结果。
+    let result = len ? fns[index].call(this, ...args) : args;  
+    while (++index < len) {
+      result = fns[index].call(this, result);
+    }
+		return result;
+  }
+}
+
+
+// 测试：
+function add(num1, num2) { return num1 + num2 }
+function double(num) { return num * 2 }
+function square(num) { return num ** 2 }
+
+const newFn = compose(add, double, square);
+const result = newFn(1, 2);  // 36
+```
+
+
+
+### 8.4 链式调用
+
+和 `then().then().then()` 一样无限调用。
+
+```js
+class Person {
+  constructor(name){
+    this.name = name;
+  }
+  method(param) {
+    console.log(param);
+    return this;			// 核心：函数执行完毕后，返回 this 即可
+  }
+}
+
+let p = new Person('ninjee');
+p.method('第一次调用').method('第二次链式调用').method('第三次链式调用');
+// 第一次调用
+// 第二次链式调用
+// 第三次链式调用
+Person {name: 'ninjee'}
+```
+
+
+
+## 10 ajax 与 jsonp
+
+异步编程相关？
+
+- https://juejin.cn/post/7033275515880341512#heading-52
+
+### 实现ajax 🌟
+
+### 实现jsonp 🌟
 
 
 
 == todo =================
 
-函数柯里化
+
+
+ES6
+
+- https://juejin.cn/post/7033275515880341512#heading-55
+- 实现 ES6：Set
+- 实现 ES6：Map
+- 实现 ES6：Class
+
+
+
+## 11 其他
+
+### 实现千分位分隔符
+
+```js
+//方法一
+function func(number) {
+	return String(number).replace(/\B(?=(\d{3})+$)/g, ",");
+}
+func(10000000);
+func('10000000');  // '10,000,000'
+
+// ❗️方法二：可以解决小数点问题
+const number = 123456.789;
+number.toLocaleString(); 	// '123,456.789'
+
+// 方法三
+const number = 1000000;
+new Intl.NumberFormat().format(number);	// '1,000,000'
+
+// 方法四：小数点
+function func(number) {
+	return String(number).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+func(10000000.234);		// '10,000,000.234'
+```
+
+另：
+
+- 保留两位小数：`num.toFixed(2)`
+
+- ES20221 新特性：`_` 数字分隔符，用下划线符号分隔数字，会被 js 引擎正常读取，并转化为普通数字。
+
+  ```js
+  Number('123_456'); // NaN
+  parseInt('123_456'); // 123
+  ```
+
+方法一：正则解释
+
+| 含义                     | 规则    |
+| ------------------------ | ------- |
+| 匹配：单个数字, [0-9]    | \d      |
+| 匹配左侧规则  1或 0 次   | ?       |
+| 匹配左侧规则 1次或无数次 | +       |
+| 匹配左侧规则 3 次        | {3}     |
+| 字符串结尾               | $       |
+| 匹配：非单词的边界       | \B      |
+| 先行断言                 | (?=xxx) |
+| 后行断言                 | (?!xxx) |
+
+先行断言：`x(?=y)`：如果 x 后面跟的是 y，则匹配 x。
+
+后行断言：`(?!y)`
+
+什么是单词的边界：
+
+- 单词的边界 / 非单词的边界，匹配的不是一个具体的字符，而是一个 **位置**。
+- `word wrod2 word3` 这三个单词，通过 `\b` `word` `\b` 就能匹配到第一个 word 单词，而第二个 word2 不会匹配到。
+- `123456` 在这个例子中，每个字母的间隙，就是非单词的边界。因为这个边界的左右两侧，都无法构成一个单词。
+  - 这里利用 `\B` 匹配每个数字之间的缝隙。
+
+
+
+- `\B(?=xx)`：如果 [非单词的边界] 后面是 xx，则匹配到 \B
+- `\B(?=\d{3})`：如果 [非单词的边界] 后面出现连续 3 个数字，则匹配到 \B。
+- `\B(?=\d{3})+`：添加了 + 号，则这个规则执行无数次。
+
+方法三：**`Intl`** 对象
+
+- 是 ECMAScript 国际化 API 的一个命名空间，它提供了精确的字符串对比、数字格式化，和日期时间格式化。[Collator](https://link.juejin.cn/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FIntl%2FCollator)，[NumberFormat](https://link.juejin.cn/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FIntl%2FNumberFormat) 和 [DateTimeFormat](https://link.juejin.cn/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FJavaScript%2FReference%2FGlobal_Objects%2FIntl%2FDateTimeFormat) 对象的构造函数是 `Intl` 对象的属性。
+- [🔗](https://juejin.cn/post/7124989393156177928)
+
+方法四：正则的含义
+
+- `(?!\d)`表示后面不能再跟数字。
+- `(?=(\d{3})+(?!\d))`代表，有 n 个位置，这些位置的特点是：
+  - 后面连续跟 3 个数字，**且** 在这（3 个数字）之后不会再有任何数字（也就是说要从右开始看）。如小数点 `.` 或字符串尾。
+    如 `12345.67` 中只有`2`和`3`之间的位置满足上述条件。指出这个位置，然后将它替换成逗号。
+
+
+
+### 属性名样式转化
+
+##### Pascal to Camel
+
+把一个 JSON 对象中，全部的 key 从下划线形式（Pascal）转换到小驼峰形式（Camel）
+
+```js
+// 方法一：正则表达式
+function getCamelCase(str) {
+    return str.replace(/_([a-z])/g, function(all, i) {
+      // _ninjee: all为_a，i为a。这里只要把 a 替换掉即可
+        return i.toLowerCase();
+    })
+}
+
+// 方法二：数组切割
+function getCamelCase(str) {
+	const arr = str.split('_');  // 把JSON通过_切分开，数组中第一个成员不需要替换字母
+  return arr.map((item, index) => {
+    if (index === 0) return item;
+    return item.charAt(0).toUpperCase() + item.slice(1); // 把第一个字母修改为小写，然后拼接剩余字母
+  }).join('');
+}
+```
+
+- **charAt()** ：字符串的下标访问
+  - `str.charAt(index)` ，这相当于对数组进行 `arr[0]` 操作。
+
+```js
+// test
+const signInfo = [
+  {
+    field_id: 539,
+    value: undefined
+  },
+  {
+    field_id: 540,
+    value: undefined
+  },
+  {
+    field_id: 546,
+    value: undefined
+  },
+]
+const str = JSON.stringify(signInfo);
+// '[{"field_id":539},{"field_id":540},{"field_id":546}]'
+
+getCamelCase(s)  // '[{"fieldId":539},{"fieldId":540},{"fieldId":546}]'
+
+// 执行时，str.split('_') 把字符串切割为：
+// 0: "[{\"field"      // 第一个成员不需要替换首字母，其余成员需要全部替换
+// 1: "id\":539},{\"field"
+// 2: "id\":540},{\"field"
+// 3: "id\":546}]"
+```
+
+##### Camel to Pascal
+
+把一个 JSON 对象中，全部的 key 从小驼峰形式（Camel）转换到下划线形式（Pascal）
+
+```js
+// 方法一：正则
+function getKebabCase(str) {
+  let temp = str.replace(/[A-Z]/g, function(i) {
+    return '_' + i.toLowerCase();
+  })
+  if (temp.slice(0,1) === '_') {
+    temp = temp.slice(1);   //如果首字母是大写，执行replace时会多一个_，需要去掉
+  }
+  return temp;
+}
+
+// 方法二：数组
+function getKebabCase(str) {
+  let arr = str.split('');
+  let result = arr.map((item) => {
+    if (item.toUpperCase() === item) {
+      return '_' + item.toLowerCase();
+    } else {
+      return item;
+    }
+  }).join('');
+  return result;
+}
+```
+
+
+
+### 数组转树
 
 
 
 
 
+### sleep函数
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+### 发布订阅模式
