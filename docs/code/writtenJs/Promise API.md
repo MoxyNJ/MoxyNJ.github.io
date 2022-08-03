@@ -480,9 +480,7 @@ promise.then(
 
 
 
-## 2 Promise API
-
-### 2.1 类：resolve reject
+### 1.5 类：resolve reject
 
 在 MyPromise 类中添加：
 
@@ -510,7 +508,7 @@ MyPromise.reject('错了').catch((err) =>{console.log('reject', err)});
 
 
 
-### 2.2 .all .allSettled
+### 1.6 .all .allSettled
 
 all：全部 **成功** 后返回保存为数组返回，期间一旦有一个失败，直接返回失败结果。
 
@@ -645,7 +643,7 @@ MyPromise.allSettled([p1, p2, p3, p4, 'heihei~'])
 
 
 
-### 2.3 .race .any
+### 1.7 .race .any
 
 race：返回第一个跨过终点线的 Promise 对象，而抛弃其他 Promise。
 
@@ -702,8 +700,6 @@ class MyPromise extends Promise {
 
 
 
-
-
 测试：
 
 ```js
@@ -752,6 +748,1008 @@ MyPromise.any([p5, p4])
 //err: AggregateError: All promises were rejected 
 // (2) ['p5 reject', 'p4 reject']
 ```
+
+
+
+### 1.8 如何串行执行多个 Promise
+
+- https://juejin.cn/post/6844903801296519182
+
+
+
+## 2 Array
+
+### 2.1 数组去重
+
+##### 方法一：双重 for + splice
+
+```js
+function arrUnique(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[i] === arr[j]) {
+        arr.splice(j, 1);   
+        j--;      // 删去后，j 下标不变 (j--, j++)
+      }
+    }
+  }
+  return arr;
+}
+
+const arr = [ 1, 6, 3, 7, 8, 3, 5, 8, 234, 5, 9, 34, 23, 2, 23, 3, 5, 89, 3, 4, 8, 87, 9, 23, 2,];
+arrUnique(arr);  // [1, 6, 3, 7, 8, 5, 234, 9, 34, 23, 2, 89, 4, 87]
+```
+
+- `[].splice(index, 删除个数, [添加成员])` 对数组删除 / 替换 / 添加，改变原数组。
+- `[].slice(start, end)`，浅拷贝并返回数组，从 start 到 end（不含）。
+
+##### 方法二：filter + indexOf
+
+- filter：挑选不重复的成员
+- indexOf：通过下标相等判断是否重复
+
+```js
+function arrUnique(arr) {
+  return arr2 = arr.filter((value, index) => {
+    return arr.indexOf(value) === index;
+  });
+}
+```
+
+##### 方法三：indexOf / include
+
+- 创建一个新数组，不断往里添加不重复的成员
+
+```js
+function arrUnique(arr) {
+    const newArr = [];
+    for (const c of arr) {
+        // if (newArr.includes(c)) continue;
+        if (newArr.indexOf(c) !== -1) continue;
+        newArr.push(c);
+    }
+    return newArr;
+}
+```
+
+##### 方法四：reduce + includes
+
+- reduce：相当于方法三中的创建新数组 + for 循环遍历的作用
+- includes：判断 acc 中是否已经存在当前 cur
+
+```js
+function arrUnique(arr) {
+  return arr.reduce((acc, cur) => {
+    if (!acc.includes(cur)) acc.push(cur);
+    return acc;
+  }, []);
+}
+```
+
+##### 方法五：sort + 快慢指针
+
+- **原地修改**
+- 最终把长度截断到慢指针指向的地方
+
+```js
+function arrUnique(arr) {
+  arr.sort((x, y) => x - y);
+  console.log(arr);
+  let slow = 0, fast = 1;
+  while (fast < arr.length) {
+    while (arr[fast - 1] === arr[fast]) fast++;
+    arr[slow] = arr[fast - 1];
+    slow++, fast++;
+  }
+  // 如果最后一位不重复，则slow额外赋值一次，同时 slow+1
+  if (arr[arr.length - 1] !== arr[arr.length - 2]) arr[slow++] = arr[arr.length - 1];
+  arr.length = slow;
+}
+```
+
+换一种思路：
+
+```js
+function arrUnique(arr) {
+  arr.sort((x, y) => x - y);
+  console.log(arr);
+  let slow = 1, fast = 1;  // fast必须从1开始
+  while (fast < arr.length) {
+    if (arr[fast -1] !== arr[fast]) {
+      arr[slow] = arr[fast];
+      slow++;
+    }
+    fast++;
+  }
+  arr.length = slow;
+}
+```
+
+##### 方法六：Set
+
+```js
+function arrUnique(arr) {
+    // const set = new Set(arr);
+    // return Array.from(set);
+    return Array.from(new Set(arr));
+}
+
+// shorter
+const arrUnique = (arr) => [...new Set(arr)];
+```
+
+**方法七：Map**
+
+- 思路和 Set 一样，只是多加了一层重复判断，map 中只保存不重复的值，最后遍历出来。
+
+```js
+function arrUnique(arr) {
+  const map = new Map();
+  for (const c of arr) {
+    if (map.has(c)) continue;
+    map.set(c, true);
+  }
+  return [...map.keys()];
+}
+```
+
+#### 另：数组成员是对象去重
+
+根据 name 重复，名称相同的去重。
+
+- reduce：相当于 for 循环 + 新建一个 array
+- temp：如果已经添加过该对象，就登记并设置为 ture。
+
+```js
+const resources = [
+  { name: "张三", age: "18" },
+  { name: "张三", age: "19" },
+  { name: "张三", age: "20" },
+  { name: "李四", age: "19" },
+  { name: "王五", age: "20" },
+  { name: "赵六", age: "21" },
+];
+
+const distinct = (arr) => {
+  const record = [];
+  return arr.reduce((acc, curv) => {
+    if (!record.includes(curv.name)) {
+      acc.push(curv);
+      record.push(curv.name);
+    }
+    return acc;
+  }, [])
+}
+
+console.log(distinct(resources));
+// 0: {name: '张三', age: '18'}
+// 1: {name: '李四', age: '19'}
+// 2: {name: '王五', age: '20'}
+// 3: {name: '赵六', age: '21'}
+```
+
+
+
+### 2.2 数组扁平化
+
+##### 实现 `Array.prototype.flat()`
+
+`Array.prototype.flat()`  特性总结
+
+- `Array.prototype.flat()` 用于将嵌套的数组“拉平”，变成一维的数组。该方法返回一个新数组，对原数据没有影响。
+- 不传参数时，默认“拉平”一层，可以传入一个整数，表示想要“拉平”的层数。
+- 传入 `<=0` 的整数将返回原数组，不“拉平”
+- `Infinity` 关键字作为参数时，无论多少层嵌套，都会转为一维数组
+- 如果原数组有空位，`Array.prototype.flat()` 会跳过空位。
+
+
+
+解决：判断元素是数组的方案，按照可靠性：
+
+- 官方 API：`Array.isArray()`
+- 调用对象的 toString 方法：`Object.prototype.toString`
+- 原型链上查找原型对象：`instanceof`
+- 原型链上查找原型对象的构造函数属性：`constructor`
+
+另外：`typeof` 操作符对数组取类型将返回 `object`
+
+```javascript
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "弹铁蛋同学" }];
+arr instanceof Array					// true
+arr.constructor === Array			// true
+Object.prototype.toString.call(arr) === '[object Array]'			// true
+Array.isArray(arr)						// true
+```
+
+
+
+解决：将元素展开一层的方案
+
+- 展开数组：扩展运算符、`.apply()` apply（第二个参数传入数组，自动展开）
+- 合并多个数组：`[].concat()` 
+
+```js
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "弹铁蛋同学" }];
+// 扩展运算符 + concat
+[].concat(...arr)
+// [1, 2, 3, 4, 1, 2, 3, Array(4), 5, 'string', {…}]
+
+// apply + concat
+[].concat.apply([], arr);
+// [1, 2, 3, 4, 1, 2, 3, Array(4), 5, 'string', {…}]
+```
+
+
+
+##### 方法一：forEach + 递归
+
+```js
+function flat(arr) {
+  let res = [];
+  deep(arr);
+  return res;
+
+  function deep(arr) {
+    arr.forEach((item) => {
+      if (Array.isArray(item)) deep(item);  // 如果是数组，进一步展开
+      else res.push(item);									// 如果不是数组，就加入到res中
+    });
+  }
+}
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "弹铁蛋同学" }];
+flat(arr);
+//  [1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 1, 2, 3, 5, 'string', {…}]
+```
+
+
+
+##### 方法二：`reduce`  + 递归
+
+```js
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "弹铁蛋同学" }];
+
+// 展开一层
+arr.reduce((acc, cur) => {
+  return acc.concat(cur);  // 合并两个数组：acc.concat([1,2,3]) / acc.concat(4);
+}, []);
+// [1, 2, 3, 4, 1, 2, 3, Array(4), 5, 'string', {…}]
+
+
+// 展开n层
+function flat(arr) {
+    return arr.reduce((acc, cur) => {
+        return acc.concat(Array.isArray(cur) ? flat(cur) : cur);
+    }, [])
+}
+console.log(flat(arr));
+// [1, 2, 3, 4, 1, 2, 3, Array(4), 5, 'string', {…}]
+```
+
+- `reduce` 自动展开，并返回了数组。
+- `concat` 将返回的数组和原来的 acc 进行合并。
+
+
+
+##### 方法三：迭代（栈）
+
+- 不用递归，用迭代思想，修改为栈
+- 数组全部入栈，挨个判断每个成员是否为数组，如果是数组，则展开后继续入栈
+
+```js
+function flat(arr) {
+  const res = [];
+  const stack = [...arr];
+  while(stack.length) {
+    const item = stack.pop();
+    Array.isArray(item)
+      ? stack.push(...item)  // 是数组，展开后继续入栈
+	    : res.unshift(item);	// 不是数组，加入res数组中
+  }
+  return res;
+}
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "弹铁蛋同学" }];
+console.log(flat(arr))
+//  [1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 1, 2, 3, 5, 'string', {…}]
+```
+
+ 
+
+##### 方法四：控制展开层数量
+
+```js
+function flat(arr, num) {
+  const res = [];
+  deep(arr, num);
+  return res;
+
+  function deep(arr, num) {
+    arr.forEach((item) => {
+      num && Array.isArray(item)  // 多加一次判断，如果num为0，则不再进行展开
+        ? deep(item, num-1)
+      	: res.push(item);
+    });
+  }
+}
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "弹铁蛋同学" }];
+console.log(flat(arr, 1));
+// [1,2,3,4,1,2,3,[ 1, 2, 3, [ 1, 2, 3 ] ],5,'string',{ name: '弹铁蛋同学' }]
+```
+
+
+
+### 2.3 数组API
+
+##### forEach 🌟
+
+- MDN 官方的 polyfill：[🔗](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach#polyfill)
+
+官方 API 的使用：
+
+```js
+// 参数：1:callback( array[index], index, array本身)；2: cb的this绑定
+arr.forEach(function(item, index, array){
+    console.log(item, index, array, this);
+  }, obj);
+```
+
+实现：
+
+```js
+Array.prototype.myForEach = function (callback, thisArg) {
+  // 判断 this 是否合法
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断 cb 是否合法
+  // if (typeof callback !== "function") {
+  if (Object.prototype.toString.call(callback) !== "[object Function]") {
+    throw new TypeError(callback + " is not a function");
+  }
+  // 获取待处理数组和传入的this值（默认为window）
+  const arr = this;
+  thisArg ??= window;
+  for (let i = 0; i < arr.length; i++) {
+    callback.call(thisArg, arr[i], i, arr);
+  }
+};
+```
+
+测试：
+
+```js
+const obj = { name: 'moxy'};
+const arr = [1, 2, 3];
+
+// thisArg 对于箭头函数没有作用
+arr.myForEach((item, index, array) => {
+  console.log(item, index, array, this);
+}, obj);
+// 1 0 (3) [1, 2, 3] Window {window: Window, self: Window, docume}
+// 2 1 (3) [1, 2, 3] Window {window: Window, self: Window, docume}
+// 3 2 (3) [1, 2, 3] Window {window: Window, self: Window, docume}
+
+// 传入有效obj
+arr.myForEach( function(item, index, array) {
+    console.log(item, index, array, this);
+  }, obj);
+// 1 0 (3) [1, 2, 3] {name: 'moxy'}
+// 2 1 (3) [1, 2, 3] {name: 'moxy'}
+// 3 2 (3) [1, 2, 3] {name: 'moxy'}
+```
+
+##### map
+
+```js
+Array.prototype.myMap = function (callback, thisArg) {
+  // 判断 this
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断 cb
+  if (Object.prototype.toString.call(callback) !== "[object Function]") {
+    throw new TypeError(callback + " is not a function");
+  }
+  
+  const arr = this;
+  thisArg ??= window;
+  const res = [];    // 相比forEach，多一个接受参数的返回值
+  for (let i = 0; i < arr.length; i++) {
+    res.push(callback.call(thisArg, arr[i], i, arr));
+  }
+  return res;				// return 返回值
+};
+```
+
+##### reduce 🌟
+
+```js
+// 参数：
+array1.reduce((previousValue, currentValue, currentIndex, array) => previousValue + currentValue,
+  initialValue
+);
+```
+
+- 如果添加初始值，则第一次调回调函数的参数：`（initialValue, arr[0], 0, array）`
+- 否则，没设定初始值的参数：`(arr[0], arr[1], 1, array)`
+
+代码：
+
+```js
+Array.prototype.myReduce = function (callback, initialValue) {
+    // 判断 this 是否合法
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断 cb 是否合法
+  if (Object.prototype.toString.call(callback) !== "[object Function]") {
+    throw new TypeError(callback + " is not a function");
+  }
+  // 判断：初始值 和 非空数 必须满足一个
+  if (initialValue === undefined && this.length === 0) {
+    throw new Error('initVal and Array.length>0 need one')
+  }
+  
+  // 获取待处理数组和传入的this值
+  const arr = this;
+  let res = initialValue;
+  let i = 0;				// i 如果有初始值，则i需要加1。
+  if (res === undefined) {
+    res = arr[0];   // 如果无初始值，则 res 赋值为数组第一个元素
+    i++;                // 消耗一个元素，下标+1
+  }
+  for (; i < arr.length; i++) {
+    res = callback(res, arr[i],  i, arr);   // 不需要绑定 this
+  }
+  return res;
+};
+```
+
+测试：
+
+```js
+const arr = [1, 2, 3];
+
+const arr2 = arr.reduce(function (prev, curv, index, array){
+  console.log(prev, curv, index, array, this);
+  return prev + curv;
+}, 2);
+// 2 1 0 (3) [1, 2, 3] Window {window: Window, self: Window, document: docume
+// 3 2 1 (3) [1, 2, 3] Window {window: Window, self: Window, document: docume
+// 5 3 2 (3) [1, 2, 3] Window {window: Window, self: Window, document: docume
+console.log(arr2);	// 8
+```
+
+
+
+##### filter
+
+回调：和 map 逻辑基本相同，只是在 push 到 res 是额外增加判断：
+
+- 如果 return true 就添加，false 就放弃。
+
+```js
+Array.prototype.myFilter = function(callback, thisArg) {
+  // 判断 this 是否合法
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断 cb 是否合法
+  if (Object.prototype.toString.call(callback) !== "[object Function]") {
+    throw new TypeError(callback + " is not a function");
+  }
+  const arr = this
+  thisArg ??= window
+  const res = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (callback.call(thisArg, arr[i], i, arr)) { // 回调函数结果为 true 时，才添加
+      res.push(arr[i]);
+    }
+  }
+  return res;
+}
+```
+
+##### every
+
+`arr.every(callback(element[, index[, array]])[, thisArg])`
+
+- 测试一个数组内的所有元素是否都能通过某个指定函数的测试。它返回一个布尔值。
+- 如果有一次回调函数返回 false，every 立即返回 false 否则，返回 true
+
+```js
+Array.prototype.myEvery = function(callback, thisArg) {
+  // 判断 this 是否合法
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断 cb 是否合法
+  if (Object.prototype.toString.call(callback) !== "[object Function]") {
+    throw new TypeError(callback + " is not a function");
+  }
+  const arr = this;
+  thisArg ??= window;
+
+  for (let i = 0; i < arr.length; i++) {
+    if (callback.call(thisArg, arr[i], i, arr) === false) return false;  //有错就立即返回
+  }
+  return true;
+}
+```
+
+##### some
+
+和 every 相反。
+
+- 是不是至少有 1 个元素通过了被提供的函数测试。它返回的是一个 Boolean 类型的值。
+- 如果有一次回调函数返回 true，some 立即返回 true，否则返回 false。
+
+```js
+Array.prototype.myEvery = function(callback, thisArg) {
+  // 判断 this 是否合法
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断 cb 是否合法
+  if (Object.prototype.toString.call(callback) !== "[object Function]") {
+    throw new TypeError(callback + " is not a function");
+  }
+  const arr = this;
+  thisArg ??= window;
+
+  for (let i = 0; i < arr.length; i++) {
+    if (callback.call(thisArg, arr[i], i, arr)) return true;  // 遇到 ture，就立即返回。
+  }
+  return false;
+}
+```
+
+##### find/findIndex
+
+`arr.findIndex(callback(element[, index[, array]])[, thisArg])`
+
+- 返回满足回调函数的第一个元素的下标
+- **若没有找到对应元素则返回 -1。**
+
+
+
+`arr.find(callback(element[, index[, array]])[, thisArg])`
+
+- 返回满足回调函数的第一个元素的值
+- **若没有找到对应元素则返回 `undefined`**
+
+```js
+Array.prototype.myFindIndex = function(callback, thisArg) {
+  // 判断 this 是否合法
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断 cb 是否合法
+  if (Object.prototype.toString.call(callback) !== "[object Function]") {
+    throw new TypeError(callback + " is not a function");
+  }
+  const arr = this;
+  thisArg ??= window;
+
+  for (let i = 0; i < arr.length; i++) {
+    if (callback.call(thisArg, arr[i], i, arr)) return i;  // 遇到 ture，就立即返回下标
+    // myFind：
+    // if (callback.call(thisArg, arr[i], i, arr)) return i;  // 遇到 ture，就立即返回元素值
+  }
+  return -1; // 找不到，就返回 -1
+  // myFind:
+  // return undefined; // 找不到，就返回 undefined
+}
+```
+
+##### indexOf
+
+`arr.indexOf(searchElement[, fromIndex])`
+
+- 参数：要查找的元素值，开始查找的位置。如果找到，则返回第一个元素下标，如果没找到，则返回 -1；
+- `fromIndex` 如果为负数，则下标从 `arr.length + fromIndex` 开始找。如果  `arr.length + fromIndex`  为负数，则从 0 开始找。
+  - 默认为 0；
+
+```js
+Array.prototype.myIndexOf = function(findVal, fromIndex = 0) {
+  // 判断 this 是否合法
+  if (this == null || this == undefined) {
+    throw new TypeError("Cannot read property 'myForEach' of null or undefined");
+  }
+  // 判断不能为空数组
+  if (this.length === 0)	return -1;
+  // beginIndex 转化为数字
+  fromIndex = Number(fromIndex);
+
+  // beginIndex 最后必须大于0
+  if (fromIndex < 0) {
+   	fromIndex = this.length + fromIndex > 0 ? this.length + fromIndex : 0;
+  }
+  // beginIndex 必须小于数组长度
+  if (fromIndex >= this.length) return -1;
+
+  for (let i = fromIndex; i < this.length; i++) {
+    if (this[i] == findVal) return i;
+  }
+    return -1;
+}
+
+//test
+const array = [2, 5, 9];
+console.log(array.myIndexOf(2)); // 0
+console.log(array.myIndexOf(2, 100)); // -1 fromIndex 超出上限
+console.log(array.myIndexOf(9, 2)); // 2
+console.log(array.myIndexOf(2, -1)); // -1  fromIndex = 2
+console.log(array.myIndexOf(2, -3)); // 0
+```
+
+
+
+## 3 sort 数组排序 🌟
+
+- https://juejin.cn/post/6844903986479251464#heading-33
+
+
+
+## 4 防抖节流 🌟
+
+### 4.1 节流（throttle）
+
+#### 1. 时间戳版
+
+- `Date.now()` 记录判断冷却时间是否达到，lastTime 记录上一次执行回调的时间。
+
+```js
+function throttle(func, delay) {
+  var lastTime = 0;
+  return function (...args) {
+    var now = Date.now();
+    if (now >= lastTime + delay) {
+      func.apply(this, args);
+      lastTime = now;
+    } else {
+      console.log("上一个定时器尚未完成");
+    }
+  }
+}
+
+function resize(e) {
+  console.log("窗口大小改变了");
+}
+window.addEventListener('resize', throttle(resize, 1000));
+```
+
+#### 2. 定时器版
+
+逻辑如下：
+
+- 如果 timer 定时器存在指向，则冷却期尚未完成，不执行回调
+- 反之，冷却期已到，立即执行回调。然后定义新的冷却期
+  - 通过 setTimeout 定义，如果到期，将 timer 置为 null。
+
+```js
+function throttle(func, delay) {
+  // func 可以添加一个函数判断
+  // delay 可以添加数值转化和判断（0 ~ Inifinity)
+  let timer;
+  return function(...args) {
+    // 定时器存在，则跳过
+    if(timer) {
+      console.log("上一个定时器尚未完成");
+      return;
+    }
+    // 定时器不存在：立即执行，设置新定时器（到期后自动删除）。
+    func.apply(this, args);
+    timer = setTimeout(()=> {
+      timer = null;     
+    }, delay);    
+  }
+}
+
+// test
+function resize(event) {
+  console.log("窗口大小改变了", event);
+}
+window.addEventListener('resize', throttle(resize, 1000));
+```
+
+
+
+### 4.2 防抖（debounce）
+
+事件监听的基本用法：
+
+```js
+window.addEventListener('click', function(event) {
+  console.log('Element clicked through function!');
+});
+```
+
+- 可以看到，第一个参数是时间类型，第二个参数是回调函数，该回调函数会接受一个 event 对象。
+- 所以，`debounce(回调, 延迟时间)` 需要返回一个函数，这个函数：
+  - 规定两次回调函数执行的间隔，必须大于 "延迟时间"；
+  - 返回的函数必须有 event 接口。
+
+```js
+function debounce(func, delay) {
+  // func 可以添加一个函数判断
+  // delay 可以添加数值转化和判断（0 ~ Inifinity)
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(()=> {   // 对 timer 重新赋值
+      func.apply(this, args);
+    }, delay);
+  }
+}
+
+// test
+function resize(event) {
+  console.log("窗口大小改变了", event);
+}
+window.addEventListener('resize', debounce(resize, 1000));
+```
+
+
+
+## 5 深拷贝/浅拷贝
+
+### 5.0 遍历对象的方式：
+
+##### 方法一：for in + hasOwnProperty
+
+- **`for...in`语句 **以任意顺序迭代一个对象的除 Symbol 以外的 **可枚举** 属性，包括继承的可枚举属性。
+
+```js
+const a = {a:1, b:2, c:3};
+const b = [1,2,3]
+
+const func = (obj) => {
+  for (let key in obj) {				// 遍历自有+原型链上所有属性
+    if (obj.hasOwnProperty(key))			// 自有属性
+				console.log(obj[key], key);
+  }
+}
+
+func(a) 
+// 1 'a'
+// 2 'b'
+// 3 'c'
+
+func(b) 
+// 1 '0'
+// 2 '1'
+// 3 '2'
+```
+
+##### 方法二：Object.keys
+
+**`Object.keys()` 方法** 会返回一个由一个给定对象的自身可枚举属性组成的数组，数组中属性名的排列顺序和正常循环遍历该对象时返回的顺序一致。
+
+- 这相当于：for in + hasOwnProperty
+
+```js
+const a = {a:1, b:2, c:3};
+const b = [1,2,3]
+
+const func = (obj) => {
+  for (let key of Object.keys(obj)) {
+				console.log(obj[key], key);
+  }
+}
+```
+
+⚠️ 这两个方法都没有遍历 symbol，如果要遍历 symbol，用 `getOwnPropertySymbols()`。
+
+
+
+返回数组：
+
+- **`Object.getOwnPropertyNames()`**：自身属性 + 不可枚举 + 非 Symbol 的属性名
+- **`Object.getOwnPropertySymbols()`**：自身属性 + 所有 Symbol 的属性名
+
+
+
+### 5.1 浅拷贝 (Array, Object)
+
+JS 中浅拷贝的手段有哪些？
+
+浅拷贝：对基本数据类型复制值，对引用数据类型复制指针。所以对于引用数据类型的属性，在浅拷贝后，新旧对象的属性会指向同一个地址。
+
+- 即，对象的浅拷贝只拷贝了当前对象的属性名和属性值（基本数据类型、引用数据类型），是对对象进行了一层拷贝。
+
+深拷贝：就是对对象进行多层拷贝，如果对象的属性指向引用类型，那么也会对指向的这个引用类型进行复制。进一步的，如果这个引用类型内也有指向引用类型的对象，依然要进一步拷贝 .... 这样重复 n 次，直到全部拷贝完毕，就是深拷贝。
+
+##### 方法一：手动实现
+
+```js
+const shallowClone = (target) => {
+  // 判断是否为 object
+  if (typeof target === 'object' && target !== null) {
+    const cloneTarget = Array.isArray(target) ? []: {};   // 支持：数组 或 对象
+    for (let key in target) {
+      if (target.hasOwnProperty(key)) {
+          cloneTarget[key] = target[key];
+      }
+    }
+    return cloneTarget;
+  } else {
+    return target;
+  }
+}
+```
+
+##### 方法二：Array API
+
+```js
+const a = [1,2,3];
+
+// 静态方法
+Array.from(a);
+
+// 实例方法(2):
+a.concat([4]);  // [1,2,3,4]
+a.slice();	  	// [1,2,3]
+
+
+// 带回调的实例方法(3)
+a.map((item) => item);
+a.filter((item) => true);
+a.reduce((prev, curv) => {
+  prev.push(curv);
+  return prev;
+}, []);
+```
+
+##### 方法三：Object API
+
+```js
+// 静态方法
+const obj = { name: 'ninjee', age: 18 };
+const obj2 = Object.assign({}, obj, {name: 'sss'});
+console.log(obj2);		//{ name: 'sss', age: 18 }
+```
+
+##### 方法四：展开运算符
+
+- 对象 / 数组 都可以
+
+```js
+const a = {a:1, b:2, c:3};
+const b = [1,2,3]
+
+{...a} // {a: 1, b: 2, c: 3}
+[...b] // [1, 2, 3]
+```
+
+##### 方法五：lodash clone 方法
+
+```js
+const clone = require('lodash');
+const a = {a:1, b:2, c:3};
+const b = [1,2,3]
+
+clone(a);
+clone(b);
+```
+
+
+
+### 5.2 深拷贝
+
+- https://juejin.cn/post/7033275515880341512#heading-33
+- https://juejin.cn/post/6844904197595332622#heading-8
+- https://www.yuque.com/changyanwei-wlmrd/rbxc2v/rnnxoe#ABqD0
+
+
+
+## 6 Java Script 基础
+
+### 6.1 实现 new 🌟
+
+使用：
+
+```js
+function Person(name, age) {
+	this.name = name;
+  this.age = age;
+}
+
+const p = new Person('ninjee', 18);
+// Person {name: 'ninjee', age: 18}
+```
+
+代码：
+
+- `Object.create()` 如果添加入参，则会把其绑定在新创建的对象的原型链上 `.__proto__`
+
+  ```js
+  const obj = Object.create(Con.prototype);
+  // 相当于：
+  const obj = Object.create(null);
+  Object.setPrototypeOf(obj, Con.prototype);
+  ```
+
+实现：
+
+```js
+function createObject(Con, ...args) {
+  // [1]创建新对象 + 原型链指向
+  const obj = Object.create(Con.prototype);
+
+  // 执行构造函数，得到返回值
+  const res = Con.apply(obj, args);
+
+  // res 为对象，则直接返回，否则返回 obj
+  return typeof(res) === 'object' ? res: obj;
+}
+
+const p = createObject(Person, 'ninjee', 18);
+// Person {name: 'ninjee', age: 18}
+
+p.__proto__ === Person.prototype		// true
+p.constructor === Person.prototype.constructor		// true
+Person === Person.prototype.constructor		// true
+```
+
+### 6.2 instanceof
+
+- https://juejin.cn/post/6946136940164939813#heading-4
+
+### 6.4 手写类型判断函数
+
+- https://juejin.cn/post/6946136940164939813#heading-11
+
+
+
+## 7 继承 🌟
+
+- 继承的方法誊写过来
+
+### 6.3 Object.create()
+
+- https://juejin.cn/post/6946136940164939813#heading-4
+
+
+
+## 8 function 🌟
+
+实现 call、bind、apply
+
+- 自己写的誊写过来。
+
+
+
+
+
+
+
+
+
+== todo =================
+
+函数柯里化
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
