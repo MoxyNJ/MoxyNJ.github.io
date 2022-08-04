@@ -7,21 +7,17 @@ tags: [手写JavaScript]
 
 ## 1 ajax 与 jsonp
 
+== todo =================
+
 异步编程相关？
 
 - https://juejin.cn/post/7033275515880341512#heading-52
 
-### 实现ajax 🌟
+### 实现 ajax 🌟
 
-### 实现jsonp 🌟
+### 实现 jsonp 🌟
 
-
-
-== todo =================
-
-
-
-ES6
+### ES6
 
 - https://juejin.cn/post/7033275515880341512#heading-55
 - 实现 ES6：Set
@@ -356,8 +352,6 @@ console.log(res);
 
 
 
-
-
 ### sleep函数
 
 ```js
@@ -586,4 +580,89 @@ str.trimStart().trimEnd();  // ES2021?
 ```
 
 - `\s` 匹配空格（包括换行符、制表符、空格符等），相等于 `[ \t\r\n\v\f]`。
+
+
+
+### 循环打印红黄绿
+
+红灯 3s 亮一次，绿灯 1s 亮一次，黄灯 2s 亮一次；如何让三个灯不断交替重复亮灯？
+
+##### 方法1：回调
+
+```javascript
+function task(time, light, callback) {
+  setTimeout(() => {
+    // 1. 根据 light 确定灯亮
+    if (light === "red") red();
+    else if (light === "yellow") yellow();
+    else green();
+    // 2. 执行回调（下一个灯）
+    callback();
+  }, time);
+}
+
+function step() {
+  task(3000, "red", () => {
+    task(2000, "yellow", () => {
+      task(1000, "green", step);   // 最后传入step，形成循环
+    });
+  });
+}
+
+step();
+```
+
+##### 方法2：promise
+
+```javascript
+function task(time, light) {
+  return new Promise( resolve => {
+    setTimeout(() => {
+      // 1. 根据 light 确定灯亮
+      if (light === "red")  red();
+      else if (light === "yellow") yellow();
+      else green();
+      // 2. 决议
+      resolve();
+    }, time);
+  });
+}
+
+function step() {
+  task(3000, "red")
+    .then(() => task(2000, "yellow"))
+    .then(() => task(1000, "green"))
+    .then(step);	// 最后调用step，形成循环
+}
+
+step();
+```
+
+##### 方法3：async/await
+
+```javascript
+function task(time, light) {
+  return new Promise( resolve => {
+    setTimeout(() => {
+      // 1. 根据 light 确定灯亮
+      if (light === "red")  red();
+      else if (light === "yellow") yellow();
+      else green();
+      // 2. 决议
+      resolve();
+    }, time);
+  });
+}
+
+async function step() {
+  await task(3000, "red");
+  await task(2000, "yellow");
+  await task(1000, "green");
+  step();	// 最后调用step，形成循环
+}
+
+step();
+```
+
+
 

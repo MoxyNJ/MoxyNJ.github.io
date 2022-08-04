@@ -1,5 +1,5 @@
 ---
-title: 11-Symbol, Set, Map
+title: 11. Symbol, Set, Map
 sidebar_position: 11
 date: 2022-07-28
 tags: [JavaScript]

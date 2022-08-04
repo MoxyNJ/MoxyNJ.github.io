@@ -1384,9 +1384,32 @@ console.log(array.myIndexOf(2, -3)); // 0
 
 
 
+### 2.4 类数组转化为数组
+
+类数组：具有 length 属性，但不具有数组原型上的方法。常见的类数组有 arguments、DOM 操作方法返回的结果。
+
+- 类数组可迭代，入参可以为可迭代对象，返回为数组的 API 都可以。
+
+```js
+// 方法一：Array.from
+Array.from(document.querySelectorAll('div'));
+
+// 方法二：Array.prototype.slice.call()
+Array.prototype.slice.call(document.querySelectorAll('div'));
+
+// 方法三：扩展运算符
+[...document.querySelectorAll('div')]
+
+// 方法四：利用concat
+Array.prototype.concat.apply([], document.querySelectorAll('div'));
+```
+
+
+
 ## 3 sort 数组排序 🌟
 
 - https://juejin.cn/post/6844903986479251464#heading-33
+- 自己记录的
 
 
 
@@ -1641,6 +1664,119 @@ clone(b);
 - https://juejin.cn/post/6844904197595332622#heading-8
 - https://www.yuque.com/changyanwei-wlmrd/rbxc2v/rnnxoe#ABqD0
 
+##### 循环引用
+
+```js
+const a = {
+  info: a
+}
+
+// or
+const ob1 = { info: ob2 }
+const ob2 = { info: ob1 }
+```
+
+这里，如果尝试对 ob1 进行深拷贝：
+
+1. 遍历 ob1 的属性 `ob1.info` 指向了 ob2，经过判断，ob2 也是一个对象，需要遍历属性；
+2. 遍历 ob2 的属性 `ob2.info` 指向了 ob1，经过判断，ob1 也是一个对象，需要遍历属性，
+3. 遍历 ob1 ...
+4. 形成了死循环。
+
+**破解循环引用：通过 Map / WeakMap 登记所有已经复制过的对象**，步骤：
+
+1. 判断 ob1 是否在 Map 中登记。经过判断 ob1 是新对象尚未登记，创建 cloneOb1 进行深拷贝。
+   - `map.set(ob1, cloneOb1);` Map 中登记 ob1 和 cloneOb1。
+2. 遍历 ob1 的属性，其中 `ob1.info` 指向了 ob2，经过判断，ob2 也是一个对象。
+3. 判断 ob2 是否在 Map 中登记。经过判断 ob2 是新对象尚未登记，创建 cloneOb2 进行深拷贝。
+   - `map.set(ob2, cloneOb2);` Map 中登记 ob2 和 cloneOb2。
+4. 遍历 ob2 的属性，其中 `ob2.info` 指向了 ob1，经过判断，ob1 在 Map 中已经登记。
+   - `return Map.get(ob1)` 返回已经进行深拷贝的 cloneOb1，不用对 ob1再进行深拷贝。
+
+死循环解除。
+
+##### API 实现
+
+```js
+// 方法一：JSON
+const newArray = JSON.parse(JSON.stringify(array));
+```
+
+- 对象 --> JSON字符串 --> 对象
+
+必须是符合 JSON 安全的对象：
+
+- 实现 array 或 object 深拷贝，但是不能处理 function 和 regExp；
+- 对象中有值为 `NaN`、`Infinity`、`-Infinity` 会变为 null
+- 对象中有值为 `undefined` ，该属性会丢失。
+- 不得有循环引用
+
+```js
+// 方法二：lodash.cloneDeep()
+import lodash from 'lodash';
+const newObj = lodash.cloneDeep(obj);
+```
+
+
+
+##### 自己实现
+
+deepClone 代码要点：
+
+1. 入参：obj 待深拷贝值（基本类型/各种对象类型） +  WeakMap（用于记录已经拷贝的对象，防止循环引用）
+   - 切记，map 在形参添加默认值 `new WeakMap()`；
+2. 简单拷贝：当数据类型是 null、Date、RegExp、非 `'object'` 是，可直接拷贝出结果。
+3. 读取 Map 解决循环引用
+4. 创建深拷贝对象（通过原型对象创建） + map 登记
+5. 进行深拷贝（Set、Map、object / array）
+   - 注意赋值，统一为：`deepClone(value, map)` 进行递归深拷贝。
+   - 拷贝 Set / Map
+     - forEach 遍历 + set.add / map.set 添加
+   - 拷贝 object 和 array
+     - for in 遍历 + `Object.hasOwnproperty` 判断
+
+```js
+// 1.入参：obj + new WeakMap
+function deepClone(obj, map = new WeakMap()) {
+  // 2.null、Date、RegExp、基本数据类型
+  if (obj === null) return obj;
+  if (obj instanceof Date) return new Date(obj);
+  if (obj instanceof RegExp) return new RegExp(obj);	
+  if (typeof obj !== 'object') return obj;
+
+  // 3.解决对象循环引用
+  if (map.has(obj)) return map.get(obj);
+
+  const cloneObj = new obj.constructor();  // 通过原型对象创建
+  map.set(obj, cloneObj);
+
+  // set
+  if (obj instanceof Set) {
+    obj.forEach((value) => {
+      cloneObj.add(deepClone(value, map));
+    });
+    return cloneObj;
+  }
+
+  // map
+  if (obj instanceof Map) {
+    obj.forEach(((value, key) => {
+      cloneObj.set(key, deepClone(value, map));
+    }));
+    return cloneObj;
+  }
+
+  // object / array
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      cloneObj[key] = deepClone(obj[key], map);
+    }
+  }
+
+  return cloneObj;
+}
+```
+
 
 
 ## 6 Object 和 关键字
@@ -1692,25 +1828,38 @@ p.constructor === Person.prototype.constructor		// true
 Person === Person.prototype.constructor		// true
 ```
 
-### 6.2 instanceof 🌟
+### 6.2 实现 instanceof 🌟
 
 - https://juejin.cn/post/6946136940164939813#heading-4
 
 ```js
-function instance_of(Case, Constructor) {
-    // 基本数据类型返回false
-    // 兼容一下函数对象
-    if ((typeof(Case) != 'object' && typeof(Case) != 'function') || Case == 'null') return false;
-    let CaseProto = Object.getPrototypeOf(Case);
-    while (true) {
-        // 查到原型链顶端，仍未查到，返回false
-        if (CaseProto == null) return false;
-        // 找到相同的原型
-        if (CaseProto === Constructor.prototype) return true;
-        CaseProto = Object.getPrototypeOf(CaseProto);
-    }
+// 方法一：自己实现
+// 判断对象 + 构造函数（类）
+function myInstanceof(Case, Constructor) {
+  // 基本数据类型返回false
+  if ((typeof(Case) !== 'object' && typeof(Case) !== 'function') || Case === 'null') return false;
+  let CasePrototype = Object.getPrototypeOf(Case);
+  while (true) {
+    // 查到原型链顶端，仍未查到，返回false
+    if (CasePrototype == null) return false;
+    // 找到相同的原型
+    if (CasePrototype === Constructor.prototype) return true;
+    CasePrototype = Object.getPrototypeOf(CasePrototype);
+  }
 }
+
+// 方法二：API
+object instanceof constructor;
+// or
+constructor.prototype.isPrototypeOf(object);
 ```
+
+- typeof 只能判断基本数据类型，引用数据类型 **只有 'function'** 可以判断，其余均为 'object'。
+  - `typeof` 原理： **不同的对象在底层都表示为二进制，在Javascript中二进制前（低）三位存储其类型信息**。
+  - `typeof null`  为 `'object'`
+- instanceof 只能判断引用类型，也就是对象。用来判断对象的原型对象。
+  - 原理：从待测对象 (case) 的原型链角度，判断入参 (constructor) 的原型对象是否在原型链上。
+  - `null instance null` 为 `TypeError: Right-hand side of 'instanceof' is not an object`
 
 
 
@@ -1726,7 +1875,19 @@ Object.prototype.toString.call([]);
 // '[object Array]'，前面减掉 8 == 左括号 + object + 空格；后面减掉 1。
 ```
 
-- 坑：为什么要用改方法？见自己写的：**类型判断** 文章。
+为什么要用 Object 原型对象上的 toString，而不是类型自带的 toString？
+
+> 我们可以使用 `toString` 来获取准确的引用类型：
+>
+> 每一个引用类型都有`toString`方法，默认情况下，`toString()`方法被每个`Object`对象继承。如果此方法在自定义对象中未被覆盖，`toString()` 返回 `"[object type]"`，其中 type 是对象的类型。
+
+- 注意，`toString` 只有在自定义对象中未被覆盖，才会达到预想的效果。而大部分引用类型比如 `Array、Date、RegExp` 等都重写了`toString`；
+- 我们可以直接调用 `Object` 原型上未被覆盖的 `toString()` 方法，使用 `call` 来改变 `this` 指向来达到我们想要的效果。
+
+进一步，toString 读取的是原型对象的 `[Symbol.toStringTag]` 属性。
+
+> **`Symbol.toStringTag`** 是一个内置 symbol，是对象的属性 Key。对应的属性值为 string，表示该对象的自定义类型标签。
+> 内置的 [`Object.prototype.toString()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/toString) 方法会去读取这个标签并把它包含在自己的返回值里：`[Object xxxx]`。
 
 
 
@@ -2069,3 +2230,18 @@ p.method('第一次调用').method('第二次链式调用').method('第三次链
 Person {name: 'ninjee'}
 ```
 
+
+
+
+
+==== todo ==================
+
+Promise 串行多个
+
+sort 数组排序
+
+Object.create
+
+Object.is
+
+Object.assign
