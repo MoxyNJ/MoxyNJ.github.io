@@ -84,10 +84,10 @@ const config = {
                 label: "手写Js",
                 to: "docs/code/writtenJs",
               },
-              {
-                label: "技巧",
-                to: "docs/code/skill",
-              },
+              // {
+              //   label: "技巧",
+              //   to: "docs/code/skill",
+              // },
             ],
           },
           {
@@ -102,10 +102,10 @@ const config = {
                 label: "操作系统",
                 to: "docs/interview/os",
               },
-              {
-                label: "面经",
-                to: "docs/interview/experience",
-              },
+              // {
+              //   label: "面经",
+              //   to: "docs/interview/experience",
+              // },
               {
                 label: "总结",
                 to: "docs/interview/summary",
