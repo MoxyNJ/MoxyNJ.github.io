@@ -7,15 +7,60 @@ tags: [手写JavaScript]
 
 ## 1 ajax 与 jsonp
 
-== todo =================
-
-异步编程相关？
-
-- https://juejin.cn/post/7033275515880341512#heading-52
+- 坑：这部分尚未复习
 
 ### 实现 ajax 🌟
 
+```js
+function ajax({
+  url= null,
+  method = 'GET',
+  dataType = 'JSON',
+  async = true}){
+  return new Promise((resolve, reject) => {
+    let xhr = new XMLHttpRequest()
+    xhr.open(method, url, async)
+    xhr.responseType = dataType
+    xhr.onreadystatechange = () => {
+      if(!/^[23]\d{2}$/.test(xhr.status)) return;
+      if(xhr.readyState === 4) {
+        let result = xhr.responseText;
+        resolve(result);
+      }
+    }
+    xhr.onerror = (err) => {
+      reject(err);
+    }
+    xhr.send();
+  })
+}
+```
+
 ### 实现 jsonp 🌟
+
+```js
+const jsonp = ({ url, params, callbackName }) => {
+  const generateUrl = () => {
+    let dataSrc = ''
+    for (let key in params) {
+      if (params.hasOwnProperty(key)) {
+        dataSrc += `${key}=${params[key]}&`
+      }
+    }
+    dataSrc += `callback=${callbackName}`
+    return `${url}?${dataSrc}`
+  }
+  return new Promise((resolve, reject) => {
+    const scriptEle = document.createElement('script')
+    scriptEle.src = generateUrl()
+    document.body.appendChild(scriptEle)
+    window[callbackName] = data => {
+      resolve(data)
+      document.removeChild(scriptEle)
+    }
+  })
+}
+```
 
 ### ES6
 

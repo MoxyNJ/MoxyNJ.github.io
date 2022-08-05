@@ -755,6 +755,158 @@ MyPromise.any([p5, p4])
 
 - https://juejin.cn/post/6844903801296519182
 
+需求：希望可以让 Promise 串行调用。如下代码：传入数组 times，可以在 1s, 2s, 3s 后执行 delay 函数
+
+```js
+function delay(time) {
+    return new Promise((resovle) => {
+        console.log(`wait ${time}s...`);
+        setTimeout(() => {
+            console.log("execute");
+            // @ts-ignore
+            resovle();
+        }, time * 1000);
+    });
+}
+
+const times = [1, 2, 3];
+```
+
+方法一：手动输入 then 回调
+
+```js
+// 回调地狱
+delay(1).then(() => {
+    delay(2).then(() => {
+        delay(3);
+    });
+});
+
+// then调用链
+// then 中把delay()的结果return出去，所以可以用调用链
+Promise.resolve()
+  .then(() => delay(1))
+  .then(() => delay(2))
+  .then(() => delay(3));
+```
+
+方法二：for 循环 + 外部变量
+
+- 把 then 调用链改为循环，实现自动调用
+- 从打印结果可以看到，for 循环是在第一个宏任务内就同步执行完毕了。
+
+其实质上，这里是利用 res 做为外部指针，在每一轮 for 循环中，让 res 指向 res.then() 返回的新 prmise。在循环结束时，res 让最初的 promise 形成了方法一中的 then 调用链。
+
+```js
+let res = Promise.resolve();
+for (const time of times) {
+  res = res.then(() => delay(time));
+  console.log(res);
+}
+//     .then(() => delay(1))
+//     .then(() => delay(2))
+//     .then(() => delay(3));
+// Promise { <pending> }
+// Promise { <pending> }
+// Promise { <pending> }
+// wait 1s...
+// execute
+// wait 2s...
+// execute
+// wait 3s...
+// execute
+```
+
+##### 方法三：forEach
+
+- forEach 可以代替方法二的 for 循环 + 外部变量
+
+```js
+// prev：promise对象，curv：delay 时间
+times.reduce((prev, curv) => {
+    return prev.then(() => delay(curv));
+}, Promise.resolve());
+```
+
+##### 方法四：递归
+
+```js
+function dispatch(index, p = Promise.resolve()) {
+    // 递归结束
+    if (!times[index]) return Promise.resolve();
+    // 第一轮：dispatch(1, delay(times[0]))
+    return p.then(() => dispatch(index + 1, delay(times[index])));
+}
+dispatch(0);
+```
+
+方法五：promise + generator
+
+```js
+// 生成器
+function* gen() {
+    for (const time of times) {
+        yield delay(time);
+    }
+}
+
+// 实现自动迭代
+function run(gen) {
+    const g = gen();
+
+    function next(res) {
+        const result = g.next(res);
+        // 迭代结束
+        if (result.done) return result.value;
+        // 把delay的结果放入下一次next()迭代中
+        result.value.then((res) => {
+            next(res);
+        });
+    }
+    next();
+}
+
+run(gen);
+```
+
+##### 方法六：async/await
+
+- 规范化了 promise + generator
+
+```js
+(async function () {
+    for (const time of times) {
+        await delay(time);
+    }
+})();
+```
+
+方法七：for await of
+
+`for await of`和`for of` 规则类似，只需要实现一个内部`[Symbol.asyncIterator]`方法即可
+
+```js
+function createAsyncIterable(times) {
+  return {
+    [Symbol.asyncIterator]() {
+      return {
+        index: 0,
+        next() {
+          if (this.index < times.length) {
+            return delay(times[this.index]).then(() => ({ value: this.index++, done: false }));
+          }
+          return Promise.resolve({ done: true });
+        },
+      };
+    },
+  };
+}
+
+(async function () {
+  for await (index of createAsyncIterable(times)) {}
+})();
+```
+
 
 
 ## 2 Array
@@ -1409,7 +1561,105 @@ Array.prototype.concat.apply([], document.querySelectorAll('div'));
 ## 3 sort 数组排序 🌟
 
 - https://juejin.cn/post/6844903986479251464#heading-33
-- 自己记录的
+
+在v8引擎中，对 sort方法提供了 2 种排序算法：插入排序、快排序。
+
+```js
+// sort使用方法：
+const arr = [1,2,6,8,3,5,67,11];
+arr.sort();//默认排序
+arr.sort(comparefn(a,b));//自定义排序比较方法
+```
+
+原生API：sort() 将元素转换为字符串，然后按照 UTF-16 进行排序，即使数组内容全部是 number，也会转化为 string 然后再进行比较。
+
+- **当 arr.length ≤ 0 时，采用插入排序； arr.length  > 10 时，采用快排。**
+
+![这里写图片描述](images/jsAPI.assets/4abde1748817d7f35f2bf8b6a058aa40tplv-t2oaga2asx-watermark.awebp)
+
+##### 插入排序
+
+- 双层 for 循环。
+  - 外层for循环：当遍历到 i 时，此时 [0, i-1] 已经排序完毕，需要插入 arr[i]。
+  - 内层for循环：将 arr[i] 从后往前判断，只要小于前一个数，就交换位置，直到比前一个大，结束循环。
+
+```js
+function insertSort(arr) {
+  for (let i = 1; i < arr.length; i++) {
+    for (let j = i; j > 0; j--) {
+      if (arr[j] < arr[j - 1]) 
+        [arr[j - 1], arr[j]] = [arr[j], arr[j - 1]];
+      else break;
+    }
+  }
+  return arr;
+}
+
+const arr = [5, 2, 7, 8, 34, 7, 39, 12, 56, 9, 1];
+console.log(insertSort(arr));
+```
+
+##### 快速排序
+
+```js
+// 原生API: sort() 将元素转换为字符串，然后按照 UTF-16 进行排序。
+// 即使数组内容全部是 number，也会转化为 string 然后再进行比较。
+["c","b","a","A","C","B",3,2,1].sort()		// (9) [1, 2, 3, 'A', 'B', 'C', 'a', 'b', 'c']
+
+// 快速排序 1
+function quickSort(arr) {
+    let left = 0, right = arr.length - 1;
+    main(arr, left, right);
+    return arr;
+  
+    function main(arr, left, right) {
+        if (arr.length === 1) return;
+        let index = partition(arr, left, right);
+
+        if (left < index - 1) main(arr, left, index - 1);
+        if (index < right)    main(arr, index, right);
+    }
+
+    function partition(arr, left, right) {
+        let pvoit = arr[Math.floor((left + right) / 2)];  // 取开头会非常慢
+
+        while (left <= right) {
+            while (arr[left] < pvoit) left++;
+            while (arr[right] > pvoit) right--;
+
+            if (left <= right) {
+                [arr[left], arr[right]] = [arr[right], arr[left]];
+                left++;
+                right--;
+            }
+        }
+        return left;
+    }
+}
+
+let arr = [5, 43, 7, 60, 5, 3, 21, 8, 1];
+console.log(quickSort(arr));
+```
+
+##### 简便方法
+
+```js
+// 快速排序 2
+// 没有原地排序
+function quickSort(array) {
+  if (array.length < 2) {
+    return array
+  }
+  let pivot = array[Math.floor(array.length / 2)]; // 取开头会非常慢
+  let left = array.filter((value, index) => {
+    return value <= pivot && index != array.length - 1;
+  })
+  let right = array.filter((value) => {
+    return value > pivot
+  })
+  return [...quickSort(left), pivot, ...quickSort(right)]
+}
+```
 
 
 
@@ -1544,7 +1794,7 @@ func(b)
 // 3 '2'
 ```
 
-##### 方法二：Object.keys
+##### 方法二：Object.keys / values / entries
 
 **`Object.keys()` 方法** 会返回一个由一个给定对象的自身可枚举属性组成的数组，数组中属性名的排列顺序和正常循环遍历该对象时返回的顺序一致。
 
@@ -1552,13 +1802,15 @@ func(b)
 
 ```js
 const a = {a:1, b:2, c:3};
-const b = [1,2,3]
+const b = [1,2,3];
 
 const func = (obj) => {
-  for (let key of Object.keys(obj)) {
-				console.log(obj[key], key);
-  }
+  Object.keys(obj).forEach(key => {
+    console.log(obj[key], key);
+  })
 }
+func(a);
+func(b);
 ```
 
 ⚠️ 这两个方法都没有遍历 symbol，如果要遍历 symbol，用 `getOwnPropertySymbols()`。
@@ -1893,17 +2145,127 @@ Object.prototype.toString.call([]);
 
 ### 9.1 Object.create 🌟
 
-https://juejin.cn/post/6946136940164939813#heading-4
+定义静态方法的基本公式：
 
+```js
+Object.defineProperty(Object, 'assign', {
+  enumerable: false,   // 不可枚举 默认为false，可不填写
+  writable: true,
+  configurable: true,
+  value: function(target, ...args) { 
+    // your code ...
+  }
+}
+```
 
+Object.create() 的使用:
+
+- 第二个参数是一个对象，其成员是要添加的属性，结构为：`{ key 属性名: value 属性描述符desc(一个对象) }`
+
+```js
+const ages = Object.create(null, {
+  alice: { value: 18, enumerable: true },
+  bob: { value: 27, enumerable: true },
+});
+ages; // {alice: 18, bob: 27}
+```
+
+实现如下：
+
+```js
+Object.defineProperty(Object, 'create', {
+    enumerable: false,   // 不可枚举 默认为false，可不填写
+    writable: true,
+    configurable: true,
+    value: function newCreate(proto, propertiesObject) {
+    if (typeof proto !== 'object' && typeof proto !== 'function') {
+      throw TypeError('Object prototype may only be an Object: ' + proto);
+    }
+    function F() { }
+    F.prototype = proto
+    const o = new F()
+  
+    if (propertiesObject !== undefined) {
+      // 遍历对象的基本公式: forIn + hasOwnProperty === keys + forEach
+      Object.keys(propertiesObject).forEach(key => {
+        let desc = propertiesObject[key];
+        if (typeof desc !== 'object' || desc === null) {
+          throw TypeError('Object prorotype may only be an Object: ' + desc);
+        } else {
+          Object.defineProperty(o, key, desc);
+        }
+      })
+    }
+    return o;
+  }
+})
+
+const ages = Object.create(null, {
+alice: { value: 18, enumerable: true },
+bob: { value: 27, enumerable: true },
+});
+ages // {alice: 18, bob: 27}
+const a = Object.create(null);
+a.__proto__.__proto__  // null
+
+```
 
 ### Object.is
 
-https://juejin.cn/post/6875152247714480136#heading-31
+`Object.is `解决的主要是这两个问题：
+
+```js
++0 === -0  // true
+NaN === NaN // false
+
+1 / +0	// Infinity
+1 / -0  // -Infinity
+```
+
+- 对于 +-0，的判断，通过 1 / 0 为 `Infinity` 来判断
+- 对于 NaN，通过 `x !== x && y !== y` 来判断，如果 x 和 y 做对比，两者都是 NaN 的话，x !== x 且 x !== y
+
+```js
+const is= (x, y) => {
+  if (x === y) {
+    // +0和-0应该不相等
+    return x !== 0 || y !== 0 || 1/x === 1/y;
+  } else {
+    return x !== x && y !== y;
+  }
+}
+```
 
 ### Object.assign
 
-https://juejin.cn/post/6875152247714480136#heading-31
+用于将所有可枚举属性的值从一个或多个源对象复制到目标对象。它将返回目标对象（浅拷贝）。
+
+```js
+Object.defineProperty(Object, "assign", {
+  enumerable: false, // 不可枚举 默认为false，可不填写
+  writable: true,
+  configurable: true,
+  value: function (target, ...args) {
+    // 判断：目标对象必须存在
+    if (target == null) {
+      return new TypeError("Cannot convert undefined or null to object");
+    }
+    // 转换：目标对象为 object
+    const targetObj = Object(target);
+
+    for (let i = 0; i < args.length; i++) {
+      // 源对象必须存在
+      const source = args[i];
+      if (source === null) return;
+      // 遍历对象的基本公式：无symbol、仅可枚举。
+      Object.keys(source).forEach((key) => {
+        targetObj[key] = source[key];
+      });
+    }
+    return targetObj;
+  },
+});
+```
 
 
 
@@ -2229,19 +2591,3 @@ p.method('第一次调用').method('第二次链式调用').method('第三次链
 // 第三次链式调用
 Person {name: 'ninjee'}
 ```
-
-
-
-
-
-==== todo ==================
-
-Promise 串行多个
-
-sort 数组排序
-
-Object.create
-
-Object.is
-
-Object.assign

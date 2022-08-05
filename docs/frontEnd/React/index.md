@@ -2,10 +2,9 @@
 id: introduction
 title: 概述
 sidebar_position: 0
-slug: /frontEnd/HTML&CSS
+slug: /frontEnd/React
 keywords:
-  - HTML
-  - CSS
+  - React
 ---
 
-- HTML 和 CSS 相关知识
+React 相关知识
