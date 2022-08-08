@@ -7,59 +7,101 @@ tags: [手写JavaScript]
 
 ## 1 ajax 与 jsonp
 
-- 坑：这部分尚未复习
-
 ### 实现 ajax 🌟
 
 ```js
-function ajax({
-  url= null,
-  method = 'GET',
-  dataType = 'JSON',
-  async = true}){
-  return new Promise((resolve, reject) => {
-    let xhr = new XMLHttpRequest()
-    xhr.open(method, url, async)
-    xhr.responseType = dataType
-    xhr.onreadystatechange = () => {
-      if(!/^[23]\d{2}$/.test(xhr.status)) return;
-      if(xhr.readyState === 4) {
-        let result = xhr.responseText;
-        resolve(result);
-      }
-    }
-    xhr.onerror = (err) => {
-      reject(err);
-    }
-    xhr.send();
-  })
-}
+const SERVER_URL = "/server";
+let xhr = new XMLHttpRequest();
+// 创建 Http 请求
+xhr.open("GET", SERVER_URL, true);
+// 设置状态监听函数
+xhr.onreadystatechange = function() {
+  if (this.readyState !== 4) return;
+  // 当请求成功时
+  if (this.status === 200) {
+    handle(this.response);
+  } else {
+    console.error(this.statusText);
+  }
+};
+// 设置请求失败时的监听函数
+xhr.onerror = function() {
+  console.error(this.statusText);
+};
+// 设置请求头信息
+xhr.responseType = "json";
+xhr.setRequestHeader("Accept", "application/json");
+// 发送 Http 请求
+xhr.send(null);
 ```
 
 ### 实现 jsonp 🌟
 
+要点：
+
+1. 请求结束后，需要 **销毁** 本次请求产生的 **script 标签**和 **window上的回调函数**。
+2. callback 需要注册在 window 对象上，因为 script 加载后的执行作用域是 window 作用域。
+3. callback 名称要尽可能唯一。
+
 ```js
-const jsonp = ({ url, params, callbackName }) => {
+// @ts-nocheck
+/**
+ * url: baseURL
+ * params: url携带参数
+ * callback: 服务器返回数据的回调函数
+ */
+const jsonp = ({ url, params, callback }) => {
+  // 构建请求的 url 地址：基本地址 + url参数 + 回调函数参数
   const generateUrl = () => {
-    let dataSrc = ''
-    for (let key in params) {
-      if (params.hasOwnProperty(key)) {
-        dataSrc += `${key}=${params[key]}&`
-      }
-    }
-    dataSrc += `callback=${callbackName}`
-    return `${url}?${dataSrc}`
-  }
+    let urlParams = "?";
+    Object.keys(params).forEach((key) => {
+      urlParams += `${key}=${params[key]}&`;
+    });
+    urlParams += `callback=${callback}`;
+    // "https://www.ninjee.co/test?name=ninjee&age=18&callback=handle"
+    return url + urlParams;
+    // `https://www.ninjee.co/test?name=ninjee&age=18&callback=() => {\n    console.log\n    ("i'm callback~");\n}`
+  };
+
   return new Promise((resolve, reject) => {
-    const scriptEle = document.createElement('script')
-    scriptEle.src = generateUrl()
-    document.body.appendChild(scriptEle)
-    window[callbackName] = data => {
-      resolve(data)
-      document.removeChild(scriptEle)
-    }
-  })
-}
+    // 创建 script 元素
+    const scriptElement = document.createElement("script");
+    // .src 属性添加地址
+    scriptElement.src = generateUrl();
+    // 元素添加到网页上
+    document.body.appendChild(scriptElement);
+    // 收尾工作：在window上定义属性(名称为callback的函数代码，防止重名)，
+    window[callback] = (res) => {
+      try {
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      } finally {
+        //请求结束，移除 script 标签 + window上的回调函数
+        document.body.removeChild(script);
+        delete window[callback];
+      }
+    };
+  });
+};
+
+// 使用
+const baseURL = "https://www.ninjee.co/test";
+const params = { name: "ninjee", age: 18 };
+//声明一个全局函数，用于接收服务器的响应数据。
+window.uniqueCallbackFunc = (res) => {
+  console.log(res);
+};
+
+const result = jsonp(baseURL, params, uniqueCallbackFunc);
+result
+  .then((res) => {
+  if (res.code === 0) console.log("响应成功：", res.value);
+	})
+  .catch((err) => {
+  console.log("发送失败：", err);
+	});
+
 ```
 
 ### ES6
