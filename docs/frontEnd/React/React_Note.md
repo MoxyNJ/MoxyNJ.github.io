@@ -15,7 +15,7 @@ React 架构体系三大模块
 
 ## React 设计理念
 
-### 问题：react 架构
+### 问题：React 运行机制 / 架构
 
 ##### 设计理念
 
@@ -401,6 +401,22 @@ RootFiber 已经创建不需要复制，但其子节点由于尚不存在， 则
 
 
 
+### 问题：哪些方式可以触发 update 更新？
+
+对于用户来说，对 UI 的操作都有可能触发 update 更新：拖动组件、输入文本、点击按钮改变 state 等等。
+
+对 React 内部来说，通过对 DOM 事件监听，会触发对应的回调函数，按照可以触发更新的方法所隶属的组件分类：
+
+- `ReactDOM.render()` —— HostRoot
+- `this.setState()` —— ClassComponent
+- `this.forceUpdate()` —— ClassComponent
+- `useState()` —— FunctionComponent
+- `useReducer()` —— FunctionComponent
+
+可以看到，一共三种组件（`HostRoot` | `ClassComponent` | `FunctionComponent`）可以触发 update 更新。
+
+
+
 ## diff 相关
 
 ### 问题：什么是 virtual DOM
@@ -782,7 +798,7 @@ interface Fiber {
   /**
    * ⚛️ 节点的类型信息
    */
-  // 标记 Fiber 类型, 例如函数组件、类组件、宿主组件
+  // 标记 Fiber 类型: 函数/类组件、根元素、dom元素、文本节点、Fragment、MemoComponent等
   tag: WorkTag,
   // 节点元素类型, 是具体的类组件、函数组件、宿主组件(字符串)
   type: any,
@@ -913,6 +929,475 @@ useEffect 是异步调用的，useLayoutEffect 是同步调用的。
 
 
 ![截屏2022-08-07 00.18.02](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-07%2000.18.02.png)
+
+
+
+
+
+### 问题：React 生命周期（8）
+
+> - https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/
+
+类组件的生命周期，从 React 运行阶段 + 组件处理类型来分析。
+
+- React 运行有三个阶段：调度、协调、渲染。
+- 组件的处理有三个类型：挂载、更新、卸载。
+
+![截屏2022-08-08 15.34.10](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-08%2015.34.10.png)
+
+组件挂载会执行：
+
+- 协调阶段：constructor、static getDerivedStateFrpmProps、render
+
+- 渲染阶段：componentDidMount
+
+组件更新会执行：
+
+- 协调阶段：static getDerivedStateFrpmProps、shouldComponentUpdate（forceUpdate不执行）、render
+- 渲染阶段：getSnapshotBeforeUpdate、componentDidUpdate
+
+组件卸载会执行：
+
+- 渲染阶段：componentWillUnmount
+
+
+
+#### 协调阶段 render
+
+协调阶段的生命周期函数是不包含副作用的。
+
+组件挂载：
+
+**`constructor(props)`**
+类组件的继承、props 传递、初始化 state。
+
+- 在初始化阶段执行，可直接对 `this.state` 赋值。其他生命周期函数中只能通过 `this.setState` 修改 state，不能直接为 `this.state` 赋值。
+
+```js
+constructor(props) {
+  super(props);
+  this.state = {number: 0};
+  this.handlexxx = this.handlexxx.bind(this);
+}
+```
+
+
+
+共有：
+
+**`static get­Derived­State­From­Props（props, state)`**
+
+做为 `componentWillMount`、`componentWillUpdate` 和 `componentWillReceiveProps` 的替代方案。在调用 render 前，最后一次修改 state 的机会。它可以返回一个对象，用来更新 state；返回 null 则不更新。
+
+- 做为静态方法，其内部使用 this 拿不到组件实例。
+
+
+
+组件更新：
+
+**`shouldComponentUpdate(nextProps, nextState)`**
+
+只有在通过修改 props 或 state 时才会触发。首次渲染和 forceUpdate 不会触发。这里是 React 给用户判断，组件是否应当更新的时机。如果返回 flase，则组件不会调用 render 及以后的方法，不会更新。
+
+- **性能优化**。通过将  `this.props` 和 nextProps 比较，以及将 `this.state` 与 nextState 比较，并返回 false，让组件跳过更新。
+- **关联知识**：`Diff`、`PureComponent`、`React.memo()`。
+
+
+
+**`render`**
+
+render 函数必须实现，它的返回值将构建为 fiber node，参与到 WorkInProgress Fiber Tree 的构建。
+
+render 函数是纯函数，相同的 state 和 props，它总是返回相同的渲染结果。
+
+render 会返回：React Element、Fragments、string / number（会当作文本节点）、false / null（空）。
+
+
+
+#### 渲染阶段 commit
+
+渲染阶段又有三个阶段：before mutation、mutation、layout。
+
+**(1) 在 before mutation 时**
+
+ **`getSnapshotBeforeUpdate(prevProps, prevState)` 组件更新** 
+
+在页面即将渲染、DOM 树尚未改变时触发。可以在这里获取 DOM 改变前的信息。
+
+它接收两个参数，分别是：上一个状态的 props 和上一个状态的 state。它的返回值将会传递给 componentDidUpdate 生命周期钩子的第三个参数。
+
+**使用场景：**获取更新前 DOM 的信息时。例如：需要以特殊方式处理滚动位置的聊天线程等。
+
+
+
+**(2) 在 mutaiton 时**
+
+**`componentWillUnmount` 组件卸载**
+
+会在组件卸载以及销毁之前调用。
+
+**使用场景**：执行组件的清理操作，例如：清除 timer、取消网络请求、清除订阅等。
+
+
+
+**(3) 在 layout 时**
+
+layout 阶段，这两个生命周期的调用时机是相同的，一个是针对组件首次挂载，一个是针对组件更新。
+
+**`componentDidMount` 组件挂载**
+
+该生命周期方法会在组件挂载之后执行，也只会执行一次，也就是将组件对应的 DOM 插入 DOM 树中之后调用。
+
+- **注意避免**：它会在浏览器更新视图之前调用，如果在 componentDidMount 中**直接调用** `this.setState`，它会触发额外的渲染，会再一次调用 render 函数，但是浏览器中视图的更新只会执行一次。
+- **使用场景**：依赖于 DOM 的初始化操作。发送网络请求、监听事件、获取到真实 DOM。
+
+```js
+componentDidMount(){
+  fetch('https://api.github.com/users').then(res=>res.json()).then(users=>{
+    console.log(users);
+    this.setState({users});
+  });
+}
+```
+
+
+
+**`componentDidUpdate(prevProps, PrevState, snapshot) ` 组件更新**
+
+该生命周期方法会在组件更新之后执行，只会执行一次。
+
+该函数有三个参数：前一个状态的 props，前一个状态的 state、getSnapshotBeforeUpdate 的返回值。
+
+可以（不建议）在生命周期中直接调用 `this.setState`。但必须包裹在一个条件语句中，否则会导致死循环。
+
+**使用场景：**对 DOM 进行操作，或者进行网络请求。
+
+
+
+#### 问题：React 17 为什么会废弃 3 个生命周期
+
+componentWillMount、componentWillReceiveProps、componentWillUpdate 这三个生命周期函数在 React 17 版本被废弃。而 React 添加静态方法 static getDerivedStateFromProps 来代替。
+
+React 16 更新了 fiber 架构，提出了调度、协调、渲染三大阶段。其中协调阶段是异步可中断的，如果调度阶段安排了优先级更高的任务，当前协调的任务可被中断。
+
+这导致协调（render）阶段的生命周期函数可能会被多次执行，所以这些函数需要实现无副作用的纯函数。如果使用旧生命周期函数，在这里定义了网络请求，那么有可能会执行多次网络请求。而通过新的静态方法 getDerivedStateFromProps，开发者无法从 this 正常获取组件实例，那么就不能修改 state 和发送网络请求了。避免生命周期的不安全使用。
+
+
+
+### 问题：生命周期函数的执行顺序
+
+父子组件间，生命周期函数的触发顺序：
+
+![img](images/React_Note.assets/307ff86d82ce4d8eaab1a436234aeada~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
+
+总结：
+
+在 render 阶段的生命周期函数，自上而下调用，即父组件先调用，子组件后调用。
+
+然后是 commit 阶段中，划分每一个子阶段。每个在阶段都是子组件先调用，后父组件调用。
+
+- before mutation：getSnapshotBeforeUpdate（更新）
+- mutation：componentWillUnmoun (卸载)
+- layout：componentDidMount（挂载）或 componentDidUpdate（更新）
+
+最后的生命周期函数
+
+```jsx
+import React from 'react';
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {count: 0,}
+    console.log('App constructor');
+  }
+
+  static getDerivedStateFromProps() {
+    console.log('App static getDerivedStateFromProps');
+    return null;
+  }
+
+  shouldComponentUpdate(nextProps) {
+    console.log('App shouldComponentUpdate');
+    return true;
+  }
+
+  getSnapshotBeforeUpdate(prevProps) {
+    console.log('App getSnapshotBeforeUpdate');
+    return null;
+  }
+  
+  componentDidMount() {
+    console.log('App componentDidMount');
+  }
+
+  componentDidUpdate() {
+    console.log('App componentDidUpdate');
+  }
+
+  render() {
+    console.log('App render');
+    return (
+      <div>
+        <div onClick={() => this.setState((count) => ({ count: count + 1 }))}>App</div>
+        <Child order={1} />
+        <Child order={2} />
+      </div>
+    )
+  }
+}
+
+class Child extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {count: 0}
+    console.log(`Child${this.props.order} constructor`);
+  }
+
+  static getDerivedStateFromProps(props) {
+    console.log(`Child${props.order} static getDerivedStateFromProps`);
+    return null;
+  }
+
+  shouldComponentUpdate(nextProps) {
+    console.log(`Child${nextProps.order} shouldComponentUpdate`);
+    return true;
+  }
+
+  getSnapshotBeforeUpdate(prevProps) {
+    console.log(`Child${prevProps.order} getSnapshotBeforeUpdate`);
+    return null;
+  }
+  
+  componentDidMount() {
+    console.log(`Child${this.props.order} componentDidMount`);
+  }
+  
+  componentDidUpdate() {
+    console.log(`Child${this.props.order} componentDidUpdate`);
+  }
+
+  render() {
+    console.log(`Child${this.props.order} render`);
+    return (
+      <div onClick={() => this.setState((count) => ({ count: count + 1 }))}>
+        Child{this.props.order}
+      </div>
+    )
+  }
+}
+
+export default App;
+```
+
+首次渲染：
+
+![截屏2022-08-08 16.24.03](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-08%2016.24.03.png)
+
+子组件状态改变：当点击文字 Child1 时，其执行结果如下：
+
+![截屏2022-08-08 16.30.47](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-08%2016.30.47.png)
+
+父组件状态改变：点击父组件文字，让 `this.seteState` 触发
+
+![截屏2022-08-08 16.34.02](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-08%2016.34.02.png)
+
+
+
+### 问题：React hooks
+
+React 16+ 开始，通过 fiber 结构实现了协调阶段的异步可中断。每个组件都会被转化为 fiber node，参与 WorkInProgress fiber tree 的构建。
+
+#### Hooks 的特点
+
+在调和阶段，hooks 会被初始化并绑定在函数组件 fiber.memoizedState 上。
+
+- 对于类组件 fiber ，用 memoizedState 保存 state 信息；**对于函数组件 fiber ，用 memoizedState 保存 hooks 信息**。
+
+**链表**。在 memoizedState 属性中，hooks 通过 .next 属性把绑定在当前函数组件的 hooks 连接起来，形成一个链表。
+
+**创建**。函数组件的 hooks 在挂载会调用 Mount 函数，在更新时会调用 update函数。比如第一次调用 useState 会执行 mountState，后面再调用 useState 会执行 updateState。而这个函数的执行，会根据不同的 hooks 会生成对应的 hooks 对象，绑定在 next 链上。
+
+- updateQueue 存放每个 useEffect/useLayoutEffect 产生的副作用组成的链表。在 commit 阶段更新这些副作用。
+
+**有序**。所以，React 用链表来严格保证 hooks 的顺序。如果我们在函数组件中对 hooks 的添加使用 if 判断语句。这会导致一次更新的前后 hooks 链不一致，具体来说，current tree 和  WorkInProgress 中，对同一个函数组件的 hooks 链保存的内容不一致。如果此时 WorkIn Progress 要从 current 中读取 `state`、`ref` 等信息，原本按照 next 链条去对等读取（类似数组下标读取），但因为前后两次 hooks 链已经发生改变，对等位的 hooks 对象不一致，所以发生错误，React 防止错误发生，会抛出错误。
+
+- 这就是为什么 Hooks 不可以在条件语句定义了。
+
+![截屏2022-08-08 17.20.09](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-08%2017.20.09.png)
+
+#### Hooks 介绍 (9)
+
+数据更新驱动：useState、useReducer
+
+执行副作用：useEffect、useLayoutEffect
+
+状态获取/传递：useContext、useRef、useImperativeHandle
+
+状态派生/保存：useMemo、useCallback
+
+
+
+#### useState
+
+```js
+const [ state , setState ] = useState(initData);
+```
+
+- state：目的提供给 UI ，作为渲染视图的数据源。
+- setState：改变 state 的函数，推动函数组件渲染的触发函数。
+- initData：获得 state 的初始值。有两种情况，如果是具体值，直接作为初始值。 如果是函数，执行函数的返回值做为初始化值。
+
+**注意事项**：
+
+- **“所谓异步”**，在函数组件一次执行上下文中，state 的值是固定不变的。
+  - 且当前执行上下文中获取不到 setState 改变的值，只有在下一次 render 后才能获取到。
+- **浅对比**，如果 setState 传入了相同的值，组件就不会触发 render 更新。
+
+
+
+#### useReducer
+
+useReducer 是 react-hooks 提供的能够在无状态组件中运行的，类似 redux 的功能 api。
+
+useReducer 是 useState hooks 的扩展。在逻辑相对复杂的情况下，可以用 reducer 的 switch 进行判断，通过 dispatch 达到对同一个 state 有不同的更新方法。
+
+```js
+const [ state , dispatch ] = useReducer((state, action) => {
+  switch(action.type) {
+      //增加、减少、清空、赋值..
+      return newState;
+  }
+});
+
+// 使用：
+dispatch({ type: "increment" });
+```
+
+- state：目的提供给 UI ，作为渲染视图的数据源。
+- dispatch：改变 state 的函数，推动函数组件渲染的触发函数。和 useState 的 setState 一样。
+- reducer：相当于 redux 的 reducer。是一个入参有 旧state + action、内部有 switch 的纯函数。函数内部实现了根据不同的 type，对 state 进行操作并返回，从而更新 state。
+
+使用方式：
+
+1. **封装**。当对 state 更新的逻辑相对复杂，可以通过 useReducer 包装。
+2. **复用**。如果多个组件均有一个相同的判断方式（可以用同一个 switch 判断），那么单独定义一个 reducer 纯函数，然后不同的组件 import 引入这个 reducer 即可。
+
+
+
+#### useEffect
+
+```js
+useEffect(()=>{
+  // code..
+  return destory;
+},[dep1, dep2])
+```
+
+- 第一个参数为 callback，主体为 useEffect 的回调函数，当依赖发生变化时执行。
+- return destory 销毁函数，作为下一次 callback 执行之前调用，用于清除上一次 callback 产生的副作用。
+- 第二个参数为依赖，是一个数组，当依赖项改变，就会执行上一次的销毁函数，新的回调函数。
+  - 如果不添加任何依赖，组件 render 就会触发，挂载 / 更新都会触发；
+  - 如果添加空数组 `[]`，组件只有在挂载时触发。
+
+useEffect 是 **异步调用** 的。关联知识：渲染（commit阶段工作流程）：
+
+- before mutation：创建微任务，给 `useEffect` 的回调函数设定 normal Scheduler Priority，加入任务队列。
+- layout：绑定 useEffect 的销毁 + 回调函数。
+- commit 完成，等待主线程任务完成（DOM 更新，视图绘制完毕）。异步执行 useEffect 的（上一次）销毁函数 + （本次）回调函数。
+
+**useEffect 回调函数不会阻塞浏览器绘制视图。**
+
+**使用方式**：
+
+- 回调函数：初始化 state、异步数据请求、注册事件监听、设置定时器；
+- 销毁函数：注销事件监听、清楚定时器。
+
+
+
+#### useLayoutEffect
+
+参数逻辑和 useEffect 相同，只是触发时机不同，useLayoutEffect 同步调用。在渲染阶段：
+
+- mutation 阶段：执行 useLayoutEffecta 的销毁函数；
+- layout 阶段：执行 useLayoutEffect 的回调函数。
+
+**使用方式：**
+
+- 回调函数：在最后绘制 dom 前，需要对 dom 进行调整，注意不要死循环。
+
+
+
+useEffect 和 useLayoutEffect 的区别：
+
+1. 前者异步调用，后者同步调用（参考在 commit 阶段的处理流程）。
+2. 前者不会阻塞浏览器绘制，后者的回调函数会阻塞浏览器绘制。
+
+所以，如果要对 DOM 进行修改，则不可以在 useEffect 中设置， useEffect 执行是在浏览器绘制视图之后，接下来又改 DOM ，会导致浏览器再次回流和重绘。而 useLayoutEffect 在 commit 阶段同步执行，阻塞浏览器的绘制，重新进入协调阶段，则页面不会发生画面闪现，抖动的问题。
+
+
+
+#### useContext
+
+```js
+const contextValue = useContext(context);
+```
+
+
+
+
+
+#### useRef
+
+
+
+
+
+#### useImperativeHandle
+
+
+
+
+
+#### useMemo
+
+
+
+
+
+#### useCallback
+
+
+
+
+
+
+
+
+
+`useState` 两次值相等的时候，组件不触发渲染，因为其内部通过浅对比发现相等，则不触发更新。防止同步执行时阻塞浏览器做视图渲染（如果对 dom 操作，则又要重协调）。
+
+
+
+
+
+
+
+===todo========================== 
+
+类组件生命周期、函数组件有生命周期吗？
+
+函数组件的 hooks，坑：函数组件 hooks 实现类组件的生命周期（找笔记）。
+
+考虑简历投递前，哪些知识还需要复习（看笔试题总结 + 牛客网笔试面经）。
+
+
+
+hooks 我在项目中的用法。
+
+
+
+
 
 
 
