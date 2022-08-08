@@ -1339,37 +1339,192 @@ useEffect 和 useLayoutEffect 的区别：
 
 #### useContext
 
-```js
-const contextValue = useContext(context);
+useContext 可以代替 `context.Consumer` 来获取 Provider 中保存的 value 值，而不需要创建 `comsumer`。
+
+- 使用 `Context` 可以避免的组件的层层 `props` 嵌套的问题。但是使用 `context.Consumer` 拿值时，会包裹一层 `<Comsumer>` 组件。
+
+使用 useContext hook 可以不用 `<Consumer>` 嵌套。
+
+**使用方式**：获取全局的class 前缀，或者国际化，UI 主题颜色等。
+
+```jsx
+/* 用useContext方式 */
+const DemoContext1 = ()=> {
+  const value = useContext(Context);
+  return <div> my name is { value.name }</div>
+}
+
+/* 用Context.Consumer 方式 */
+const DemoContext2 = ()=>{
+  return <Context.Consumer>
+    { (value)=> <div> my name is { value.name }</div> }
+  </Context.Consumer>
+}
+
+export default ()=>{
+  return <div>
+    <Context.Provider value={{ name:'alien' , age:18 }} >
+      <DemoContext1 />
+      <DemoContext2 />
+    </Context.Provider>
+  </div>
+}
 ```
-
-
 
 
 
 #### useRef
 
+useRef 用来保持一个对象的引用。接受一个状态 initState 作为初始值，返回一个 ref 对象。该对象的 `.current` 属性就是 ref 对象保持引用的对象（initState），也可以通过 `.current` 来改变引用状态。
 
+```js
+const cur = React.useRef(initState);
+cur.current  // ref element
+```
+
+特点：不论该组件如何更新，该引用都不会被销毁，而一直保存在内存中不变。
+
+**使用方式**：通常用来保持对 DOM 元素的引用，或对一个固定状态的引用。
+
+```jsx
+const DemoUseRef = () =>{
+  const dom = useRef(null);
+  const handerSubmit = () =>{
+    console.log(dom.current);
+    //  打印dom节点：<div>表单组件</div>  
+  }
+  return <div>
+    <div ref={dom}>表单组件</div>
+    {/* ref 标记当前dom节点 */}
+    <button onClick={()=>handerSubmit()}>提交</button> 
+  </div>
+}
+```
 
 
 
 #### useImperativeHandle
 
+用于父组件调用子组件的属性/方法。子组件对外暴露 / 提供部分功能，供父组件调用。
 
+
+
+引：**`React.forwardRef()`** 用于转发 ref。
+
+- 把一个函数组件（有 props, ref 两个参数）传入 forwardRef，会返回一个 绑定好 ref 的新组件。
+
+下面的例子中，通过 forwardRef，Father 传递给 Son 一个 sonRef 对象。而 Son 接收到 sonRef 后，把它绑定在 input DOM 元素上。这样，父组件就持有了一个子组件中 input 元素的引用。
+
+```jsx
+import React,{useRef,forwardRef} from 'react'
+
+const Son = forwardRef((props, ref) => {
+  return <div>
+    <input type="text" defaultValue={props.value} ref={ref} />
+  </div>
+})
+
+const Father = () => {
+  const sonRef = useRef(null);
+  return <div>
+    <Son ref={sonRef} value='子组件' />
+    <button onClick={() => console.log(sonRef.current)}>点击打印 sonRef</button>
+   
+  </div>
+}
+
+// 点击子组件的 button 后，控制栏输出：<input type="text" value="子组件"></input>
+```
+
+> 代码：https://codesandbox.io/s/festive-elion-4w514b?file=/src/App.js
+
+上面的例子可以看到，对于 Son 来说，入参 `ref` 就是父组件发来的，用于调用子组件的引用。但有时子组件需要对父组件暴露更多指定的属性和方法，这是就需要 `useImperativeHandle` 对其打包。
+
+**useImperativeHandle**  接收三个参数：
+
+- ref：父组件传递过来的 ref，也就是将要绑定的 ref 引用。
+- callback：初始化时会调用该函数，返回一个对象，这个对象会绑定在 ref 引用上，被父组件引用。
+- deps：数组，成员是依赖项，当依赖发生改变，就会重新执行 callback，重新添加绑定。
+
+```jsx
+const SonComponent = forwardRef((props, ref) => {
+
+  useImperativeHandle(ref,() => {
+    return {
+      handle1: () => {},
+      handle2: () => {}
+      // ..
+    }
+  }, deps);
+
+}
+```
+
+**使用场景**：当父组件需要使用子组件部分属性和方法，而子组件不希望把自己全部内容都对外暴露时，通过 `forward.Ref` + `useImperativeHandle` 的配合，可以针对性的暴露部分功能。实现父组件调用子组件的部分方法。
+
+- 父组件是一个提交组件，n 个子组件是表单。父组件需要调用全部子组件的提交函数，让子组件把表单信息提交给父组件。
 
 
 
 #### useMemo
 
+```js
+const memoizedValue = useMemo(() => { 
+  // function 
+}, deps);
+```
 
+性能优化。useMemo 会缓存一个 **引用**，这个引用可以是一个具体的值、对象、函数。在初始化组件时，会调用回调函数，并让 `memoizedValue` 缓存回调函数的返回值。当 deps 依赖项不发生变化时，即使发生多次 render，也不会重新执行回调函数，`memoizedValue` 会一直持相同的引用，从而节省相同代码的执行。
+
+**使用场景**：
+
+1. 复杂计算，当创建一个值，会产生高昂的开销（比如计算上千次才会生成变量值），有必要使用 `useMemo`，当然这种场景少之又少。
+2. 通过 props ，父组件给子组件传递局部变量。父组件把这个局部变量通过 useMemo 传递给子组件。不论父组件如何 rerender，该变量不会发生改变。所以通过 `memo()` 的包裹的子组件，会对传入的变量 shallow equal，顺利的避免重新渲染。
+   - 如果传入变量在父组件中，没有通过 useMemo 包裹，仅使用 `memo()`包裹自组件是没用的。加入传入变量是一个对象 object，父组件每次 render 都会导致该 object 重新创建，子组件的 shallow equal 会发现前后 object 地址不一致，从而判定为 props 发生改变，而重新 render。
 
 
 
 #### useCallback
 
+和 useMemo 的功能、触发机制相同，在依赖项变化后，会让 `memoizedValue` 重新缓存引用。不同的是，useMemo 会执行回调函数，并缓存得到的函数返回值；而 useCallback 直接缓存这个回调函数，并不会执行。
+
+```jsx
+const memoizedValue = useCallback(() => { 
+  // function 
+}, deps);
+```
+
+- 这个回调函数并不会执行，而是直接缓存。
+- useCallback 是 useMemo 的一种特例，因为 useMemo 可以引用/缓存任何值（对象、函数），而 useCallback 只能引用/缓存函数。
+
+**使用场景**：父组件给子组件传递一个回调函数时，会把该回调函数通过 useCallback 包裹后再返回。原理同 useMemo 一样，子组件需要用 `memo()` 包裹。这样，即使父组件 render，但被 useCallback 包裹的回调函数不会发生改变，所以子组件通过 shallow equal，顺利避免重新渲染。
 
 
 
+useMemo 和 useCallback 的区别：
+
+相同：
+
+1. 从逻辑上来说，触发逻辑相同，两个 hooks 的返回值 `memoizedValue` 会对一个值保持引用(缓存)。在依赖项不变的情况下，不论组件 render 多少次，都不该引用(缓存)都不会更新。
+2. 从目的上来说，两者都是性能优化，尽可能减少子组件的 render。
+
+不同：
+
+1. 从代码上来说，useMemo 的回调函数会被执行，`memoizedValue` 缓存被执行的返回值；useCallback 的回调函数不会被执行，而是被 `memoizedValue` 直接缓存。
+2. 从效果上来说，useMemo 可以缓存任何值（基本值、对象、函数），而 useCallback 仅能缓存函数。
+3. 从原理上来说，useCallback 是 useMemo 的语法糖，是一个特例。useMemo 除了可以避免子组件重新渲染外，还可以包裹计算复杂的函数，减少复杂计算的执行次数。
+
+
+
+### 问题：Component、PureComponent 、memo()
+
+**`PureComponent` 组件创建了默认的 `shouldComponentUpdate` 行为。**
+
+这个默认的 `shouldComponentUpdate` 行为会执行 shallow equal，逐一比较即将 render 前后， `props` 和 `state` 是否发生改变，如果没有改变，就会阻止组件接下来的 render 以及之后的生命周期函数的执行，提升性能。
+
+而函数组件没有生命周期的概念，也无法使用 PureComponent，所以 React 16+ 定义了`React.memo()` 方法，它既可以包裹 class component，也可以包裹 function component，达到和 PureComponent 相同的效果。
+
+- 通常和 useMemo、useCallback hooks 配合使用。
 
 
 
@@ -1383,21 +1538,24 @@ const contextValue = useContext(context);
 
 
 
-===todo========================== 
 
-类组件生命周期、函数组件有生命周期吗？
-
-函数组件的 hooks，坑：函数组件 hooks 实现类组件的生命周期（找笔记）。
 
 考虑简历投递前，哪些知识还需要复习（看笔试题总结 + 牛客网笔试面经）。
 
 
 
-hooks 我在项目中的用法。
+###### === todo ========================================= 
 
+React
 
-
-
+- hooks 我在项目中的用法。
+- creatRef、useRef、Ref、forwardRef 相关知识和使用（看看笔记？）
+- 自定义hook（看看笔记）
+  - 函数组件 hooks 实现类组件的生命周期（找笔记）。
+- React 的执行顺序：从 index 说起（先看笔记）
+- state 和 props 的相关知识：
+  - state 是同步还是异步。https://juejin.cn/book/6945998773818490884/section/6951186955321376775
+  - https://juejin.cn/book/6945998773818490884/section/6950659615675645990
 
 
 
