@@ -67,7 +67,17 @@ React 15+ 实现了异步可中断的架构。
 
 ![image-20220806231908259](images/React_Note.assets/image-20220806231908259.png)
 
-Scheduler 调度器会通过 diff 算法，处理传入的更新任务。diff 完毕后，会由 fiber 构成一颗新的 virtualDOM 树，然后提交给 Renderer 渲染器进一步处理。
+Scheduler 调度器会通过 diff 算法，处理传入的更新任务。diff 完毕后，会由 fiber 构成一颗新的 fiber 树，然后提交给 Renderer 渲染器进一步处理。
+
+- 关于 virtual DOM 的概念，有两种说法：
+  - 广义的说，由 fiber 组成的树为 fiber 树，也是一个 virtual DOM 树；
+  - 狭义的说，通过 React element 组成的树，是 virtual DOM 树，在协调阶段，会把 virtual DOM 转化为 fiber tree。
+- 关于组件中的 render 函数的作用：
+  - 在调和阶段的整体任务，是通过 fiber 节点构建一棵 workInProgress fiber tree。这个构建过程是从根节点向子节点深度优先遍历完成的。
+  - 遇到，某个组件，会执行其调和阶段的生命周期函数，然后调用组件的 render。 render 会根据本次更新中的 state 变化，通过 `React.createElement` 生成新的 React Element 对象，在新的对象上保存了新的 state + props 状态。
+  - 该组件的 fiber 节点会根据对应的 React element 完成构建。同时对副作用变化打上标记。
+
+
 
 ##### 该阶段的特点：
 
@@ -143,7 +153,7 @@ export const Ref = /*                   */ 0b0000010000000;  // ref
 
 “递”和“归”阶段会交错执行，直到 “归” 到 `rootFiber` 根结点。至此，`render阶段` 的工作就结束了。
 
-- 构成（调和）了由 fiber节点构成的 work IN Progress Tree 树。
+- 构成（调和）了由 fiber 节点构成的 work IN Progress Tree 树。
 - 构成了接下来 commit 阶段需要执行更新的 effectList 副作用链表。
 
 ![截屏2022-08-08 00.27.04](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-08%2000.27.04.png)
@@ -417,7 +427,7 @@ RootFiber 已经创建不需要复制，但其子节点由于尚不存在， 则
 
 
 
-## diff 相关
+## diff
 
 ### 问题：什么是 virtual DOM
 
@@ -824,9 +834,9 @@ interface Fiber {
   // 新的、待处理的props
   pendingProps: any,
   // 上一次渲染的props
-  memoizedProps: any, // The props used to create the output.
-  // 上一次渲染的组件状态
-  memoizedState: any,
+  memoizedProps: any, // props、events
+  // 上一次渲染的组件状态	
+  memoizedState: any, // state、hooks
 
   /**
    * ⚛️ 副作用
@@ -838,7 +848,7 @@ interface Fiber {
 
   /**
    * ⚛️ 替身
-   * 指向旧树中的节点，如果节点不发生任何改变，就会直接使用旧节点，而无需重新创建
+   * 指向旧树中的节点，WorkInProgress会把alternate对应的fiber属性完整的复制过来
    */
   alternate: Fiber | null,
 }
@@ -856,40 +866,13 @@ Fiber 包含的属性可以划分为 5 个部分:
   - 在 Reconciliation 过程中发现的 '副作用'(**变更需求**) 就保存在节点的 `effectTag` 中(想象为打上一个标记)。
   - 使用链表结构，将本次渲染的所有节点副作用都收集起来。在遍历过程中 React 会将所有有 ‘副作用’ 的节点都通过 `nextEffect` 连接起来。
 - **🆕 替身** 
-  - React 在 Reconciliation 过程中会构建一颗新的 virtualDOm (官方称为**workInProgress tree**，**WIP树**)。是一颗表示当前工作进度的树。
+  - React 在 Reconciliation 过程中会构建一颗新的 virtualDOM (官方称为**workInProgress tree**，**WIP树**)。是一颗表示当前工作进度的树。
   - 还有一颗表示已渲染界面的**旧树（current tree）**，这棵树代表了已经渲染的并正在显示的页面。
   - React就是一边和旧树比对，一边构建WIP树的。 alternate 指向旧树的同等节点。
 
 ![img](images/React_Note.assets/16deecce3162b355~tplv-t2oaga2asx-zoom-in-crop-mark:3024:0:0:0.awebp)
 
 上图是 Reconciliation 完成后的状态，左边是旧树，右边是WIP树。对于需要变更的节点，都打上了'标签'。 在提交阶段，React 就会将这些打上标签的节点应用变更。
-
-
-
-## 其他
-
-
-
-### 问题：JSX, element, fiber, dom 的关系
-
-首先必须需要弄明白 React.element ，fiber 和真实 DOM 三者是什么关系。
-
-- jsx 语法，是创建 `React.creatElement()` 的语法糖。
-  - jsx 语法最终会被 babel 转译为各种 `React.creatElement()`。最终，这些代码会被执行，从而创建 React element 对象，
-- React element 是 js 对象，上面保存了 props，children 等信息。
-- DOM 是元素在浏览器上给用户直观的表象。
-- fiber 可以说是是 element 和真实 DOM 之间的交流枢纽站。
-  - 每一个类型 element 都会有一个与之对应的 fiber 类型，element 变化引起更新流程都是通过 fiber 层面做一次调和改变，fiber 通过链表形式，构建出一颗 virtualDOM 树。最终会在渲染阶段，转化为真实 DOM 并渲染在页面上。
-
-![2.jpg](images/React_Note.assets/0a90368f24f0477aaf0d446a8f6736db~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
-
-
-
-
-
-
-
-JSX 最终会转变为 `React.createElement()` 并执行，从而创建 React element，最终合并到 fiber 节点上。而 fiber 节点之间通过链表连接，最终构造为一颗 virtualDOM 树。
 
 
 
@@ -915,9 +898,11 @@ ReactDOM.render(<Index/>, document.getElementById('app'));
 
 **第二步：workInProgress 和 current**
 
+待续。
 
 
 
+## 生命周期 hooks
 
 ### 问题：useEffect 和 useLayoutEffect 的区别
 
@@ -1516,6 +1501,408 @@ useMemo 和 useCallback 的区别：
 
 
 
+## State
+
+### 问题：state API
+
+类组件的 state：
+
+```jsx
+setState(obj, callback);
+
+/* 第一个参数为object类型 */
+this.setState({ number:1 },()=>{
+  console.log(this.state.number) //获取最新的number
+})
+
+/* 第一个参数为function类型 */
+this.setState((state, props)=>{
+  return { number:1 } 
+})
+```
+
+- 第一个参数：
+  obj 为一个对象，则为即将合并的 state ；
+  obj 是一个函数，那么当前组件的 state 和 props 将作为参数，返回值用于合并新的 state。
+- 第二个参数 callback ：函数内的 state 为 setState 更新后的最新值，作为依赖 state 变化的副作用函数。
+
+一次事件中，触发了 `setState()`，React 底层会做如下事情：
+
+1. 调度阶段：setState 会产生当前更新的优先级（基于 lane）
+2. 协调阶段：从根部 fiber 节点 (fiber Root)，向下调和子节点：发现更新的组件，合并 state，触发组件 render 函数。最终得到 finished fiber tree (work in progress) + effectList。
+3. 渲染 mutation 阶段：进入 commit 阶段，通过 effectList 单项副作用链，完成对真实 DOM 的操作。更新流程完成
+4. 渲染 layout 阶段：执行 `setState(obj, callback)` 中 callback。所以此时获取的 state 是更新后的值。
+
+
+
+函数组件的 state
+
+```js
+[state, dispatch] = useState(initData);
+```
+
+- state：数据源，
+- dispatch：类似 setState 函数，推动函数组件渲染的渲染函数。
+- initData：可以是初始值 / 函数。如果是函数，则执行后返回的值为初始值。
+
+注意：dispatch 的参数也可以是函数，入参为对应 state 上一次更新后的最新值：
+
+```jsx
+const [number , setNumbsr] = React.useState(0);
+const handleClick=()=>{
+   setNumber((state) => state + 1)  // state - > 0 + 1 = 1
+   setNumber(8)  // state - > 8
+   setNumber((state) => state + 1)  // state - > 8 + 1 = 9
+}
+```
+
+
+
+### 问题：state 的批量更新
+
+关联问题：setState 的更新流程、state 是同步更新 (同步执行) 还是异步更新？
+
+
+
+**关于更新流程：**
+
+setState 会调用 dispathAction，创建一个 update 对象放到对应元素 fiber 节点的 updateQueue 上，然后调度渲染。
+
+
+
+**关于同步还是异步：**
+
+我的理解：如果没有异步环境更新 state，state 是在同一个执行上下文（调用栈）执行的。所以理论上来说是同步执行的。通常讨论的点是 state 是批量更新，还是非批量更新。
+
+- 虽然我们讨论的是 setState 的同步异步，但这个不是 setTimeout、Promise 那种异步调用，而是指 setState 执行后，state 是否立刻改变了，是否可以在当前执行上下文中得到改变的值，组件是否 render 了。
+- 回答批量更新的要点：
+  - 先说 state 的更新顺序：flushSync 可以提前批量更新，直接 render。然后是批量更新，最后一个 setState 执行并 render。最后是异步环境（微任务/宏任务）遇到一个 setState，就立即 render。
+  - 再说类组件和函数组件的区别：（1）类组件 api 可以回调监听到 state 更新，函数组件只能用 useEffect 副作用监听。（2）类组件异步更新 state，可在当前执行上下文获取到更新后的值（看起来像同步的），函数组件在当前执行上下文的 state 不会发生变化。
+
+
+
+**关于批量更新：**
+
+用户触发事件，会推动 React 的组件更新。所以 state 更新的源头还是触发事件。React 使用自定义的事件机制（关联：React 事件知识）。
+
+React 使用 dispatchEvent 同一调度所有元素 fiber 上绑定的事件，在 dispatchEvent 中，会开启 state 批量更新，待 **同步** 更新完毕后，关闭批量更新：
+
+- 如没有定义异步 state 操作（没有在 setTimeout、promise 中更新 state），连续的 setState 更新操作会被统一的批量更新。也就是说多个 setState 只会执行最后一个，得到一个 state 结果后，才**执行一次 render 函数**。
+
+当异步环境时，批量更新是默认关闭的：
+
+- 如果定义异步 state 操作，如在同一个 setTimeout 中连续定义三个 setState，因为此时没有批量更新，就会遇到一个 setState，就先执行，然后触发 render，触发 setState 回调，接着继续往下执行其他 setState。最终会 **执行 3 次 render 函数**。
+
+**所以，如果采用异步环境更新 state，就会导致多次的 render 调用，也会导致视图的多次渲染，影响性能。**
+
+- 通过 `unstable_batchedUpdates` 包裹可以手动开启批量更新。
+
+
+
+**批量更新举例**：
+
+```jsx
+handleClick= () => {
+  this.setState({ number:this.state.number + 1 },()=>{   
+    console.log( 'callback1', this.state.number);  
+  });
+  console.log(this.state.number);
+  this.setState({ number:this.state.number + 1 },()=>{   
+    console.log( 'callback2', this.state.number);  
+  });
+  console.log(this.state.number);
+  this.setState({ number:this.state.number + 1 },()=>{   
+    console.log( 'callback3', this.state.number);  
+  });
+  console.log(this.state.number);
+}
+// 点击按钮，触发事件后的打印：
+// 0, 0, 0, callback1 1 ,callback2 1 ,callback3 1
+```
+
+React 更新流程：
+
+- 在批量更新环境下：
+- 缓存第 1 个 setState 但不更新 state；调用 `console.log()` 打印：0；
+- 缓存第 2 个 setState 但不更新 state；调用 `console.log()` 打印：0；
+- 缓存第 3 个 setState 但不更新 state；调用 `console.log()` 打印：0；
+- 合并 state，触发最后一个 setState，state 更新为 1；
+- 调用 render，更新 state；
+- 依次调用 3 个 setState 的回调函数，打印 `callback1/2/3   1`
+
+
+
+**异步环境更新举例**：
+
+```js
+handleClick = () => {
+  // setTimeout 包裹
+  setTimeout(() => {
+    this.setState({ number:this.state.number + 1 },()=>{   
+      console.log( 'callback1', this.state.number);  
+    });
+    console.log(this.state.number);
+    this.setState({ number:this.state.number + 1 },()=>{   
+      console.log( 'callback2', this.state.number);  
+    });
+    console.log(this.state.number);
+    this.setState({ number:this.state.number + 1 },()=>{   
+      console.log( 'callback3', this.state.number);  
+    });
+    console.log(this.state.number);
+  })
+}
+```
+
+- 非批量更新环境：
+- 遇到第 1 个 setState，更新 state，触发 render，调用 setState 回调，打印 `callback1 1`。
+- 调用 `console.log()`，打印：1。
+- 遇到第 2 个 setState，更新 state，触发 render，调用 setState 回调，打印 `callback1 2`
+- 调用 `console.log()`，打印：2。
+- 遇到第 3 个 setState，更新 state，触发 render，调用 setState 回调，打印 `callback1 3`
+- 调用 `console.log()`，打印：3。
+
+
+
+**手动调用批量更新**
+
+```jsx
+import ReactDOM from 'react-dom'
+const { unstable_batchedUpdates } = ReactDOM
+
+setTimeout(()=>{
+  // 使用 unstable_batchedUpdates 包裹
+  unstable_batchedUpdates(()=>{
+    this.setState({ number:this.state.number + 1 })
+    console.log(this.state.number)
+    this.setState({ number:this.state.number + 1})
+    console.log(this.state.number)
+    this.setState({ number:this.state.number + 1 })
+    console.log(this.state.number) 
+  })
+})
+```
+
+
+
+#### 函数组件 注意1
+
+上面的例子如果换成函数组件，所有的 `console.log(number)` 都无法获取更新后的 number 值，即使用 setTimeout 包裹，避免批量更新也不行：
+
+```jsx
+const [ number , setNumber ] = React.useState(0)
+const handleClick = ()=>{
+  // 优先级更新
+  ReactDOM.flushSync(()=>{
+    setNumber(2);
+    console.log(number);  // 0
+  })
+ 	// 批量更新
+  setNumber(1);
+  console.log(number);		// 0
+	// 异步: 滞后更新
+  setTimeout(()=>{
+    setNumber(3);
+    console.log(number);	// 0
+  })   
+}
+```
+
+原因：函数组件的更新，就是函数的执行。每次执行，都会重新声明 state。所以改变的 state 只有在下次函数组件执行时才会被更新。所以在如上同一个函数执行上下文中，number 一直为0，无论怎么打印，都拿不到最新的 state 。
+
+
+
+#### 函数组件 注意2
+
+函数组件如果在一次更新前后，仅有 state 发生变化，且更新时，setState 传入了相同的值（或相同的内存空间），则不会触发 render，更新会被阻止。因为 React 内部在处理 dispacthAction 时，会 shallow equal 浅对比 state 更新前后的值，如果相同则忽略本次更新。
+
+```jsx
+export default function Index(){
+  const [state  , dispatchState] = useState({name:'alien'});
+  const handleClick = () => { // 点击按钮，视图没有更新。
+    state.name = 'ninjee';
+    dispatchState(state); // 直接操作state对象，在内存中指向的地址相同。
+  }
+  return <div>
+    <span>{state.name}</span>
+    <button onClick={handleClick}>changeName++</button>
+  </div>
+}
+```
+
+- 正确的使用方式，要浅拷贝一份再传递给 dispatch
+
+```js
+const handleClick = () => {
+  const newState = state;  // 创建 newState
+  newState.name = "ninjee";
+  dispatchState(state);
+}
+```
+
+
+
+### 问题：useState 和 setState 区别
+
+函数组件 useState 和类组件 setState 的区别。
+
+相同点：
+
+- **推动更新**。useState 的 dispatch 和 setState 都可以更新 state，推动组件更新和渲染。
+- **批量更新**。通过事件驱动触发更新，都有批量更新规则。
+  - 非事件驱动：比如在 setTimeout 中异步更新。
+  - forceUpdate
+
+不同点：
+
+- **浅对比**。类组件不会浅比较更新前后 state 的变化，函数组件会默认比较，这就需要在更新时传递一个新的对象。
+  - 类组件如果定义 pureComponent，或在 shouldComponentUpdate 生命周期函数中自定义，可以达到浅对比效果。
+- **监听变化**。类组件 setState 有专门监听 state 变化的回调函数 callback，可以获取最新state；但是在函数组件中，只能通过 useEffect 执行 state 变化引起的副作用。
+- **底层原理**。setState 在底层处理逻辑上主要是和老 state 进行合并处理，而 useState 更倾向于重新赋值。
+
+
+
+### 问题：state 中的更新顺序
+
+> 类组件 setState 和函数组件 dispatch 的概念相同，这里用类组件 setState 举例。
+
+state 的更新可以通过 `flushSync` 提升优先级：
+
+```js
+ReactDOM.flushSync(()=>{
+  this.setState({ number: 3 });
+})
+```
+
+`flushSync` 的逻辑是，当处于同步条件下（开启批量更新），遇到 `flushSync` 定义的 setState，就会发生 state 合并，**并执行 `flushSync` 定义的 state 更新，调用 render**。然后再继续往下执行其他同步环境（开启批量更新）下 setState。
+
+ React 同一组件中 setState **更新优先级** 关系是:
+
+同步环境，默认开启批量更新：
+
+- 高优先级更新 flushSync 中的 setState，已经缓存的 setState 都合并 (丢弃)。
+  - 其内部也存在批量更新。
+- 正常执行上下文中 setState，执行最后一个 setState，将已经缓存的都丢弃。
+
+异步环境，默认关闭批量更新：
+
+- Promise 中的 setState，立即执行 + render + 渲染，然后往下执行。
+- setTimeout 中的 setState，立即执行 + render + 渲染，然后往下执行。
+  - **注意调用顺序**：执行 setState  => 执行 render => 执行 setState 后面的代码。
+
+
+
+### 问题：函数组件中，监听 state 的变化
+
+类组件中，推动更新 state 的方法是 `setState({}, callback);`
+
+其中，第二个参数的触发时机，是当前 state 完成更新，页面完成渲染（render + commit 完成），再异步调用，可以获得 state 更新后的最新值，达到监听 state 变化的目的。
+
+函数组件中，推动 state 更新的方法是 `const [state, dispatch] = useState(0)` 中的 dispatch，该函数不支持第二个回调参数。
+
+**监听方式：**自定义 hooks
+
+通过 `useEffect` 添加该 state 的依赖，可以达到监听 state 变化的目的。
+
+- 缺点：useEffect 初始化会调用一次，需要其他方法阻止初始化调用。
+  - 解决：useUpdateEffect：useRef 自定义（关联问题）。
+
+使用参考：https://codesandbox.io/s/agitated-pare-fwln3f?file=/src/App.js
+
+
+
+
+
+## 事件机制
+
+### 问题：事件机制
+
+React 事件的几个特点：
+
+1. **兼容性**。不同的浏览器，对事件存在不同的兼容性，React 创建了一个兼容全浏览器的事件系统，以抹平不同浏览器的差异。
+2. **版本**。v17 之前 React 事件全部绑定在 document 上；v17 之后 React 把事件绑定在 app 对应的容器container 上。
+   - 将事件绑定在同一容器统一管理，防止很多事件直接绑定在原生的 DOM 元素上，产生兼容性问题。
+3. **重新定义事件**。由于不是绑定在真实的 DOM 上，所以 React 需要模拟一套事件流：事件捕获 -> 事件源 -> 事件冒泡；重写了事件源对象 event 。
+4. **一个事件源**。基于**事件委托**，在整个 React 应用中只绑定一个事件源。在 v17 以前，这个事件绑定在 document 上，在 v17 以后，这个事件绑定在 app 容器上，这样更有利于一个 html 下存在多个应用（微前端）。
+   - 事件委托：利用事件的冒泡原理，把事件绑定在父元素上面，把所有子元素各自处理的事情交给父元素统一处理，达到性能优化的效果。
+5. **事件合成**。React 应用中，元素绑定的事件并不是原生事件，而是React 合成的事件，比如 onClick 是由 click 合成，onChange 是由 blur ，change ，focus 等多个事件合成。
+6. **按需绑定**。不是一次性绑定所有事件，比如开发者添加 onClick 事件，React 就会绑定 click 事件；比如添加 onChange 事件，会绑定 `[blur，change ，focus ，keydown，keyup]` 多个事件。
+
+事件触发的细节：
+
+1. **元素 fiber 节点保存**。事件触发的回调函数，会在对应 DOM 的 fiber 节点上保存，具体是在 fiber.memoizedProps 属性上。
+   - fiber.memoizedStates 上保存了 hooks 回调函数。
+2. **事件队列**。在触发某个元素的事件后，会从该事件源触发，通过 `fiber.return` 向上收集全部对应事件的回调函数，通过数组保存。冒泡放在队头，捕获放在队尾。最终收集到 app 后截止，事件中心 dispatchEvent 会逐步调用这些回调函数（捕获 + 冒泡）。
+
+
+
+使用：
+
+```js
+export default function Index(){
+  const handleClick=(e)=>{ 
+    console.log('模拟冒泡阶段执行');
+    e.stopPropagation() /* 阻止事件冒泡 */
+  } 
+  const handleClickCapture = ()=>{ console.log('模拟捕获阶段执行') }
+  return <div>
+    <button onClick={ handleClick  } onClickCapture={ handleClickCapture }  >点击</button>
+  </div>
+}
+```
+
+- 冒泡阶段：React 绑定的事件比如 onClick，onChange，默认会在模拟冒泡阶段执行。
+- 捕获阶段：在捕获阶段执行：事件 + Capture 后缀，如 onClickCapture，onChangeCapture
+- 阻止冒泡：用 `e.stopPropagation()`。
+- 阻止默认行为：
+  - 原生事件： `e.preventDefault()` 和 `return false` 可以用来阻止事件默认行为
+  - React 事件：只能用 `e.preventDefault()`，注意这里的 event 对象和相应方法，都被 React 重新实现了。
+
+
+
+### 问题：一次点击事件触发的流程
+
+如点击一个 button 按钮，触发 onClick 事件。
+
+
+
+React 事件系统可分为三个部分：
+
+1. 事件合成。初始化会注册不同的事件插件。
+2. 事件绑定。在一次渲染过程中，对事件标签中事件的收集，向 container 注册事件。
+3. 事件触发。第三个就是一次用户交互，事件触发，到事件执行一系列过程。
+
+
+
+事件绑定：React 事件会绑定在对应 DOM 元素的 fiber 对象上，具体是 fiber.memoizedProps 属性上。
+
+![截屏2022-08-09 20.44.13](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-09%2020.44.13.png)
+
+（1）批量更新
+
+执行 dispatchEvent，会把真实事件源 DOM (button) 传递给 dispatchEvent，通过真实 DOM 找到对应的 fiber 节点。
+
+（2）合成事件源
+
+接下来会通过 onClick 找到对应的处理插件 SimpleEventPlugin ，合成事件源 event。
+
+- event 包含 preventDefault (阻止默认行为)、stopPropagation (阻止继续冒泡) 等方法。
+
+（3）形成事件队列
+
+通过事件源 fiber.return 向上遍历，遇到元素类型 fiber，就会收集事件到数组中：
+
+- 遇到 onClickCapture 捕获阶段触发，就 unshift 放在队头，
+- 遇到 onClick 冒泡阶段触发，就 push 放在对尾。
+
+最终收集到顶端 app 组件，形成执行队列。
+
+（4）执行事件队列
+
+依次执行数组里面的事件回调函数，如果遇到 `event.isPropagationStopped === true` 就会中断后续的回调执行，达到阻止冒泡的效果。
+
+
+
 ### 问题：Component、PureComponent 、memo()
 
 **`PureComponent` 组件创建了默认的 `shouldComponentUpdate` 行为。**
@@ -1525,6 +1912,209 @@ useMemo 和 useCallback 的区别：
 而函数组件没有生命周期的概念，也无法使用 PureComponent，所以 React 16+ 定义了`React.memo()` 方法，它既可以包裹 class component，也可以包裹 function component，达到和 PureComponent 相同的效果。
 
 - 通常和 useMemo、useCallback hooks 配合使用。
+
+
+
+## 其他
+
+### 问题：JSX, element, fiber, dom 的关系
+
+首先必须需要弄明白 React.element ，fiber 和真实 DOM 三者是什么关系。
+
+- jsx 语法，是创建 `React.creatElement()` 的语法糖。
+  - jsx 语法最终会被 babel 转译为各种 `React.creatElement()`。最终，这些代码会被执行，从而创建 React element 对象，
+- React element 是 js 对象，上面保存了 props，children 等信息。有人这么表达：React element 组成的 DOM树，就是 virtul DOM。
+- DOM 是元素在浏览器上给用户直观的表象。
+- fiber 可以说是是 element 和真实 DOM 之间的交流枢纽站。
+  - 每一个类型 element 都会有一个与之对应的 fiber 类型，element 变化引起更新流程都是通过 fiber 层面做一次调和改变，fiber 通过链表形式，构建出一颗 fiber 树。最终会在渲染阶段，转化为真实 DOM 并渲染在页面上。
+  - 也就是说，React element 组成了 virtualDOM，在 render（协调）阶段转化为 fiber tree，在 commit(渲染) 阶段转化为真实DOM。
+
+![2.jpg](images/React_Note.assets/0a90368f24f0477aaf0d446a8f6736db~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
+
+所以：JSX 最终会转变为 `React.createElement()` 并执行，从而创建 React element（virtual DOM），最终合并到 fiber 节点上。而 fiber 节点之间通过链表连接，最终构造为一颗 fiber 树。
+
+
+
+### 问题：什么是受控组件？
+
+在 HTML 的表单元素中，它们通常自己维护一套 `state`，并随着用户的输入自己进行 `UI`上的更新，这种行为是不被我们程序所管控的。而如果将 `React` 里的 `state` 属性和表单元素的值建立依赖关系，再通过 `onChange` 等事件与 `setState()` 结合更新 `state` 属性，就能达到控制用户输入过程中表单发生的操作。被 `React` 以自身 state 控制取值的表单输入元素就叫做 **受控组件**。
+
+
+
+在 `HTML` 中，表单元素（如`<input>`、 `<textarea>` 和 `<select>`）之类的表单元素通常自己维护 state，并根据用户输入进行更新。
+
+利用表单自己维护的 state，也能获取表单提交的信息：
+
+- 通过 `createRef` 绑定 input DOM节点，然后在 `onSubmit`  监听：`this.ref.current.value` 就可以获得表单中的输入值。
+
+这种利用 DOM 自身能力获取表单值的方式，就是非受控组件，如下面：
+
+```jsx
+import React, { Component } from 'react';
+
+export class UnControll extends Component {
+  constructor (props) {
+    super(props);
+    this.inputRef = React.createRef();
+  }
+  handleSubmit = (e) => {
+    console.log('获得input的值: ', this.inputRef.current.value);
+    e.preventDefault();
+  }
+  render () {
+    return (
+      <form onSubmit={e => this.handleSubmit(e)}>
+        <input defaultValue="lindaidai" ref={this.inputRef} />
+        <input type="submit" value="提交" />
+      </form>
+    )
+  }
+}
+```
+
+受控组件。
+
+把表单的输入、submit 收集表单信息通过 React 的 state 管理起来，就是受控组件。
+
+```jsx
+class TestComponent extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      username: "lindaidai"
+    }
+  }
+  onChange (e) {
+    console.log(e.target.value);
+    this.setState({
+      username: e.target.value
+    })
+  }
+  render () {
+    return <input name="username" value={this.state.username} onChange={(e) => this.onChange(e)} />
+  }
+}
+```
+
+
+
+### 问题：什么是无状态组件？
+
+数据就是状态（state），数据的变化就是状态的变化（setState()）。有维护自己状态存储和变化机制的组件叫做有状态组件；把状态的维护抽离到父组件中，没有 state 维护的叫做无状态组件或 UI 组件。
+
+
+
+### 问题：HOC / 高阶组件
+
+通常项目中的权限鉴定，就是利用了高阶组件 HOC。高阶组件实现了相同功能和逻辑的复用。
+
+高阶函数：一个将函数作为参数并且返回值也是函数的函数。
+
+高阶组件：是以组件作为参数，返回组件的函数。达到功能强化的目的。
+
+- 个人理解：类似对象的 `object.create()` 混入增强效果。
+
+
+
+使用场景：
+
+- **对组件的拦截，本质上是对渲染的控制。**不仅可以控制是否渲染组件，还可以像 dva 中 dynamic 那样懒加载/动态加载组件。
+- **让 props 中混入一些额外的数据。**比如，项目中想让一个非 Route 组件，也能通过 props 获取路由实现跳转，但是不想通过父级路由组件层层绑定 props ，这个时候就需要一个 HOC 把改变路由的 history 对象混入 props 中，于是 withRoute 诞生了。
+- **不想改变组件，只是监控组件的内部状态。**比如对组件内的点击事件做一些监控，或者加一次额外的生命周期。
+
+
+
+常用的高阶组件有 **属性代理** 和 **反向继承** 两种：
+
+**属性代理**
+
+属性代理，就是用组件包裹一层代理组件，在代理组件上对源组件的强化操作。
+
+- 返回的是一个新组件，被包裹的原始组件将在新的组件里被挂载。
+
+```jsx
+function HOC(WrapComponent){
+  return class Advance extends React.Component{
+    state={
+      name:'alien'
+    }
+    render(){
+      return <WrapComponent { ...this.props } { ...this.state }  />
+    }
+  }
+}
+```
+
+优点：
+
+- **低耦合**。正向属性代理，更适合做一些开源项目的 HOC。属性代理可以和业务组件低耦合。只对组件增加了渲染控制、props 参数控制，无须知道业务组件内做了些什么。
+- **兼容性**。同样适用于类组件和函数组件。
+- **渲染可控**。可以完全隔离业务组件的渲染，因为属性代理返回了个新组件，相比反向继承，可以完全控制业务组件是否渲染。
+- **可嵌套**。可以嵌套使用，多个 HOC 可以嵌套使用，一般不限制包装 HOC 的先后顺序。
+
+缺点：
+
+- **Ref 问题**。因其产生了一个新组件，所以需要配合 forwardRef 来转发 ref。
+
+- **获取状态**。需要 ref 获取组件实例，才能获取原始组件的状态。
+
+- **无法继承静态属性**。如果需要继承需要手动处理，或者引入第三方库。
+
+  
+
+**反向继承**
+
+反向继承包装后的组件 **继承** 了原始组件本身，所以此时无须再挂载业务组件。
+
+```jsx
+class Index extends React.Component{
+  render(){
+    return <div> hello,world </div>
+  }
+}
+function HOC(Component){
+  /* 直接继承需要包装的组件 */
+  return class wrapComponent extends Component{ 
+  	// ...
+  }
+}
+export default HOC(Index);
+```
+
+优点：
+
+- **获取状态**。组件内部状态可直接获取：state ，props ，生命周期，绑定的事件函数等。
+- **继承静态属性**。因为继承关系，可以直接继承静态属性和方法。
+
+缺点：
+
+- **高耦合**。和被包装的组件耦合度高，是对原始组件的直接继承并改造。
+- **兼容性**。函数组件无法使用。
+- **不可随意嵌套**。多个反向继承 HOC 嵌套在一起，当前状态会覆盖上一个状态。比如说有多个 componentDidMount ，当前 componentDidMount 会覆盖上一个 componentDidMount。导致对副作用的管理可能失控。
+
+
+
+## 自定义 hook
+
+### 问题：阻止 useEffect 初始化调用
+
+```js
+const useUpdateEffect = (callback, deps) => {
+	const firstMount = useRef(true);
+  useEffect(() => {
+    if (firstMount.current) {
+      firstMount.current = false;
+      return;
+    }
+    callback();
+  }, deps);
+}
+```
+
+- 缺点：callback 中不可以有 hooks，因为使用了 if 判断
+  - 关联：hooks 为什么不能用 if。问题：Hooks 的特点之一，有序。
+
+
 
 
 
