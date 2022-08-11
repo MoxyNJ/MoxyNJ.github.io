@@ -10,29 +10,45 @@ tags: [手写JavaScript]
 ### 实现 ajax 🌟
 
 ```js
-const SERVER_URL = "/server";
-let xhr = new XMLHttpRequest();
-// 创建 Http 请求
-xhr.open("GET", SERVER_URL, true);
-// 设置状态监听函数
-xhr.onreadystatechange = function() {
-  if (this.readyState !== 4) return;
-  // 当请求成功时
-  if (this.status === 200) {
-    handle(this.response);
-  } else {
-    console.error(this.statusText);
-  }
-};
-// 设置请求失败时的监听函数
-xhr.onerror = function() {
-  console.error(this.statusText);
-};
-// 设置请求头信息
-xhr.responseType = "json";
-xhr.setRequestHeader("Accept", "application/json");
-// 发送 Http 请求
-xhr.send(null);
+function getJSON(url) {
+  return new Promise(function (resolve, reject) {
+    // 1.创建XMLHttpRequest对象
+    const xhr = new XMLHttpRequest();
+    // 2.设置请求信息：请求行 + 请求头(可省)
+    xhr.open("GET", url, true);
+    xhr.responseType = "json";
+    xhr.setRequestHeader("Accept", "application/json");
+    // 3.接收响应（事件绑定）
+    xhr.onreadystatechange = function () {
+      // 0 已创建，1 已调用open，2 已调用send，3下载中，4 完成
+      if (this.readyState !== 4) return;
+      // 4.请求成功/失败时，promise 决议
+      if (this.status === 200) resolve(this.response);
+      else reject(this.statusText); // 返回错误状态码
+    };
+    // 5.网络异常监听
+    xhr.onerror = function () {
+      reject(this.statusText);
+    };
+    // 6. 网络超时监听
+    xhr.timeout = 10000;  // 超时时间 10s
+    xhr.ontimeout = function(){   // 超时回调
+      reject('time out');
+    }
+    // 7.发送 http 请求
+    xhr.send(null);
+  });
+}
+
+
+// 使用：
+getJSON("https://www.ninjee.co")
+  .then((res) => {
+  console.log(res);
+})
+  .catch((err) => {
+  console.log(err);
+});
 ```
 
 ### 实现 jsonp 🌟
