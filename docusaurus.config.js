@@ -98,14 +98,14 @@ const config = {
                 label: "总结",
                 to: "docs/interview/summary",
               },
-              {
-                label: "计算机网络",
-                to: "docs/interview/internet",
-              },
-              {
-                label: "操作系统",
-                to: "docs/interview/os",
-              },
+              // {
+              //   label: "计算机网络",
+              //   to: "docs/interview/internet",
+              // },
+              // {
+              //   label: "操作系统",
+              //   to: "docs/interview/os",
+              // },
               {
                 label: "物联网",
                 to: "docs/interview/iot",
