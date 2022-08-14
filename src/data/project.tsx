@@ -89,7 +89,7 @@ const Projects: Project[] = [
   {
     title: "Toy Browser",
     description:
-      "浏览器实现。根据浏览器的实现原理，模拟了页面加载的解析 URL 、下载 HTML 代码、解析 DOM &CSSOM、计算 CSS 属性、排版、渲染等一系列过程。",
+      "浏览器简单实现。根据浏览器的实现原理，模拟了页面加载的解析 URL 、下载 HTML 代码、解析 DOM &CSSOM、计算 CSS 属性、排版、渲染等一系列过程。",
     preview: require("./showcase/toy-browser.png"),
     website: "https://github.com/MoxyNJ/Toy-Browser",
     source: "https://github.com/MoxyNJ/Toy-Browser",
@@ -98,15 +98,15 @@ const Projects: Project[] = [
   {
     title: "鲜花图书馆",
     description:
-      "设计并实现了一个花朵绿植知识分享、用户讨论和购买的“鲜花图书馆”网站。基于一套 HTML 代码适配手机、平板和电脑等不同端口，风格统一，排版美观。",
+      "从 Logo 到网站，完全设计并实现一个花朵绿植分享、用户讨论和购买的“鲜花图书馆”。响应式设计，基于一套 HTML 代码适配手机、平板和电脑等不同视口，风格统一，排版美观。",
     preview: require("./showcase/flowerlibrary.png"),
-    website: "http://ninjee.top:880/",
+    website: "https://flowerlibrary.vercel.app/Home.html",
     source: "https://github.com/MoxyNJ/FlowerLibrary",
     tags: ["design", "product", "html"],
   },
   {
     title: "ninjee的前端篮子",
-    description: "基于Docusaurus v2 静态网站生成器实现个人博客",
+    description: "基于 Docusaurus v2 静态网站生成器实现个人博客",
     preview: require("./showcase/blog.png"),
     website: "https://www.ninjee.co",
     source: "https://github.com/MoxyNJ/MoxyNJ.github.io",
