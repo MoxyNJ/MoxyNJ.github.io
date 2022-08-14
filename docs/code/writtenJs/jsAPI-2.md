@@ -769,3 +769,132 @@ step();
 
 
 
+### 判断一个变量是否为数组
+
+这道题实际上是在考两个方向的知识点：原型链和类型转换。
+
+以下是 ES5 常用的判断方式。基于原型链，会导致如果绑定原型链后，会判断错误：
+
+```js
+var a = []; 
+var b = {};
+b.__proto__ = Array.prototype;
+
+// 方式一
+a.constructor === Array; 			// true，通过原型链访问构造函数来判断
+
+
+// 方式二
+a instanceof Array; 				// true, instanceof 基于原型链判断，可判断引用类型，
+Array.prototype.isPrototypeOf(a); 	// true，isPrototypeOf 基于原型链判断，a 的原型链上是否有 Array.prototype
+
+// 方式三
+Object.getPrototypeOf(a) === Array.prototype;  	// true，获取原型链，判断是否是 Array.prototype
+a.__proto__ === Array.prototype 				// true，获取原型链，判断是否是 Array.prototype
+```
+
+以下是可以准确判断的方式：
+
+```js
+Object.prototype.toString.call(a) === '[object Array]';   // true，通过 toString 方式判断类型，是最常用的方法。
+
+Array.isArray(a) 					// true，直接判断出
+
+// polyfill
+if (!Array.isArray){ 
+    Array.isArray = function(arg){ 
+        return Object.prototype.toString.call(arg) === '[object Array]'; 
+    }; 
+}
+```
+
+
+
+### 遍历 JSON 中查找 value
+
+```js
+// 查找 200
+function findItems(list, targetValue){
+    let res = [];
+    traversal(res, list, targetValue);
+    return res
+
+    function traversal(res, list, targetValue) {
+        for (let item of list) {
+            const { value, children, label } = item;
+
+            if (value && value === targetValue)
+                res.push({ label, value });
+
+            if (Array.isArray(children) && children.length)
+                traversal(res, children, targetValue);
+        }
+    }
+}
+	
+const res = findItems(list, 200)
+console.log(res) 	// [{label: '财务部', value: 200}]
+```
+
+数据：
+
+```js
+  const list = [{
+      "value": 192,
+      "label": "技术部",
+      "children": [{
+          "value": 193,
+          "label": "软件组",
+          "children": [{
+              "value": 195,
+              "label": "软件一组"
+            },
+            {
+              "value": 196,
+              "label": "软件二组"
+            }
+          ]
+        },
+        {
+          "value": 198,
+          "label": "运维组"
+        }
+      ]
+    },
+    {
+      "value": 200,
+      "label": "财务部",
+      "children": [{
+          "value": 201,
+          "label": "会计"
+        },
+        {
+          "value": 203,
+          "label": "出纳"
+        }
+      ]
+    },
+    {
+      "value": 300,
+      "label": "人资部",
+      "children": [{
+          "value": 301,
+          "label": "行政"
+        },
+        {
+          "value": 302,
+          "label": "人资"
+        }
+      ]
+    }
+  ]
+```
+
+
+
+## 坑：创建对象
+
+- [JavaScript 创建对象之原型模式 (juejin.cn)](https://juejin.cn/post/6844903460903583758)
+
+- [JavaScript 创建对象之单例、工厂、构造函数模式 (juejin.cn)](https://juejin.cn/post/6844903460396236813)
+
