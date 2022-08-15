@@ -1,6 +1,7 @@
 ---
 title: 1. Chrome
 sidebar_position: 1
+slug: /frontEnd/浏览器原理
 date: 2022-03-01
 tags: [浏览器]
 ---

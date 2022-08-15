@@ -7,19 +7,18 @@ tags: [CSS]
 
 # 视觉格式化模型 - CSS 2.2
 
----------------
 
 视觉格式化模型 Visual formatting model：浏览器对于DOM树的可视化处理方式。
 
 本文基于 CSS 2.2 的模型概念，不涉及 CSS 3 相关的知识（比如，flex排版，grid排版）。
 
-# 1. 简介
+## 1. 简介
 
 在视觉格式化模型中，DOM树中的每个元素，基于盒模型，会生成一个或多个盒。然后根据排版规则，形成页面。
 
 排版规则的基本参考因素：
 
-- box dimensions and type.  
+- box dimensions and type. 
   - 盒子尺寸（content, padding, border, margin)、盒子类型（各种 block ）。
 - position scheme (normal flow, float, and absolute position). 
   - 盒子的定位方式，即受 position 属性影响。
@@ -30,9 +29,9 @@ tags: [CSS]
 
 
 
-## 1.1 基本概念
+### 1.1 基本概念
 
-### 1.1.1 引入
+#### 1.1.1 引入
 
 1. leyout
    - 排版。有翻译为布局的，但称之为 'CSS排版' 更为合适。
@@ -43,7 +42,7 @@ tags: [CSS]
 4. box
    - 盒。在页面中，所有元素都被渲染成一个或多个矩形盒子。是排版和渲染的基本单位。
 
-###  1.1.2 flow
+####  1.1.2 flow
 
 **flow**：流，是页面排版的基本规则。
 
@@ -69,7 +68,7 @@ tags: [CSS]
 
 
 
-### 1.1.3 定位
+#### 1.1.3 定位
 
 **CSS Flow Layout**
 
@@ -142,14 +141,14 @@ tags: [CSS]
 
 
 
-# 2. 盒类型
+## 2. 盒类型
 
 浏览器会通过语义，把HTML标签识别为一个个元素（elements）。然后浏览器又会把元素渲染成各种类型的盒子，最后，根据盒类型盒排版规则，把它们渲染到页面中，呈现给用户。下面会介绍 CSS 2.2 中，所有类型的盒子。
 
 - 包含块类型，是通过 position 属性确定的；
 - 盒类型，是通过 display 属性确定的。
 
-## 2.1 盒模型
+### 2.1 盒模型
 
 #### 外部显示类型
 
@@ -165,7 +164,7 @@ tags: [CSS]
 
 
 
-## 2.1 名词总结
+### 2.1 名词总结
 
 为达成认知统一，以下英文为 CSS 官方标准中出现的名词，中文为本文中对应的翻译。
 
@@ -187,7 +186,7 @@ tags: [CSS]
 - replaced element  可替换元素
 - non-replaced element  不可替换元素
 
-## 2.2 盒的生成
+### 2.2 盒的生成
 
 开头讲过，浏览器根据元素的特性，来生成对应类型的盒。具体过程如下：
 
@@ -199,9 +198,9 @@ tags: [CSS]
 
 结论，与主体盒相关的元素，比如标记盒、子元素生成的盒子、主体盒中的内容等，其定位都与主体盒有关。
 
-<img src="images/01-Visual%20formatting%20model.assets/image-20201117220655806.png" alt="image-20201117220655806" style="zoom:67%;" />
+![image](images/01-Visual%20formatting%20model.assets/image-20201117220655806.png)
 
-## 2.3 Block & Inline
+### 2.3 Block & Inline
 
 盒的生成，从大的范围来讲，有两大类盒子： 块（block），内联（inline）。
 
@@ -210,7 +209,7 @@ tags: [CSS]
 - 块类型的元素（block-level element），生成主体块级盒（principal block-level box）。
 - 内联类型的元素（inline-level element），生成主体内联盒（principal block-level box）。
 
-## 2.4 Block 系列
+### 2.4 Block 系列
 
 在文档中有四个概念与 **块（block）** 相关：block-level element、block box、block-level box 和 block container box。这四个概念不是单纯的相交或互斥，也不是单纯的 A 是 B 的子集，下面会分别介绍这四个概念。
 
@@ -225,7 +224,7 @@ tags: [CSS]
 先说结论：**block box = block-level box + block container box**
 即，一个块盒：既要满足块级盒的特性，又要满足块级容器盒的特性。
 
-### 2.3.1 Block-level element
+#### 2.3.1 Block-level element
 
 块级元素，是在 HTML 层面来讲述的。即把标签 “语义” 化为一个有意义的 “元素”。然后可以被 CSS 选择器所识别。在 CSS 的视角看来，HTML代码中的 “标签” 都被识别为了 “元素”。而块级元素，就是元素中那些被划分为块级的元素。
 
@@ -237,7 +236,7 @@ tags: [CSS]
 
 **一个块级元素会被格式化成一个块级盒（例如文章的一个段落），然后会参与排版，默认按照垂直方向依次排列。**
 
-### 2.3.2 Block-level box
+#### 2.3.2 Block-level box
 
 块级盒的定义：
 
@@ -255,7 +254,7 @@ tags: [CSS]
 
 简单来说，主体块级盒和包含块的概念，就是为 position 定位方案服务的。
 
-### 2.3.3 Block container box
+#### 2.3.3 Block container box
 
 粗略来看，块容器盒顾名思义，它可以容纳块级概念的元素。认清这个概念的定义，或者说区分这个概念的方法，就是要先判断一个盒子包含的东西是否是块级的，它是不是一个 **容器** 。
 
@@ -287,11 +286,11 @@ tags: [CSS]
    - ...
 -  元素类型是 replace element，即替换元素，均不是 block container box。replaced element 的内容不归 CSS 渲染，这些内容最后是要被其他内容物替换的，该元素本身就是一个空元素，没有内容。所以自然不是一个可以放块级盒子的 “容器”。 替换元素不可以理解为一个 “容器”，而是应当理解为一个 **标记位**。
 
-### 2.3.4 Block box
+#### 2.3.4 Block box
 
 既满足了（block-level box）的要求，又满足了（block container）的要求的盒子，是块盒（block box）。
 
-<img src="images/01-Visual%20formatting%20model.assets/image-20201118100112004.png" alt="image-20201118100112004" style="zoom:50%;" />
+![image](images/01-Visual%20formatting%20model.assets/image-20201118100112004.png)
 
 - 块级盒 block-level box：描述了元素与其父元素和兄弟元素之间的行为。
 - 块容器盒 block container box：描述了元素跟其后代之间的行为。
@@ -304,7 +303,7 @@ tags: [CSS]
 - 有些块级盒不是块容器盒：表格 table；
 - 有些块容器盒不是块级盒：非替换的行内块 non-replaced inline-block、非替换的表格单元格 non-replaced table-cell。
 
-### 2.3.5 Anonymous block box
+#### 2.3.5 Anonymous block box
 
 匿名块盒。
 
@@ -337,7 +336,7 @@ tags: [CSS]
 
 
 
-### 2.3.6 Q & A
+#### 2.3.6 Q & A
 
 1. 关于 block-level box 和 block container box：
 
@@ -357,28 +356,28 @@ tags: [CSS]
    <div>Some inline text <p>followed by a paragraph</p> followed by more inline text.</div>
    ```
 
-   <img src="images/01-Visual%20formatting%20model.assets/=anonymous_block-level_boxes-1605794985475.png" alt="=anonymous_block-level_boxes" style="zoom:%;" />
+   ![image](images/01-Visual%20formatting%20model.assets/=anonymous_block-level_boxes-1605794985475.png)
 
    - CSS无法获取两个匿名块级盒所在的元素，所以这两个的样式，是通过继承 'div'而来。如果没有为他们指定 'background-color'，他们就具有默认的 **透明背景**。
 
-## 2.4 Inline 系列
+### 2.4 Inline 系列
 
 以下翻译中，‘行内’ 可以等效替换为 ‘内联’。
 
-### 2.4.1 Inline-level element
+#### 2.4.1 Inline-level element
 
 定义：display属性设置为 'inline', 'inline-block', 'inline-table'，这些元素都是行内级元素。
 
 行内级元素不直接用于格式化上下文或排版，这只是一个针对元素本身的属性概念。行内级元素的内容可以分布在多行显示。
 
-### 2.4.2 Inline-level box
+#### 2.4.2 Inline-level box
 
 行内级盒的定义：
 
 - 从来源上：行内级盒是由行内级元素生成而来的盒子；
 - 从结果上：行内级是参与行内级格式化上下文（inline formatting context）的盒子。
 
-### 2.4.3 Inline box
+#### 2.4.3 Inline box
 
 行内盒。
 
@@ -390,13 +389,13 @@ tags: [CSS]
 - 内联块元素（inline-block element）：其内部是一个 BFC，而不是 IFC。
 - 内联表格元素（inline-table element）：里面是表格的特殊格式。
 
-### 2.4.4 **atomic inline-level box**
+#### 2.4.4 **atomic inline-level box**
 
 原子行内级盒。
 
 是行内级盒子的子集。它不是不参与行内级格式化上下文，而是更特殊：因为原子行内级盒的内容不会被拆分成多行显示。所以如果遇到 atomic inlne-level box，并不会像传统的 IFC 处理方式一样，从左到右自然的 “挤满” 一整行，再重新开启下一行。而是会作为一个不可分割的整体，如果本行所剩空间放不下它时，便会 “提前” 排放到下一行，本行剩余空间的会闲置不用。
 
-<img src="images/01-Visual%20formatting%20model.assets/%E6%88%AA%E5%B1%8F2021-07-31%20%E4%B8%8B%E5%8D%882.20.48.png" alt="截屏2021-07-31 下午2.20.48" style="zoom:50%;" />
+![image](images/01-Visual%20formatting%20model.assets/%E6%88%AA%E5%B1%8F2021-07-31%20%E4%B8%8B%E5%8D%882.20.48.png)
 
 可以看到，上图粉色框内是一个 IFC 环境。而中间蓝色框被设置为："display : inline-block" 所以内部会形成一个 BFC。这个盒子作为一个不透明的整体，参与到所处的 IFC 环境中，上下和右边，都被蓝色盒子的 width 和 height 的设置而挤开了。
 
@@ -421,7 +420,7 @@ tags: [CSS]
 
 
 
-> ### 9.2.2 Inline-level elements and inline boxes
+> #### 9.2.2 Inline-level elements and inline boxes
 >
 > **Inline-level elements** are those elements of the source document that do not form new blocks of content; the content is distributed in lines (e.g., emphasized pieces of text within a paragraph, inline images, etc.). The following values of the ['display'](https://www.w3.org/TR/CSS22/visuren.html#propdef-display) property make an element inline-level: 'inline', 'inline-table', and 'inline-block'. Inline-level elements generate **inline-level boxes**, which are boxes that participate in an inline formatting context.
 >
@@ -431,7 +430,7 @@ tags: [CSS]
 
 
 
-### 2.4.5 line box
+#### 2.4.5 line box
 
 行盒。
 
@@ -455,7 +454,7 @@ inline box 主要是为了看其内部是不是一个 IFC 环境而定义的。
 
 
 
-<img src="images/01-Visual%20formatting%20model.assets/image-20201118152123045.png" alt="image-20201118152123045" style="zoom: 67%;" />
+![image](images/01-Visual%20formatting%20model.assets/image-20201118152123045.png)
 
 > 参考
 >
@@ -463,7 +462,7 @@ inline box 主要是为了看其内部是不是一个 IFC 环境而定义的。
 
 
 
-# 3. 元素的替换性
+## 3. 元素的替换性
 
 （Empty elements / Void elements）不是所有的元素都有开始和结束标签。有些元素只有一个标签，在这个元素位置上，浏览器会嵌入一些额外的内容。这些元素如果没有被正确的替换，则不会在网页中显示任何东西。
 
@@ -476,13 +475,13 @@ inline box 主要是为了看其内部是不是一个 IFC 环境而定义的。
 
 `<area>`、`<base>`、`<br>`、`<col>`、`<colgroup> `、`<command>`、`<embed>`、`<hr>`、`<img>`、`<input>`、`<keygen>`、`<link>`、`<meta>`、`<param>`、`<source>`、`<track>`、`<wbr>`
 
-## 3.1 non-replaced element
+### 3.1 non-replaced element
 
 不可替换元素。
 
 可以理解为正常的元素。绝大多数元素都是不可替换的：元素的内容通过CSS渲染，然后在网页中展示，而不是被替换成其他内容。
 
-## 3.2 replaced element
+### 3.2 replaced element
 
 替换元素。
 
@@ -517,7 +516,7 @@ content 生成的替换元素：
 -   生成的文本无法选中、无法复制、无法被屏幕阅读设备读取、无法被搜索引擎抓取；
 -   原本的文字信息没有被替换、替换的只是视觉层。
 
-## 3.3 Intrinsic dimensions
+### 3.3 Intrinsic dimensions
 
 固有尺寸。
 
@@ -527,15 +526,15 @@ content 生成的替换元素：
 
 - 比如：display 属性值为 'inline' 的 `<img>` 可以设置宽高，但是 `<span>` 不可以设置宽高。
 
-# 4. containing block
+## 4. containing block
 
 包含块。
 
-## 4.1 定义
+### 4.1 定义
 
 定义一个 '包含块' 概念的目的：确定一个元素的尺寸和位置，有时候会需要一个参照物，而这个参照物是就是它的包含块。
 
-## 4.2 确定包含块
+### 4.2 确定包含块
 
 确定一个元素的包含块的过程完全依赖于这个元素自身的 `position` 属性（与 position 知识重合）：
 
@@ -554,7 +553,7 @@ content 生成的替换元素：
   -  `filter`的值不是 `none` 或 `will-change` 的值是 `filter`(只在 Firefox 下生效).
   -  `contain` 的值是 `paint` (例如: `contain: paint;`)
 
- ## 4.3 包含块参与计算
+ ### 4.3 包含块参与计算
 
 宽度：如果某元素的 width, left, right, padding, margin 属性，赋值为百分比值，那么这个数值是通过它的包含块的 width 属性值来计算。
 
@@ -567,14 +566,14 @@ content 生成的替换元素：
 
 
 
-# 4. float 属性 | CSS 2.2
+## 4. float 属性 | CSS 2.2
 
 float CSS 属性指定一个元素应沿其容器的左侧或右侧放置，允许 **文本** 和 **内联元素** 环绕它。该元素从网页的正常流动 (文档流) 中移除。
 
 - 判定为浮动元素的标准：float 属性不是 none 的元素。float 通常会受 display 的影响。
 - 浮动的定位方式：元素浮动后，会被移除正常流，然后向左/向右**平移（在该行内块中移动）**，一直平移到触碰容器边框 / 另一个浮动元素。
 
-### clear
+#### clear
 
 **`clear`** 让一个元素移动到在它前面的那个浮动元素的下面。适用于自身是浮动的，或非浮动的元素。
 
@@ -588,21 +587,21 @@ float CSS 属性指定一个元素应沿其容器的左侧或右侧放置，允�
 
 
 
-# 5. display 属性 ｜ CSS 2.2
+## 5. display 属性 ｜ CSS 2.2
 
 display 属性，通常有两对值，块级 / 行内级，两种都有对应关系。
 
-<img src="images/01-Visual%20formatting%20model.assets/Block-level%20Box.png" alt="Block-level Box" style="zoom: 50%;" />
+![image](images/01-Visual%20formatting%20model.assets/Block-level%20Box.png)
 
-## 5.1 作用
+### 5.1 作用
 
 `display` 属性可以设置元素的内部和外部显示类型 **display types**。
 
-### 5.1.1 outer display types
+#### 5.1.1 outer display types
 
 外部显示类型，决定了该元素处在正常流中的表现：是块级元素，还是内联级元素。
 
-### 5.1.2 inner display types
+#### 5.1.2 inner display types
 
 内部显示类型，决定该元素的后代元素排版 / 布局方式：flow layout、grid、flex。
 
@@ -611,7 +610,7 @@ display 属性，通常有两对值，块级 / 行内级，两种都有对应关
   - 该盒子的所有直接子元素都会成为 flex 元素，会根据弹性盒子（Flexbox）规则进行布局。
 - display: grid。同上，内部会变成 grid 盒子。
 
-## 5.2 取值
+### 5.2 取值
 
 display 属性，可以改变该元素的显示类型，可取值如下（只列出较为通用的取值）
 
@@ -660,9 +659,9 @@ display 属性，可以改变该元素的显示类型，可取值如下（只列
 
 
 
-# 6. position 属性 ｜ CSS 2.2
+## 6. position 属性 ｜ CSS 2.2
 
-## 6.1 定义
+### 6.1 定义
 
 CSS **`position`** 属性用于指定一个元素在文档中的定位方式。通过 position 确定定位方式，通过 top, right, bottom, left 属性确定偏移量。
 
@@ -670,7 +669,7 @@ CSS **`position`** 属性用于指定一个元素在文档中的定位方式。�
 
 position 来确定元素的定位位置，是依照 containing block 包含块决定的。
 
-## 6.2 取值
+### 6.2 取值
 
 - static
   - 默认定位。
@@ -711,7 +710,7 @@ position 来确定元素的定位位置，是依照 containing block 包含块�
 
 
 
-# 7. 格式化上下文
+## 7. 格式化上下文
 
 名词：
 
@@ -726,7 +725,7 @@ Inline-level boxes participate in an IFC.  行内级盒参与 IFC。
 
 - line box 行盒：文字，或 inline-box 内联盒排出来的一整行盒，就是 line-box。
 
-## 7.1 Block formatting context
+### 7.1 Block formatting context
 
 块级格式化上下文，简称 BFC。
 
@@ -744,7 +743,7 @@ BFC 的概念，包括了它的元素内部的所有内容。BFC简单来讲，�
 
 **注意：IFC、flex、grid都不会发生 Margin Collapse。**因为边距折叠只会发生在一个BFC中，如果创建了新的BFC，就不会发生边距折叠。
 
-### 7.1.1 BFC 的生成条件：
+#### 7.1.1 BFC 的生成条件：
 
 **判断依据：如果该元素是一个 block-level element，且这个元素的内部可以放一个正常流，就会生成一个 BFC。**
 
@@ -764,7 +763,7 @@ BFC 的概念，包括了它的元素内部的所有内容。BFC简单来讲，�
 
 
 
-### 7.1.2 BFC & margin callapse
+#### 7.1.2 BFC & margin callapse
 
 如果没有 BFC：
 
@@ -813,11 +812,11 @@ BFC 的概念，包括了它的元素内部的所有内容。BFC简单来讲，�
 
 
 
-## 7.2 Inline formatting context
+### 7.2 Inline formatting context
 
 行内格式化上下文，就是网页中行内级元素 Inline-level element，会按照先后顺序，依次**水平排列**。如果遇到包含块的边界，就会另起一行，继续水平排列，直到排列结束。只要在这个包含块（上文）内，就是一个 IFC 行内格式化上下文。包含块通常是一个 Block container box。
 
-### 7.2.1 line box
+#### 7.2.1 line box
 
 行盒。
 
@@ -837,15 +836,15 @@ BFC 的概念，包括了它的元素内部的所有内容。BFC简单来讲，�
 
 如果是垂直书写模式，则对应 line box是水平排列；同一个 line box 中，所有行内级元素垂直排列。
 
-### 7.2.3  细节
+#### 7.2.3  细节
 
 > 一个行内盒（inline box）被分割到多行中时， margins, borders, 以及 padding 的设定均不会在断裂处生效。 下例中有一个 `<span>` 元素，它包裹了一系列单词，占据了两行。可以看见在断裂处，`<span>` 的 border 同样发生了断裂。
 
-<img src="images/01-Visual%20formatting%20model.assets/image-20201119215210536.png" alt="image-20201119215210536" style="zoom:50%;" />
+![image](images/01-Visual%20formatting%20model.assets/image-20201119215210536.png)
 
-## 7.3 其他补充
+### 7.3 其他补充
 
-### 7.3.1 flow
+#### 7.3.1 flow
 
 前文介绍了 流内(in folw)、流外(out of flow)的知识。
 
@@ -859,11 +858,11 @@ BFC 的概念，包括了它的元素内部的所有内容。BFC简单来讲，�
 
 - 如果是 block cintainers box，或者是 overflow 非默认的 visible 元素，便不会脱离当前正常流，依然在流内。
 
-### 7.3.2 实例
+#### 7.3.2 实例
 
 直接摘录了 MDN 中的图片，如图，从元素结构上讲，浮动盒子是紫色盒子的子元素。当浮动盒子向左浮动时，出现了脱流紫盒子的正常流的情况（浮动盒子没有被紫盒子包裹 / 紫盒子没有被浮动盒子“上下撑开”）。
 
-<img src="images/01-Visual%20formatting%20model.assets/image-20201119204847403.png" alt="image-20201119204847403" style="zoom:50%;" />
+![image](images/01-Visual%20formatting%20model.assets/image-20201119204847403.png)
 
 解决办法1：
 
@@ -877,7 +876,7 @@ BFC 的概念，包括了它的元素内部的所有内容。BFC简单来讲，�
 
 > 关于值 `flow-root`的这个名字，当你明白你实际上是在创建一个行为类似于根元素 （浏览器中的`<html>`元素） 的东西时，就能发现这个名字的意义了——即创建一个上下文，里面将进行 flow layout。   —— MDN
 
-<img src="images/01-Visual%20formatting%20model.assets/image-20201119210103098.png" alt="image-20201119210103098" style="zoom:50%;" />
+![image](images/01-Visual%20formatting%20model.assets/image-20201119210103098.png)
 
 
 

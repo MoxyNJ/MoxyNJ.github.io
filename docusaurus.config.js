@@ -70,6 +70,10 @@ const config = {
                                 to: "docs/frontEnd/React",
                             },
                             {
+                                label :"浏览器原理",
+                                to: "docs/frontEnd/浏览器原理"
+                            },
+                            {
                                 label: "other",
                                 to: "docs/frontEnd/other",
                             },

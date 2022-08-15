@@ -5,7 +5,7 @@ date: 2022-01-10
 tags: [CSS]
 ---
 
-# Flexbox
+## Flexbox
 
 Flexible box 模型，是一种一维的排版模型。Flexbox 一次只能处理一个维度上的元素排版（行 / 列）。
 
@@ -13,13 +13,13 @@ Flexible box 模型，是一种一维的排版模型。Flexbox 一次只能处�
 - 第二代排版技术：Flex Layout 弹性布局，一维排版模型。
 - 第三代排版技术：Grid Layout，是一种二维的排版模型。
 
- # 1.  CSS  Flexible Box Layout
+ ## 1.  CSS  Flexible Box Layout
 
 CSS 弹性布局 / 弹性排版。
 
 在弹性排版的模型中，主要划分为 flex 容器和 flex 子元素。可以在 flex容器中，规定 排版方向（flex-direction），然后 flex 子元素会按照排版方向依次排版。在 flex 子元素排版中，可以弹性伸缩自身尺寸，已适应 flex容器框的尺寸，防止子元素溢出 / 父容器未填满。
 
-# 2. 名词
+## 2. 名词
 
 - Flex 伸缩性 / 弹性
 - Flexbox 弹性盒子
@@ -79,9 +79,9 @@ cross end：交叉轴末端
 
   ![This flex container has available space after laying out the items.](images/02.Flexbox.assets/Basics7.png)
 
-# 3. 基本属性
+## 3. 基本属性
 
-## 3.1 flex container box 的属性
+### 3.1 flex container box 的属性
 
 **flex-direction**
 
@@ -105,7 +105,7 @@ cross end：交叉轴末端
 - 是将两个属性 `flex-direction` 和 `flex-wrap` 组合简写，第一个值为 `flex-direction` ，第二个值为 `flex-wrap`.
 - 比如，flex-flow: row wrap;（flex item横向排版，且允许多行显示）
 
-## 3.2  flex items 的属性：
+### 3.2  flex items 的属性
 
 **flex-basis**
 
@@ -136,16 +136,16 @@ cross end：交叉轴末端
 - 是上面三个属性的统一简写：`flex-grow`，`flex-shrink`，`flex-basis`。即：扩展、收缩、原始尺寸。（大到小）
 - 通常情况下，是这样形式赋值的：`flex: 1 1 200px;`
 
-## 3.3 未来属性
+### 3.3 未来属性
 
 - row-gap
 - column-gap
 
-# 4. 属性 | 元素的对其和空间分配 
+## 4. 属性 | 元素的对其和空间分配 
 
 Flexbox 的一个关键特性是能够设置flex元素沿主轴方向和交叉轴方向的对齐方式，以及它们之间的空间分配。
 
-## 4.1 flex container 的属性：
+### 4.1 flex container 的属性
 
 ![一个包含另一个盒子的元素在其中心。](images/02.Flexbox.assets/align1.png)
 
@@ -193,7 +193,7 @@ Flexbox 的一个关键特性是能够设置flex元素沿主轴方向和交叉�
 - 第一个属性值的实现（交叉轴对齐），需要多行显示，flex-wrap: wrap。
 - e.g., place-content: center start;  
 
-## 4.2 flex items 的属性：
+### 4.2 flex items 的属性
 
 **order**
 
