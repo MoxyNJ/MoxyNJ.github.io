@@ -1,6 +1,7 @@
 ---
 title: HTML
 sidebar_position: 0.5
+slug: /frontEnd/HTML&CSS
 date: 2022-01-01
 tags: [HTML]
 ---

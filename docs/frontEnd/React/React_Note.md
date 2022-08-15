@@ -1,6 +1,7 @@
 ---
 title: 1. React笔记
 sidebar_position: 1
+slug: /frontEnd/React
 date: 2022-08-05
 tags: [React]
 ---
