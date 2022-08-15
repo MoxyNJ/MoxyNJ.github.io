@@ -507,7 +507,7 @@ module.exports = {
 
    
 
-import 不想写后缀：
+`import` 不写后缀：
 
 `import ./text.js` node.js 中，默认可以不写 .js 文件后缀，在 webpack.consig.js 中可以配置更多的文件：
 
