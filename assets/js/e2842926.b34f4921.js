@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[2123],{95528:function(e){e.exports=JSON.parse('{"title":"Iot","slug":"/category/iot","permalink":"/docs/category/iot","navigation":{"previous":{"title":"HTML&CSS","permalink":"/docs/interview/summary/HTML&CSS"},"next":{"title":"IOC","permalink":"/docs/interview/iot"}}}')}}]);
