@@ -1731,7 +1731,7 @@ circle  圆形
 
  ![image-20211123110731763](images/HTML&CSS.assets/image-20211123110731763.png)
 
-## 17 阴影效果
+## 18 阴影效果
 
 #### 文字阴影（`text-shadow`）
 
@@ -1829,3 +1829,55 @@ drop-shadow(offset-x offset-y blur-radius spread-radius color)
     filter: drop-shadow
 </div>
 ```
+
+
+
+## 问题：clientX/Y, screenX/Y, offsetX/Y
+
+**这些值都是只读的**。都是检测鼠标位置的参数。
+
+- `MouseEvent.clientX / clientY`：鼠标位置相对于**浏览器窗口左上角**的水平 / 垂直坐标（单位像素）。
+  - 有别名：`MouseEvent.x`和`MouseEvent.y`。
+- `MouseEvent.screenX / screenY`：鼠标位置相对于**屏幕视口左上角**的水平 / 垂直坐标（单位像素）。
+- `MouseEvent.offsetX / offsetY`：鼠标位置与 **目标节点左上边缘 (padding)** 的水平 / 垂直距离（单位像素）。
+- `MouseEvent.pageX / pageY`：鼠标位置与 **文档左上边缘的距离**（单位像素）。
+  - 包括文档不可见的部分。
+
+
+
+## 问题：判断页面滚动到底部并加载更多数据？
+
+```javascript
+window.onscroll = function (e) {
+  const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+  
+  if(clientHeight + scrollTop >= scrollHeight) {
+    console.log('==加载更多==');
+  }
+}
+```
+
+**如果：视口高度 + 已滚动高度 >= 网页高度**，表明视口已经滑动到网页底部，需要额外加载网页。
+
+```js
+// 网页的总高度
+document.documentElement.scrollHeight;
+document.body.scrollHeight;
+
+// 网页已经滚动的高度
+document.documentElement.scrollTop;
+
+// 当前视口的高度 / 浏览器高度
+document.documentElement.clientHeight;
+// == window.innerHeight - 水平滚动条高度
+```
+
+- `Element.scrollHeight` 得到一个整数值（小数会四舍五入），表示当前元素的总高度（单位像素），包括溢出容器、当前不可见的部分。包括 padding，但是不包括 border、margin 以及水平滚动条的高度（如果有水平滚动条的话），还包括伪元素（::before或::after）的高度。
+- `Element.scrollTop` 表示当前元素的**垂直滚动条向下滚动的像素数量**。如果没有滚动条，该属性为 0。
+- `document.documentElement.clientHeight` 表示当前视口的高度（即浏览器窗口的高度），等同于window.innerHeight属性减去水平滚动条的高度（如果有的话）。
+- `document.body.clientHeight` 的高度则是网页的实际高度。
+
+
+
+
+

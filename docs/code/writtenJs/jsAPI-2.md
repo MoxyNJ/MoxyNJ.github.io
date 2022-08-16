@@ -892,6 +892,82 @@ console.log(res) 	// [{label: '财务部', value: 200}]
 
 
 
+### 问题：实现 setInterval
+
+实现定时器，使用 setTimeout 来实现 setInterval。
+
+基础实现：
+
+```js
+function mySetInterval(fn, time) {
+  interval();
+  
+	function interval() {
+    setTimeout(() => {
+      fn();
+      interval();
+    }, time);
+  };
+}
+
+// 使用
+mySetInterval(() => console.log('执行一次'), 1000);
+```
+
+可以让定时器暂停：
+
+```js
+function mySetInterval(callback, time) {
+  let timer = null;
+
+  return {
+    stop: function(){
+      clearTimeout(timer);
+    },
+    interval: function(){
+      timer = setTimeout(() => {
+        callback();
+        this.interval();  // 注意这里调用对象方法，使用this
+      }, time); 
+    }
+  }
+}
+
+//创建
+const go = mySetInterval(() => console.log('执行一次'), 1000);
+// 启动
+go.interval();
+// 清除
+go.stop();
+```
+
+可以每次间隔 `[a, a+b, a+2b, ..., a+nb]` 的时间执行 fn：
+
+```js
+function mySetInterval(fn, a, b) {
+  let count = 0;
+  interval();
+	function interval() {
+    setTimeout(() => {
+      fn()
+      count++
+      interval()
+    }, a + count * b)
+  }
+}
+
+// 执行
+mySetInterval(() => {
+  console.log('执行');
+}, 1000, 1000);
+```
+
+
+
+
+
+
+
 ## 坑：创建对象
 
 - [JavaScript 创建对象之原型模式 (juejin.cn)](https://juejin.cn/post/6844903460903583758)
