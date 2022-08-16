@@ -1,10 +1,13 @@
-# 1 执行上下文(ES3)
+---
+title: 执行上下文(ES3)
+sidebar_position: 99
+date: 2022-07-01
+tags: [JavaScript]
+---
 
-注： 这里介绍的执行上下文，是 ES3 概念。
+这里介绍的执行上下文，是 ES3 概念。
 
-
-
-## Js 的执行过程：
+## 1 Js 的执行过程：
 
 提到的知识点：
 
@@ -51,7 +54,7 @@ executionContextObj = {
 
 
 
-# 2 变量对象 variable object
+## 2 变量对象 variable object
 
 在确定作用域时，会涉及到一个数据结构，即 VO 变量对象。每个作用域内，都会有一个变量对象，这里面保存了该作用域中所有的变量和函数声明。
 
@@ -118,7 +121,7 @@ fooVO = {
 
 
 
-# 3 活动对象 activation object
+## 3 活动对象 activation object
 
 activation object 活动对象，是相对 变量对象 VO 来描述的。
 
@@ -187,7 +190,7 @@ fooAO = {
 
 
 
-# 4 作用域 scope
+## 4 作用域 scope
 
 在编译阶段，会对所有的变量和函数进行提升，也就是变量和函数声明的提前编译。提前编译的核心目的，就是为了确定各自的作用域，形成作用域链。
 
@@ -219,7 +222,7 @@ bar.[[scope]] = [
 
 
 
-# 5 作用域链 scope chain
+## 5 作用域链 scope chain
 
 作用域链由当前执行环境的变量对象 VO（未进入到运行时）与上层环境的一系列活动对象 AO （运行时）组成。
 
@@ -274,7 +277,7 @@ innerFooExecutiveContext = {
 
 
 
-# 6 执行上下文栈 ECStack
+## 6 执行上下文栈 ECStack
 
 执行上下文栈也成为调用栈。
 
@@ -346,7 +349,7 @@ JS 引擎会以栈的数据结构对这些执行上下文进行处理，形成**
 5. 当 `foo1()` 执行完毕时，其对应的执行上下文会弹出栈。此时活跃指针指向了 `global execution context`，继续执行 `global execution context` 中的代码；
 6. 全部代码执行完毕。
 
-![img](images/09%E6%89%A7%E8%A1%8C%E4%B8%8A%E4%B8%8B%E6%96%87(ES3).assets/137.jpg)
+![img](images/z-%E6%89%A7%E8%A1%8C%E4%B8%8A%E4%B8%8B%E6%96%87(ES3).assets/137.jpg)
 
 注：
 
@@ -355,14 +358,14 @@ JS 引擎会以栈的数据结构对这些执行上下文进行处理，形成**
 
 
 
-## 6.1 如何查看上下文栈
+### 6.1 如何查看上下文栈
 
 1. 设置 `debugger`，然后利用浏览器开发者工具 - call stack。
 2. 设置 `console.trrace()`，输出当前函数调用关系。
 
 
 
-# 7 执行上下文的步骤（ES3）
+## 7 执行上下文的步骤（ES3）
 
 下面进一步说明每一个小阶段所要做的事情：
 

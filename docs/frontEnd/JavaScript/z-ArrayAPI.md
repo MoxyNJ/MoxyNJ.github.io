@@ -1,10 +1,11 @@
-把这个统计进来：https://segmentfault.com/a/1190000018301193
+---
+title: Array API
+sidebar_position: 50
+date: 2022-07-01
+tags: [JavaScript]
+---
 
-
-
-# Array API
-
-统计常用的 Array API
+整理：统计常用的 Array API
 
 ## 静态方法
 
@@ -29,7 +30,7 @@ console.log(Array.from([1, 2, 3], x => x + x)); // [2, 4, 6]
 
 
 
-## Array.of()
+### Array.of()
 
 当使用数组的构造器函数去新建一个数组的时候，如果只传递一个数字 `10`，就会被判定为 “指定数组的长度”，而不是该数组第一个成员值为 `10`。使用 `Array.of()` 就会避免这个问题，它创建一个数组，而不考虑参数的数量或类型。
 
@@ -40,7 +41,7 @@ let arr2 = Array.of(10)		// [10]
 
 
 
-## Array.isArray()
+### Array.isArray()
 
 判断一个值是否是 Array。
 

@@ -953,5 +953,11 @@ npx 是 npm5.2 之后自带的一个命令。
 
 以 webpack 为例：全局安装的是 webpack5.1.3；项目安装的是 webpack3.6.0。
 
-- 如果在终端执行 `webpack --version`，会通过环境变量里找，找到的是全局的 webpack 5.1.3。原因非常简单，在当前目录下找不到webpack时，就会去全局找，并且执行命令；
+- 如果在终端执行 `webpack --version`，会通过环境变量里找，找到的是全局的 webpack 5.1.3。
+
+解决方式：
+
+- 方式一：在终端中使用如下命令（在项目根目录下）:`./node_modules/.bin/webpack --version`
+- 方式二：修改 package.json 中的 scripts：`webpack": "webpack --version"`
+- 方式三：使用npx：`npx webpack --version`
 
