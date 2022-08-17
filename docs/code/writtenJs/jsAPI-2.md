@@ -5,8 +5,6 @@ date: 2022-08-04
 tags: [手写JavaScript]
 ---
 
-## 1 ajax 与 jsonp
-
 ### 实现 ajax 🌟
 
 ```js
@@ -128,8 +126,6 @@ result
 - 实现 ES6：Class
 
 
-
-## 2 其他
 
 ### 实现千分位分隔符
 
@@ -492,6 +488,111 @@ async function func(){
 
 
 
+### 工厂、观察者、发布订阅的区别
+
+**工厂模式**：见下文。
+
+- 观察者：**1 个发布者 + n 个观察者**
+- 发布订阅：**n 个发布者 +  1 个调度中心 + n 个订阅者**
+  - 双方通过中介完成。发布者无需维护订阅者信息，只专注于发布事件。订阅者无需关注发布者信息，只需专注订阅事件。
+
+
+| 设计模式 | 观察者模式                                    | 发布订阅模式                                            |
+| -------- | --------------------------------------------- | ------------------------------------------------------- |
+| 主体     | Object观察者、Subject目标对象                 | Publisher发布者、Event Channel事件中心、Subscribe订阅者 |
+| 主体关系 | Subject中通过observerList记录ObServer         | Publisher和Subscribe 不想知道对方，通过中介联系         |
+| 优点     | 角色明确，Subject和Object要遵循约定的成员方法 | 松散耦合，灵活度高，通常应用在异步编程中                |
+| 缺点     | 紧耦合                                        | 当事件类型变多时，会增加维护成本                        |
+| 使用案例 | 双向数据绑定                                  | 事件总线 EventBus                                       |
+
+观察者的应用：单发布者
+
+- 页面 DOM 的事件绑定，`addEventlistener`，同一个 DOM 上，可以绑定多个事件回调。
+- Promise，同一个结果返回，可以触发多个 `then` 处理结果。
+- React 生命周期触发。
+
+发布订阅的应用：多发布者
+
+- 中台开发：一个表上有 修改、添加、删除、刷新等等按钮，在点击按钮后，有各自的逻辑，在完成功能逻辑后，都需要调用刷新功能。多个发布者，通过发布-订阅，通知刷新。
+- React 的组件间通信 context。父组件 provider 发布数据，React 作为事件中心处理，子组件 consumer 订阅数据。
+
+
+
+### 工厂模式
+
+一种创建对象的方式。
+
+输入不同的参数如：dog、cat、monkey 等，可以对应生成不同的实例。但其都是遵循 animal 接口。
+
+- 遵循 animal 接口：必须实现：name、age 属性、call 方法。
+- 不同的动物类：不同动物，name、age、call 实现方式不同。
+
+应用：有构造函数的地方，就应该想到简单工厂；在写了大量构造函数、调用了大量的 new 代码非常重复，每次创建相同的实例。
+
+- 创建对象过程可能很复杂，但我们只需要关心创建结果。
+- 构造函数和创建者分离，符合 “开闭原则”。
+- 一个调用者想创建一个对象，只要知道其名称就可以。
+- 扩展性高，如果想增加一个产品，只要扩展一个工厂类就可以。
+
+简单抽象模式：
+
+```js
+class Woman {
+  call() {
+    console.log('a woman...');
+  }
+}
+class Man {
+  call() {
+    console.log('a man...');
+  }
+}
+class Factory {
+  getWoman() {
+    return new Woman();
+  }
+  getMan() {
+    return new Man();
+  }
+}
+
+// 通过工厂，创建Man、Woman两种实例，创建出来的实例完全相同
+const f1 = new Factory();
+f1.getWoman().drive();
+f1.getMan().drive(); 
+```
+
+工厂方法模式：
+
+```js
+class FactoryInterface {
+  constructor() {
+    if (Object.getPrototypeOf(this) === FactoryInterface.prototype) {
+      throw new Error('该类是抽象类，无法实例化')
+    }
+  }
+  getCar() {
+    throw new Error('派生类必须实现该方法，抽象函数无法直接调用！');
+  }
+}   
+class BMWFactory extends FactoryInterface {
+  getCar() {
+    return new BMW();
+  }
+}
+class BenzFactory extends FactoryInterface {
+  getCar() {
+    return new Benz();
+  }
+}
+var bmwF = new BMWFactory();
+var benzF = new BenzFactory();
+bmwF.getCar().drive();
+benzF.getCar().drive();
+```
+
+
+
 ### 观察者模式
 
 当对象之间存在一对多的依赖关系时，其中一个对象的状态发生改变，所有依赖它的对象都会收到通知，这就是观察者模式。
@@ -655,19 +756,6 @@ pubsub.unsubscribeAll('routeEvent');
 pubsub.publish("routeEvent", {type: 'routeEvent', data: '日常事件2'});
 // 没有人的回调被触发
 ```
-
-| 设计模式 | 观察者模式                                    | 发布订阅模式                                            |
-| -------- | --------------------------------------------- | ------------------------------------------------------- |
-| 主体     | Object观察者、Subject目标对象                 | Publisher发布者、Event Channel事件中心、Subscribe订阅者 |
-| 主体关系 | Subject中通过observerList记录ObServer         | Publisher和Subscribe不想不知道对方，通过中介联系        |
-| 优点     | 角色明确，Subject和Object要遵循约定的成员方法 | 松散耦合，灵活度高，通常应用在异步编程中                |
-| 缺点     | 紧耦合                                        | 当事件类型变多时，会增加维护成本                        |
-| 使用案例 | 双向数据绑定                                  | 事件总线EventBus                                        |
-
-- 观察者：**1 个目标对象 + n 个观察者**
-- 发布订阅：**n 个发布者 + n 个订阅者 + 1 个调度中心**
-
-
 
 ### 字符串首尾空格
 
