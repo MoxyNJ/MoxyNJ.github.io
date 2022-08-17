@@ -1437,7 +1437,7 @@ range.setEnd(parentNode, offset);		// 不包括 offset
 
 1. 选择 `"Example: <i>italic</i>"`。它是 `<p>` 的前两个子节点（文本节点也算在内）：
 
- ![image-20210706105458968](source/image-20210706105458968.png)
+![image-20210706105458968](images/2%20UI%E3%80%81%E8%A1%A8%E8%BE%BE%E6%8E%A7%E4%BB%B6%E3%80%81%E5%8A%A0%E8%BD%BD%E8%B5%84%E6%BA%90%E3%80%81%E6%9D%82%E9%A1%B9.assets/image-20210706105458968-0726276-0726283.png)
 
 ```js
 let range = new Range();
@@ -1452,7 +1452,7 @@ document.getSelection().addRange(range);
 
 举例2，范围跨越不同的 node 节点：
 
- ![image-20210706134329671](source/image-20210706134329671.png)
+![image-20210706134329671](images/2%20UI%E3%80%81%E8%A1%A8%E8%BE%BE%E6%8E%A7%E4%BB%B6%E3%80%81%E5%8A%A0%E8%BD%BD%E8%B5%84%E6%BA%90%E3%80%81%E6%9D%82%E9%A1%B9.assets/image-20210706134329671.png)
 
 ```html
 <p id="p">Example: <i>italic</i> and <b>bold</b></p>
@@ -1571,7 +1571,7 @@ document.getSelection().addRange(range);
 
    ![image-20210706140908304](images/2%20UI%E3%80%81%E8%A1%A8%E8%BE%BE%E6%8E%A7%E4%BB%B6%E3%80%81%E5%8A%A0%E8%BD%BD%E8%B5%84%E6%BA%90%E3%80%81%E6%9D%82%E9%A1%B9.assets/image-20210706140908304.png)
 
-### 
+
 
 #### 6.3.2.2  `selection` 的事件
 
