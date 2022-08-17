@@ -1,5 +1,5 @@
 ---
-title: webpack
+title: Webpack
 sidebar_position: 2
 date: 2022-07-01
 tags: [webpack]
