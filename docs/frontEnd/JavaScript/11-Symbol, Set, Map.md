@@ -944,9 +944,9 @@ map.forEach(function(value, key, map) {
 
 `WeakMap`结构与`Map`结构类似，也是用于生成键值对的集合。**弱引用**。
 
-补充：JavaScript 的七种数据类型
+补充：JavaScript 的 7 + 1种数据类型
 
-1. 基本数据类型 / 原始数据类型：Nudefined, Null, String, Boolean, Number, Symbol
+1. 基本数据类型：Nudefined, Null, String, Boolean, Number, Symbol, BigInt
 2. 引用数据类型 ： Object
 
 不同点，**弱引用** 导致：
