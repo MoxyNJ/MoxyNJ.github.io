@@ -7,26 +7,34 @@ keywords:
   - CSS
 ---
 
-# 正常流
+## 正常流
 
-## 1. 盒模型
-
-### 1.0 box-sizing
-
-`box-sizing` 设置 `width` 宽度的作用范围；
-
-- `content-box`：默认，`width` 就相当于 `content` 的宽度，其只作用于 `content` 区域。
-- `border-box`：`width` 作用于 `content` + `padding` + `border` 三个区域。
-
-默认情况下，盒子的总宽度 == `width` + `padding` + `border`
-
-设置了 `border-box`,盒子的总宽度 ==  `width`
-
-- `border-box` 盒子是 IE 的老标准。
+- 包含块类型，是通过 position 属性确定的；
+- 盒类型，是通过 display 属性确定的。
 
 
 
-### 1.1 display 显示类型
+### 1. 盒模型
+
+#### 1.0 box-sizing
+
+`box-sizing` 的作用，设置 `width` / `height` 的作用范围；
+
+- 标准盒模型 `content-box`：默认。`width` 相当于 `content` 的宽度，只作用于 `content` 区域。
+- 怪异盒模型 `border-box`：`width` 作用于 `content` + `padding` + `border` 三个区域。
+
+默认情况下，盒子的总宽度 == `content` + `padding` + `border`，也就是 `width + padding + border`
+
+IE 的老标准是怪异盒模型，此时的总宽度是 `width`
+
+注意：
+
+- `background-color `的作用范围是 `content + padding + border`，如果 `border` 有颜色，会额外覆盖调背景色，如果 border 为透明，则 border 的颜色是 background-color。
+- box-sizing 不考虑 margin 外边距。
+
+
+
+#### 1.1 display 显示类型
 
 设置元素的外部和内部显示类型。
 
@@ -68,20 +76,21 @@ keywords:
 - 拥有部分 block 的性质：
   - width、height 有效，可以设置盒子内容 content 的大小；
   - padding、margin、border 会推开其他盒子。
-
+  - 盒子内的文本内容，会在盒内换行，不会横向溢出盒子。
+  
 - 拥有部分 inline 的性质：
   - 盒子不会主动换行，多个内联块盒子会并排排放，和正常流一样，只有达到边界才会 “被迫” 换行；
 
 - 问题：
-  - 如果设置了 width 内容宽度：则该盒子内的文本内容，会在盒内换行，不会横向溢出盒子。一但文本内容过多，就会纵向溢出盒子。
-  - 如果没有设置 width 内容宽度：则该盒子的宽度，会随着文本内容的增多而撑开。但是如果盒子边界达到容器宽度，文本内容会在盒子中换行。
+  - 如果设置了 width 内容宽度：则该盒子的宽度固定，盒内的文本一但过多，就会纵向溢出盒子。
+  - 如果没有设置 width 内容宽度：则该盒子的宽度随着文本内容的增多而撑开。但如果盒子边界达到容器宽度，文本内容也会在盒子中换行。
 - 总结：` inline-block` 内联块盒，也就是说，是盒子之间内联关系的，内部块级的盒子。
 
 
 
-### 1.2 position 定位方式
+#### 1.2 position 定位方式
 
-通过 position 确定定位方式。参考包含块，通过 top, right, bottom, left 属性确定偏移量。
+通过 position 确定盒子在环境中的具体位置、定位方式。参考包含块，通过 top, right, bottom, left 属性确定偏移量。
 
 #### 可选的值（5）
 
@@ -91,10 +100,45 @@ keywords:
 - `fixed`：固定定位。先 **脱离正常流**，然后按照 包含块（绝大多数情况下是 **视口**）为基、盒偏移量为距离进行定位。
 - `sticky`：粘性定位（CSS3）。是 **相对定位** 和 **固定定位** 的混合。基于盒偏移量值进行偏移。
   - 元素在跨越特定阈值（盒偏移量）前为相对定位，之后为固定定位。
+  - 其包含块必须拥有“滚动机制”：`overflow` 非 visible 元素。overflow：hidden、scroll、auto。
 
 
 
-### 1.3 float 与清除浮动
+**包含块**
+
+定义 '包含块' 概念的目的：确定一个元素的尺寸和位置，需要一个参照物，这个参照物是就是它的包含块。
+
+确定一个元素的包含块的过程完全依赖于这个元素自身的 `position` 属性（与 position 知识重合）：
+
+- '**static**', '**relative**', '**sticky**'(CSS 3)：包含块是该元素的直系祖先块元素的内容区的边缘组成。
+  - 直系祖先块元素 Block container box 其内容可以放下正常流动。
+  - 内容区（盒的 content）
+- 'absolute'：包含块是由它的直系的、非 `static` 的祖先元素的内边距区的边缘组成。
+  - 非 'static' 的祖先元素（position: fixed, absolute, relative, sticky）
+  - 内边距区（盒的 padding）
+- 'fixed'：通常情况直接理解为是视口，下面是详细情况。
+  - 连续媒体(continuous media)的情况下：包含块是适口 viewport；
+  - 分页媒体(paged media)的情况下：包含块是分页区域 (page area)。
+- （太细了先不管）'absolute', 'fixed'：如果满足以下条件，会是直系父元素的内边距区的边缘组成。
+  - `transform` 或 `perspective` 的值不是 `none`
+  - `will-change`的值是 `transform` 或 `perspective`
+  - 等等等等
+
+
+
+Block container box，放下一个正常流，那就是 block container box，同时这个盒子会创建一个 BFC：
+
+- block：块
+- inline-block：内联块
+- list-item：列表
+- table-cells：表格子项
+- table-captions：表格标题
+- flex item：（CSS 3）flex 盒子项
+- grid cells：（CSS 3）grid 盒子项
+
+
+
+#### 1.3 float 与清除浮动
 
 让元素 **脱离正常流**，沿其容器的左侧或右侧放置，容器内的其他 **文本** 和 **内联元素** 会添加 `margin` 后环绕它。
 
@@ -110,17 +154,27 @@ keywords:
 
 
 
-## 2. 格式化上下文
+### 2. 格式化上下文
+
+基本的定位方案有：
+
+1. normal flow： 正常流。格式化上下文的方式排版内容（块级、行内级）。不浮动、不绝对定位。
+   - 在正常流的块级格式化上下文中，盒子会垂直依次排列；
+   - 在正常流的行内级格式化上下文中，盒子会水平依次排列。
+2. float：浮动。当一个元素被定位浮动时，它会先按照正常流来摆放，然后向该行的左/右 “挪动”，会脱离正常流。
+3. absolute：广义的绝对定位（absolute + fixed），当一个元素被绝对定位时，会脱离正常流。
+
+
 
 - Formatting context：格式化上下文
 - Block formatting context：块级格式化上下文，简称 BFC。
 - Inline formatting context：行内级格式化上下文，简称 IFC。
 
-在一个BFC中，所有块级元素，会从包含块的内容块(content)顶部开始，在 **垂直方向** 依次排版。
+在一个 BFC 中，所有块级元素，会从包含块的内容块(content)顶部开始，在 **垂直方向** 依次排版。
 
 **BFC 对 float / clear 的影响：**
 
-- **浮动定位** 和 **清除浮动** 时只会应用于同一个 BFC 内的元素。
+- **浮动定位** 和 **清除浮动** 时只会影响同一个 BFC 内的元素。
 - **浮动** 不会影响其它 BFC 中元素的布局，而 **清除浮动** 只能清除同一 BFC 中在它 **前 / 后面的元素** 的浮动。
 - 计算 BFC 的高度时，内部的浮动元素也要参与计算（解决 float 高度坍塌）。
 
@@ -129,7 +183,7 @@ keywords:
 - 外边距折叠（Margin collapsing）只会发生在属于同一 BFC 中。
 - 只要是在同一个 BFC 中，块元素不论父子结构，在纵向上都会折叠。**兄弟** 、**父子** 块级元素都会发生。
 
-**注意：IFC、flex、grid 之间都不会发生 Margin Collapse。**因为边距折叠只会发生在一个 BFC 中，如果创建了新的BFC，就不会发生边距折叠。
+**注意：IFC、flex、grid 之间都不会发生 Margin Collapse。**因为边距折叠只会发生在一个 BFC 中，如果创建了新的 BFC，就不会发生边距折叠。
 
 
 
@@ -153,10 +207,31 @@ keywords:
 
 
 
+### 3.  脱离正常流
 
-## 3. 高度坍塌和清除浮动
+**flow**：流，是页面排版的基本规则。
+
+基本定位方案（上文）：正常流、float、absolute (fixed、absolute)
+
+定义：
+
+当一个元素的定位方案是 **浮动**、**绝对定位(absolute & fixed)** 或 **根元素**，那它会在当前正常流（标准文档流）之外，此时该元素可视为流外元素。
+
+特点：
+
+1. 每一个流外元素的内部，都会产生一个新的流。
+2. 如果 A 元素内部的正常流中，有一个 B 元素脱离 A 内部的正常流，则 B 元素被当成流外元素，B 元素内正常流下的内容已不属于 A 元素的流。B 元素属于 A 元素的流。
+3. **新的流内部，会创建一个新的 BFC。而创建新的 BFC，并不一定要通过脱离文档正常流实现。**
+
+
+
+
+### 4. 高度坍塌和清除浮动
 
 高度坍塌：指父元素本来应该包括子元素的高度，但是实际上父元素比子元素的高度要小。
+
+- 视觉效果上：父元素没有包裹上部分子元素，导致子元素高度高于父元素。
+- 本质上：子元素的包含块本就不是视觉上的父元素。脱离正常流后，自然溢出。
 
 ```html
 <style>
@@ -199,14 +274,12 @@ keywords:
 - 只要让 `container` 成为 `box1` 的包含块即可撑开 `container` 的高度。
 - 因为 `container` 创建了一个 BFC，此时 `box1` 的包含块就是 `container` 了，所以 `container` 自然被 `box1` 撑开
 
-![image-20211123170431340](images/HTML&CSS.assets/image-20211123170431340.png)
-
 #### 解决方式二：clear float
 
 `clear` 清除浮动，会让被清除浮动的元素移动到浮动元素的下方。那么我们通过 CSS 创建一个内容为空的伪元素，然后让他清除浮动，就可以解决这个问题：
 
 - 注意这个伪元素必须设置为 `block`，否则变成内联了，无法撑开。
-- `::after` 会为选中元素的 **内容的最后** ，添加一个 新元素。在这里其实是对 `container` 容器内 **添加了一个子元素** 。
+- `::after` 会为选中元素的 **内容的最后位置** ，添加一个 **新元素**。在这里其实是对 `container` 容器内 **添加了一个子元素** 。
 
 ```css
 .container::after {
@@ -216,6 +289,8 @@ keywords:
 }
 ```
 
+![image-20211123170431340](images/HTML&CSS.assets/image-20211123170431340.png)
+
 
 
 # 常见问题
@@ -224,65 +299,59 @@ keywords:
 
 #### 常见非继承属性
 
-1. 尺寸：height，width，max-height, min-height, max-width, min-width
-2. 位置：display、position、left、right、top、bottom
-3. 文本效果：text-shadow
+1. 盒模型：float, margin, padding, border
+2. 块级尺寸：height，width，max-height, min-height, max-width, min-width
+3. 位置：display、position、left、right、top、bottom
 4. 背景属性：background
 5. 生成内容：content
 6. 层叠：z-index
-7. 盒模型属性：float，margin, padding, border
+7. 文本效果：text-shadow
 
 #### 常见可继承属性
 
-1. 字体系列属性：font-family，font-size
-2. 文本系列属性：text-indent，line-height，color
+1. 字体系列：font-family，font-size
+2. 文本系列：text-indent，line-height，color
 3. 元素可见性：visibility
-4. 表格布局属性：border-style
-5. 列表布局属性：list-style list-style-type
+4. 表格布局：border-style
+5. 列表布局：list-style list-style-type
 6. 光标属性：cursor
 
 
 
 ## 1. CSS 单位怎么区分
 
-相对长度单位：相对字体长度单位（em、ex、rem、ch）、相对视区长度单位（vh、vw、vmin、vmax）
-
 ### 1.0 长度单位
 
-相对长度单位：
-
--   相对字体长度单位（em、ex、rem、ch）
-
--   相对视区长度单位（vh、vw、vmin、vmax）
-
-绝对长度单位：（px、剩余非常少见：pt、cm、mm、pc等）
+- 相对长度单位：
+  - 相对字体长度单位：em、ex、rem、ch；
+  - 相对视区长度单位：vh、vw、vmin、vmax；
+- 绝对长度单位：px、(剩余非常少见:) pt、cm、mm、pc 等。
 
 
 
 相对字符长度：
 
-ex：是字符 x 高度，与 font-size 对应。font-size 值越大，则 ex 就越大；
+font-size 指定字符的大小。
 
-em：是传统 m 的宽度，也是汉字的高度。即一个字模的宽度。根据不同的英文字体，宽度会发生变化。但中文通常一个汉字正好是一个 m 的宽度和高度。
+- ex：是相对字符 x 高度。**相对于父元素的字体大小**。
 
-- font-size 是按照父元素字符尺寸来计算。
+- em：是相对字符 m 的宽度，也是汉字的宽度和高度。即一个字模的宽度。根据不同的英文字体，宽度会发生变化。但中文通常一个汉字正好是一个 m 的宽度和高度。**相对于父元素的字体大小**。
 
-rem：root 的 em。1 rem 和根字符大小一样，font-size 都按照根字符来计算。
-
-ch：是阿拉伯字母 0 的宽度。等宽字体。
+- rem：root 的 em。1 rem 和根字符大小一样，**相对于根元素字体的大小。**
+- ch：是阿拉伯字母 0 的宽度。等宽字体。
 
 
 
 ### 1.1 `px`、`em`、`rem` 的区别
 
-1. `px`：固定的像素，一旦设置了就无法因为适应页面大小而改变。
+1. `px`：固定的像素，一旦设置了就无法因为适应页面大小而改变，且不会随着屏幕分辨率而改变。
 2. `em` ：相对其父元素来设置字体大小。
 3. `rem`：相对于 `<html>` 根元素来设置字体大小。
-4. `30%`：如果要设置多列布局，使用 百分号是更好的选择。但是 `%` 的计算非常困难。
+4. `30%`：如果要设置多列布局，使用百分号是更好的选择。但是 `%` 的计算非常困难。
 
 **`em`：**
 
-- 子元素字体大小的 `em`，是相对于 **父元素** 字体大小 `font-size`；
+- 元素字体的 `em`，是相对于 **父元素** 字体大小 `font-size`；
 - 元素的 `width`/`height`/`padding`/`margin`的 `em`，是相对于 **该元素** 的字体大小 `font-size`；
 
 **`rem`：**
@@ -291,7 +360,7 @@ ch：是阿拉伯字母 0 的宽度。等宽字体。
 
 - 通常做法是给 `html` 元素设置一个字体大小，然后其他元素的长度单位就为 `rem`。
 
-结论：`em` 的计算值是基于父元素的，不同元素的参照物不一样（都是该元素父元素），所以在计算的时候不方便，相比之下 `rem` 就只有一个参照物（html元素），这样计算起来更清晰。
+结论：`em` 的计算值是基于父元素的，不同元素的参照物不一样（都是该元素父元素），所以在计算的时候方便，相比之下 `rem` 就只有一个参照物（html元素），这样计算起来更清晰。
 
 
 
@@ -312,6 +381,8 @@ CSS3 的新特性，与视图窗口有关
 `px` 如何转化为 `vw`：
 
 - `1px = （1/375）*100 vw`，假设使用 iPhone X 的 `375px` 作为视口宽度。
+
+总结：`vm vh` 在 IE 和 Opera 的兼容性存在问题。但搭配 flex 效果更好。
 
 ![image](images/HTML&CSS.assets/170e82463b522ff6tplv-t2oaga2asx-watermark.awebp)
 
@@ -380,9 +451,7 @@ CSS3 的新特性，与视图窗口有关
 
 ![img](images/HTML&CSS.assets/170e782c3e72b843tplv-t2oaga2asx-watermark.awebp)
 
-总结：
 
-1. `vm vh` 在 IE 和 Opera 的兼容性存在问题。但搭配 flex 效果更好。
 
 
 
@@ -461,7 +530,7 @@ flex item（6）：
 - `flex-basis`：兼容性差，分配剩余空间之前的默认尺寸。
   - `auto`：参考我的宽高属性。或者是 `% 、rem` 等等
 - `flex`：`flex-grow + flex-shrink + flex-basis` 的集合。
-- `align-self`：改变单个 flex item 的排版行为：auto | flex-start | flex-end | center | baseline | stretch。
+- `align-self`：单个 flex item 纵向的排版：auto | flex-start | flex-end | center | baseline | stretch。
 
  ![image-20211122164851842](images/HTML&CSS.assets/image-20211122164851842.png)
 
@@ -483,24 +552,29 @@ flex item（6）：
 三代排版技术：
 
 - 基于正常流的布局：
-  - `display` 属性（文档流布局） + `position` 属性（定位布局） + `float`属性（浮动布局）。
+  - `display` 属性（文档流布局） + `position` 属性（定位布局） + `float` 属性（浮动布局）。
   - table 表格布局、float 浮动布局
-  - 涉及到了 IFC BFC 的知识。
+  - 涉及到了 IFC、BFC 的知识。
 - Flex 布局；
 - 网格布局；
+  - 相比 Flex，变成二维布局。有行、列两个轴线。pinterest 瀑布流。
+
 - CSS `Houdini`。
+  - `CSS Houdini API` 是CSS引擎暴露出来的一套api，通过这套API，开发者可以直接触及CSSOM，告诉浏览器如何去解析CSS，从而影响浏览器的渲染过程，实现很多炫酷的功能。
+    在 HTML 解析、CSSOM 构建、页面渲染、页面绘制 等环节都有对应的 API。
 
 
 
-响应式布局：`@media` + `rem` 首选、使用 `vh/vm` 也可以，但是CSS3新特性兼容性不好；
 
-流式布局：典型网站是 pinterest.com 用 `flex` 最方便
+响应式布局：`@media` + `rem` 首选、使用 `vh/vm` 也可以，但是 CSS3 新特性兼容性不好；
 
-两栏布局：
+流式布局：典型网站是 pinterest.com 用 `flex` / `grid` 最方便。
+
+两栏布局：浮动、固定定位，相对定位 rem 等都可以。
 
 三栏布局（圣杯布局）：左右固定，中间自适应。
 
-- 左边：宽度固定，设置左浮动；右边宽度固定，设置右浮动；中间宽度 ：`width:100%`设置左浮动。双飞翼布局 / 圣杯布局
+- 左边 / 右边：宽度固定，设置左 / 右浮动；中间宽度 ：`width:100%` 设置左浮动。双飞翼布局 / 圣杯布局
 - 中间宽度 ：`width:100%` 设置左浮动。左边：宽度固定，设置左浮动；右边宽度固定，设置右浮动；
 
 双飞翼布局：是国内淘宝UE对圣杯布局的优化。把 margin 的设定从 contaienr 放到了 center 中，center 的内容通过 inner 额外包裹。
@@ -578,11 +652,11 @@ font-variant：小体形大写字母
 
 #### color
 
-rgba(255, 255, 255, .7)
+rgba(255, 255, 255, .7)：
 
-hsla(240, 100%, 50%, .7)
+hsla(240, 100%, 50%, .7)：色调、饱和度、亮度。
 
-#### backgroundf'le [fu'le]
+#### background
 
 background-color：插入背景颜色
 
@@ -606,7 +680,7 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 
 #### (1) 正常流
 
-单行内容：把 height 和 line-height 设置为相同的尺寸，就可以实现单行文字 + 图片的近似垂直居中的效果：
+**单行内容：**把 height 和 line-height 设置为相同的尺寸，就可以实现单行文字 + 图片的近似垂直居中的效果：
 
 - 如果文字长度一旦过多，出现了折行，此时因行间距 line-height 的影响，就会溢出粉色盒子。
 
@@ -626,7 +700,13 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 
  ![image](images/HTML&CSS.assets/%E6%88%AA%E5%B1%8F2021-08-05%20%E4%B8%8B%E5%8D%8810.36.08.png)
 
-多行内容：
+**多行内容：**
+
+1.   span 设置为 inline-block，已确保内部可以拥有自己的行间距。同时设置自己的行间距为 30px。
+2.   div 行间距设置为 200px，利用宽度为 0 的 strut 支撑节点，把 div 的高度撑起来的同时，此时 “文字的中线” 也在盒子的近似中间水平。
+     -   **明确一点：** div 作为一个 block 是不需要行高的，它设置 line-height 就是为了子内联元素的继承。最直接的，宽度为 0 的 strut 支撑节点继承了这一属性。
+     -   父容器最开始会有一个不可见的、0 宽度的、透明节点行内盒子,官方称它 strut。
+3.   span 此时设置上下居中对齐，也就是 `vertical-align: middle;` 那么它就会寻找所在父元素的 “文字的中线” 去对齐。最终效果就是水平近似居中对齐。
 
 ```html
 <div>
@@ -649,18 +729,13 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 
  ![image](images/HTML&CSS.assets/%E6%88%AA%E5%B1%8F2021-08-06%20%E4%B8%8A%E5%8D%8811.21.32.png)
 
-1.   span 设置为 inline-block，已确保内部可以拥有自己的行间距。同时设置自己的行间距为 30px。
-2.   div 行间距设置为 200px，利用宽度为 0 的strut 支撑节点，把 div 的高度撑起来的同时，此时 “文字的中线” 也在盒子的近似中间水平。
-     -   **明确一点：** div 作为一个 block 是不需要行高的，它设置 line-height 就是为了子内联元素的继承。最直接的，宽度为 0 的strut 支撑节点继承了这一属性。
-3.   span 此时设置上下居中对齐，也就是 `vertical-align: middle;` 那么它就会寻找所在父元素的 “文字的中线” 去对齐。最终效果就是水平近似居中对齐。
 
 
-
-图片 + 文字的垂直居中：
+**图片 + 文字的垂直居中：**
 
 ```html
 <div>
-  <img class="middle" src="1.png" />
+  <img class="middle" src="1.png" />我居中了吗？
 </div>
 <style>
   div {
@@ -677,20 +752,20 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 
 **`vertical-align` : 文字和图片等内联元素的居中，是参考 “文字的中线”，而不是盒子实际尺寸的中线。**
 
-如果上面的 `div` 只设置了尺寸高度 `height`， 而没有设置文字行高 `line-height`，就无法达到垂直居中的效果。
+- 如果上面的 `div` 只设置了尺寸高度 `height`， 而没有设置文字行高 `line-height`，就无法达到垂直居中的效果。
 
  ![image](images/HTML&CSS.assets/%E6%88%AA%E5%B1%8F2021-08-05%20%E4%B8%8B%E5%8D%8810.52.27.png)
 
 绝对垂直居中：
 
 ```css
-.parent::after, .son{
-    display:inline-block;
-    vertical-align:middle;
+.parent::after, .son {
+    display: inline-block;
+    vertical-align: middle;
 }
-.parent::after{
-    content:'';
-    height:100%;
+.parent::after {
+    content: '';
+    height: 100%;
 }
 ```
 
@@ -710,8 +785,8 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 ```css
 .son {
     position: absolute;
-    top: 50%;    /* 移动包含块height的50% */ 
-    transform: translate( 0, -50%);   /* 移动自身height的50% */
+    top: 50%;    /* 向下移动包含块height的50% */ 
+    transform: translate( 0, -50%);   /* 向上移动自身height的50% */
 }
 ```
 
@@ -720,9 +795,9 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 ```css
 .son {
     position: absolute;
-    top: 50%;
-    height: 高度;
-    margin-top: -0.5高度;
+    top: 50%;   /* 向下移动包含快高度的50% */
+    height: 高度;   /* 定义好自己的高度 */
+    margin-top: -0.5高度;  /* 向上移动自身高度的50% */
 }
 ```
 
@@ -776,7 +851,7 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
     position: absolute;
     width: 180px;
     left: 50%;
-    margin-left: -90px;
+    margin-left: -90px;  /* 总宽度的一半*/
 }
 ```
 
@@ -799,7 +874,7 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 - `Flex Box`：`parent` ===  `justify-content: center;` + `align-items: center;`
 
 - 绝对定位： `transform`
-- 绝对定位：`left / top:50%`；
+- 绝对定位：`left / top: 50%`；
 
 ```css
 .son {
@@ -824,20 +899,20 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 ## 8. 元素的隐藏
 
 - `display: none;`
-  1. DOM 结构：在 DOM 中，不占据正常流的空间；
-  2. 事件监听：**无法进行 DOM 事件监听；**
+  1. DOM 结构：在 DOM 中，不会渲染，不占据正常流的空间；
+  2. DOM 事件监听：❌
   3. 性能：动态改变此属性时会 **引起重排重绘**，性能较差；
   4. 继承：不会被子元素继承，毕竟子类也不会被渲染（直接没，不存在继承问题了）；
   5. `transition`：`transition` 不支持 `display`。
 - `visibility: hidden;`
-  1. DOM 结构：元素被隐藏，会被渲染不会消失，占据空间；
-  2. 事件监听：**无法进行 DOM 事件监听；**
+  1. DOM 结构：会渲染，不会消失，占据空间；
+  2. DOM 事件监听：❌
   3. 性能：动态改变此属性时会 **引起重绘**，性能较高；
   4. 继承：会被子元素继承，子元素可以通过设置 `visibility: visible`; 来取消隐藏；
-  5. `transition`：`visibility` 会立即显示，隐藏时会延时
+  5. `transition`：`visibility` 会立即显示，隐藏时可以延时
 - `opacity: 0;`
-  1. DOM 结构：透明度为 100%，元素隐藏，占据空间；
-  2. 事件监听：可以进行 DOM 事件监听；
+  1. DOM 结构：透明度为 100%，会渲染，不会消失，占据空间；
+  2. DOM 事件监听：✅
   3. 性能：提升为合成层，**不会触发重绘**，性能较高；
   4. 继承：会被子元素继承，子元素并不能通过 `opacity: 1` 来取消隐藏；
   5. `transition`：`opacity` 可以延时显示和隐藏
@@ -846,9 +921,9 @@ background-clip：裁剪背景图片。元素背景（背景图片或颜色）�
 
 **文本的隐藏**
 
-利用字号：`font-size: 0` 文字就会在视觉层隐藏，但是屏幕阅读设备、DOM流中依然存在；
+**利用字号**：`font-size: 0` 文字就会在视觉层隐藏，但是屏幕阅读设备、DOM流中依然存在；
 
-利用缩进：`text-indent` 设置为一个非常大的负值，则改行文本会因溢出盒子，甚至 html 页面而消失不见。但是会出现溢出容器问题。
+**利用缩进**：`text-indent` 设置为一个非常大的负值，则改行文本会因溢出盒子，甚至 html 页面而消失不见。但是会出现溢出容器问题。
 
 ```css
 .hide-text {
@@ -892,9 +967,11 @@ text-shadow：为文字添加阴影。阴影值由元素在X和Y方向的偏移�
 
 ## 10 height、line-height、vartical-align 和 font-size
 
-`line-height`：就是文字间的行间距，也称为行高。它能影响文字之间的间距，vertical-align 也会影响到文字的上下间距。
+多行文本时：
 
-`vartical-align`：垂直对齐方式，决定文本的垂直对齐高度基于哪一条线。所以， vartical-align 主要应用在内联元素。（还支持 table-cell 等）
+- `line-height`：**和上下两行的自身对比。**就是文字间的行间距，也称为行高。它能影响文字之间的间距，vertical-align 也会影响到文字的上下间距。
+
+`vartical-align`：**作为整体和包含块对比**。垂直对齐方式，决定文本整体(多行)的垂直对齐高度基于哪一条线。所以， vartical-align 应用在内联元素。（还支持 table-cell 等）
 
 
 
@@ -906,10 +983,10 @@ text-shadow：为文字添加阴影。阴影值由元素在X和Y方向的偏移�
 -   行高 = 字号，则字符正好占满行高；
 -   行高 < 字号，则多行字符会上下 “挤” 再一起。
 
-`height` 与 `line-height`：
+`height` 与 `line-height`：单行效果
 
 -   height > line-height，则容器尺寸大，行间距小，默认情况下字会像写文章一样顺次往下排布。
--   height = line-height，则容器和行间距一样，达到近似居中的效果。
+-   height = line-height，则容器和行间距一样，达到近似居中的效果。如果折行，则溢出 overflow。
 -   height < line-height，则容器尺寸小，行间距大，字会挤到盒子的外面。
 
 |                | 定义                    | 百分比值（50% 为例）                           |      |
@@ -939,13 +1016,13 @@ ID选择符：`#myId`
 
 通用选择符：`*` 选择所有元素。
 
-后代选择符： `[空格]` ，如 `blockquote p` 则选择了块引用的所有 p 后代（子后代、子孙后代全部包括）。
+后代选择符： `[空格]` ，如 `blockquote p` 则选择了块引用的 **所有** p 后代（子后代、子孙后代全部包括）。
 
 多选：`, ` ，用逗号连接，则表示连续选择多个元素，同时应用相同的 CSS 属性。
 
 #### 2 高级选择符
 
-子选择符：`>` ，如 `#nav > li`  选择了 id 为 nav 的 li 元素的直接后代，也就是子后代，**多个元素**。
+子选择符：`>` ，如 `#nav > li`  选择了 id 为 nav 的 li 元素的 **直接后代** 的 **全部元素 li**。
 
 相邻同辈选择符：`+`，如 `h2 + p` 只选择了 h2 元素 **后面** 的、拥有 **共同父元素** 的 **一个元素** p。
 
@@ -975,58 +1052,53 @@ ID选择符：`#myId`
 
 通过伪类选择器，可以找到那些不存在 DOM 树中的信息，或者不能被常规 CSS 选择器获取到的信息。
 
-- 获取不存在与DOM树中的信息。比如 a 标签的 :link、visited，这些信息不存在与 DOM 树结构中，只能通过 CSS 选择器来获取；
+- **状态伪类**：获取不存在与 DOM 树中的信息。比如 a 标签的 `:link`、`visited`，这些信息不存在与 DOM 树结构中，只能通过 CSS 选择器来获取；
 
-- 获取不能被常规CSS选择器获取的信息。比如：获取第一个子元素，无法用常规的 CSS 选择器获取，只能通过 :first-child 获取。
+- **结构化伪类**：获取不能被常规 CSS 选择器获取的信息。比如：获取第一个子元素，无法用常规的 CSS 选择器获取，只能通过 `:first-child` 获取。
 
 ##### 状态伪类：
 
-未访问过的链接，或其他可交互元素：`a:link`
+- 未访问过的链接，或其他可交互元素：`a:link`
+- 访问过的链接，或其他可交互元素：`a:visited`
+- 鼠标悬停 、 键盘聚焦的链接，或其他可交互元素：`a:hover`、`a:focus`
+- 活动状态的可交互元素：`a:active`
 
-访问过的链接，或其他可交互元素：`a:visited`
-
-鼠标悬停 、 键盘聚焦的链接，或其他可交互元素：`a:hover`、`a:focus`
-
-活动状态的可交互元素：`a:active`
-
-- 注：为了防止后定义的样式覆盖前面定义的样式，上面这几个伪类要按照以下顺序依次定义：`:link`, `visited`, `:hover`, `:focus`, `:active`。
+- 注：存在样式覆盖，伪类需按序定义：`:link`, `visited`, `:hover`, `:focus`, `:active`。
 
 ##### 结构化伪类：
 
-`:not()`：反选
+- `:not()`：反选
 
-`:target`：目标
+- `:target`：目标，选中：URL 中有 `...index.html#section2` 锚点，且 DOM 中有元素 id 为锚点名。
 
-`:nth-child()`：根据不同的属性值，来选择子元素：
+- `:nth-child()`：找到当前元素的所有兄弟元素，然后排序，最后根据入参匹配。
 
-- odd、even、n、2n+4：选中奇数、偶数、第 n 个元素（1开始）、（n = 0, 1, 2...）的表达式结果
-
-- `nth-child(n+3)` ：选择列表中的标签从第 3 个开始到最后（>=3）
-
-  `nth-child(-n+3)` ：选择列表中的标签从 0 到 3，即小于 3 的标签(<=3)
-
-`:nth-last-child()` ：属性值和 `:nth-child()` 相同，只不过它是倒着数。
-
-- `nth-last-child(3)` ：选择列表中的倒数第 3 个标签
-
-`:nth-of-type(n)`：匹配指定类型的第 N 个子元素，**与元素类型有关**。可以插入含 n 的表达式，来选中同类型元素。
-
-- 如 `.myDiv p:nth-of-type(3)`：匹配 class 值为 myDiv 内的第 3 个 p 元素。
+  - odd、even、n、2n+4：选中奇数、偶数、第 n 个元素（1开始）、（n = 0, 1, 2...）的表达式结果
 
 
+  - `nth-child(n+3)` ：选择列表中的标签从第 3 个开始到最后（>=3）
 
-`:first-child` 相当于 `:nth-child(1)`
+    `nth-child(-n+3)` ：选择列表中的标签从 0 到 3，即小于 3 的标签(<=3)
 
-`:last-child` 相当于 `:nth-last-child(1)`
 
-`:only-child`：配没有任何兄弟元素的元素
+- `:nth-last-child()` ：属性值和 `:nth-child()` 相同，只不过它是倒着数。
+  - `nth-last-child(3)` ：选择列表中的倒数第 3 个标签
 
-- 相当于：`:first-child:last-child`或者`:nth-child(1):nth-last-child(1)`。
 
-`:only-of-type()`：匹配父元素中，类型是唯一的那个子元素。
+- `:nth-of-type(n)`：匹配指定类型的第 N 个兄弟元素，**与元素类型有关**。可使用表达式。
+  - 如 `.myDiv p:nth-of-type(3)`：匹配 class 值为 myDiv 内的第 3 个 p 元素。
 
-- `.myDiv :only-of-type()`：在 .myDiv 中，寻找类型唯一的子元素，如果有，则匹配成功。注意 .myDiv 后有一个空格。
+- `:nth-last-of-type(1)`：倒数第 1 个。
 
+
+
+- `:first-child` 相当于 `:nth-child(1)`
+- `:last-child` 相当于 `:nth-last-child(1)`
+- `:only-child`：配没有任何兄弟元素的元素
+  - 相当于：`:first-child:last-child`或者`:nth-child(1):nth-last-child(1)`。
+
+- `:only-of-type()`：匹配父元素中，类型是唯一的那个子元素。
+  - `.myDiv :only-of-type()`：在 .myDiv 中，寻找类型唯一的子元素，如果有，则匹配成功。注意 .myDiv 后有一个空格。
 
 
 ![weilei.png](images/HTML&CSS.assets/16ef8eecad4f1adbtplv-t2oaga2asx-watermark.awebp)
@@ -1037,7 +1109,7 @@ ID选择符：`#myId`
 
 伪元素用于创建一些 **不在文档树中的元素**，并为其添加样式。
 
-比如说，我们可以通过 `:before` 来在一个元素前增加一些文本，并为这些文本添加样式。虽然用户可以看到这些文本，但是这些文本实际上不在文档树中。
+比如说，我们可以通过 `:before` 来在一个元素内的开头增加一些文本，并为这些文本添加样式。虽然用户可以看到这些文本，但是这些文本实际上不在文档树中。
 
 > 因此，伪类与伪元素的区别在于：有没有创建一个文档树之外的元素。
 
@@ -1048,7 +1120,7 @@ ID选择符：`#myId`
 
 - `::first-line`：选择一段文本的第一行，如 `#myPara::first-letter`。
 
-其他常见的伪元素有：`::selection`、`::placeholder` 等。
+其他常见的伪元素有：`::selection` 被用户高亮的部分、`::placeholder` input 中的默认文本等。
 
 
 
@@ -1085,17 +1157,16 @@ CSS2 中的伪元素和伪类都使用 1 个冒号，在 CSS3 中，为了区分
 1. 行内样式，记为 1；
 2. ID 选择符
 3. class 类选择符、伪类选择符、属性选择符
-4. type 类型选择符、伪元素选择符
+4. type 元素类型选择符、伪元素选择符
 
-| 选择符                                                       | 特殊性     |                                |
-| ------------------------------------------------------------ | ---------- | ------------------------------ |
-| `style="xxx"`                                                | 1, 0, 0, 0 |                                |
-| `#myContainer #content {}`                                   | 0, 2, 0, 0 |                                |
-| `div #content {}`                                            | 0, 1, 0, 1 |                                |
-| `div p {}`                                                   | 0, 0, 0, 2 |                                |
-| `#content > [id="main"] .news-story:nth-of-type(1) h2.first {}` | 0, 1, 4, 1 | 依次是：100, 10, 10, 10, 1, 10 |
-| `div > #main > h2 {}`                                        | 0, 1, 0, 2 | 依次是：1, 100, 1              |
-|                                                              |            |                                |
+| 选择符                                                   | 特殊性     |                                      |
+| -------------------------------------------------------- | ---------- | ------------------------------------ |
+| `style="xxx"`                                            | 1, 0, 0, 0 |                                      |
+| `#myContainer #content {}`                               | 0, 2, 0, 0 |                                      |
+| `div #content {}`                                        | 0, 1, 0, 1 |                                      |
+| `div p {}`                                               | 0, 0, 0, 2 |                                      |
+| `#content > [id="main"] .new:nth-of-type(1) h2.first {}` | 0, 1, 4, 1 | 依次是：<br />100, 10, 10, 10, 1, 10 |
+| `div > #main > h2 {}`                                    | 0, 1, 0, 2 | 依次是：1, 100, 1                    |
 
 - 注 1 ：`*` 通用选择符的权重最小，可以看似是 0。
 - 注 2 ：继承而来的样式没有权重，所以即使是权重最小的 `*` 通用选择符也能轻易覆盖继承的样式。
@@ -1515,7 +1586,9 @@ CSS2 中的伪元素和伪类都使用 1 个冒号，在 CSS3 中，为了区分
 
 
 
-## 15. CSS 动画
+## CSS 特效 / 动画
+
+### 1 CSS 动画
 
 精简版总结：
 
@@ -1630,7 +1703,7 @@ animation 是 8 个属性的简写：以下属性如果单独写，要加 `anima
 
  ![image](images/HTML&CSS.assets/163c4261137cc7dftplv-t2oaga2asx-watermark.awebp)
 
-## 16 实现图片的旋转
+### 2 实现图片的旋转
 
 ```css
 .rotate {
@@ -1655,7 +1728,7 @@ animation 是 8 个属性的简写：以下属性如果单独写，要加 `anima
 
 
 
-## 17. CSS 实现图形
+### 3 CSS 实现图形
 
 #### triangle 三角形
 
@@ -1731,7 +1804,7 @@ circle  圆形
 
  ![image-20211123110731763](images/HTML&CSS.assets/image-20211123110731763.png)
 
-## 18 阴影效果
+### 4 阴影效果
 
 #### 文字阴影（`text-shadow`）
 
@@ -1832,7 +1905,9 @@ drop-shadow(offset-x offset-y blur-radius spread-radius color)
 
 
 
-## 问题：clientX/Y, screenX/Y, offsetX/Y
+## 属性相关：
+
+#### 1 问题：clientX/Y, screenX/Y, offsetX/Y
 
 **这些值都是只读的**。都是检测鼠标位置的参数。
 
@@ -1879,5 +1954,11 @@ document.documentElement.clientHeight;
 
 
 
+CSS  link 和 import 的区别：
 
+
+
+
+
+=== 不常考的放下面 ======----------------------
 
