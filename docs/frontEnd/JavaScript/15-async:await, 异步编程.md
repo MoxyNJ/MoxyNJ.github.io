@@ -741,9 +741,7 @@ function* bar() {
 
 下图是在控制台中输入的截图：
 
-![image-20220701114638804](images/14-Iterator,%20Generator.assets/image-20220701114638804.png)
-
-
+![截屏2022-08-20 23.21.52](images/15-async:await,%20%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B.assets/%E6%88%AA%E5%B1%8F2022-08-20%2023.21.52.png)
 
 ### 2.5 应用
 
