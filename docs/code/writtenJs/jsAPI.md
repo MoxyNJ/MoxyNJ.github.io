@@ -1702,7 +1702,14 @@ window.addEventListener('resize', throttle(resize, 1000));
 ```js
 function throttle(func, delay) {
   // func 可以添加一个函数判断
+  if (typeof func !== 'function') {
+    throw new TypeError('fn must be a function')
+  }
   // delay 可以添加数值转化和判断（0 ~ Inifinity)
+  if (typeof delay !== 'number' && delay >= 0 && isFinite(delay)) {
+    throw new TypeError('delay must be a number')
+  }
+  
   let timer;
   return function(...args) {
     // 定时器存在，则跳过
@@ -1745,7 +1752,14 @@ window.addEventListener('click', function(event) {
 ```js
 function debounce(func, delay) {
   // func 可以添加一个函数判断
+  if (typeof func !== 'function') {
+    throw new TypeError('fn must be a function')
+  }
   // delay 可以添加数值转化和判断（0 ~ Inifinity)
+  if (typeof delay !== 'number' && delay >= 0 && isFinite(delay)) {
+    throw new TypeError('delay must be a number')
+  }
+  
   let timer;
   return function(...args) {
     clearTimeout(timer);
