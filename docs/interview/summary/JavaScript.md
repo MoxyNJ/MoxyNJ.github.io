@@ -263,6 +263,43 @@ new mySymbol() // mySymbol {}
 
 
 
+## 事件循环的题：
+
+```js
+ const async1 = async () => {
+  console.log('async1');
+  setTimeout(() => {
+    console.log('timer1')
+  }, 2000)
+  await new Promise(resolve => {   // promise没有resolve后续不会执行
+    console.log('promise1')
+  })
+  console.log('async1 end')
+  return 'async1 success'
+} 
+console.log('script start');
+async1().then(res => console.log(res));
+console.log('script end');
+Promise.resolve(1)						// 	这里把 1 顺次传递，因为下面的 then 方法没有接收 res。
+  .then(2)
+  .then(Promise.resolve(3))
+  .catch(4)
+  .then(res => console.log(res))
+setTimeout(() => {
+  console.log('timer2')
+}, 1000)
+
+// script start
+// async1
+// promise1
+// script end
+// 1
+// timer2
+// timer1
+```
+
+
+
 
 
 ====== 坑 =============================
