@@ -473,8 +473,6 @@ inline box 主要是为了看其内部是不是一个 IFC 环境而定义的。
 
 **不可替换元素** 不可以随意修改，而是要通过 CSS 中 block 和 inline 性质来判断。
 
-`<area>`、`<base>`、`<br>`、`<col>`、`<colgroup> `、`<command>`、`<embed>`、`<hr>`、`<img>`、`<input>`、`<keygen>`、`<link>`、`<meta>`、`<param>`、`<source>`、`<track>`、`<wbr>`
-
 ### 3.1 non-replaced element
 
 不可替换元素。
@@ -489,17 +487,18 @@ inline box 主要是为了看其内部是不是一个 IFC 环境而定义的。
 
 进一步解释，CSS 只可以调整替换元素的位置，而不能修改元素内容的样式。
 
-- 典型的替换元素有：
-  - `<iframe>`
-  - `<video>`
-  - `<embed>`
-  - `<img>` （最常见）
-- 特定情况下，是替换元素的有：
-  - `<option>`
-  - `<audio>`
-  - `<canvas>`
-  - `<object> `
-  - `<applet>` （不推荐使用）
+- HTML 规范上，替换元素有：
+
+  ```css
+  img, input, iframe, select, textarea, object, video, audio, canvas, embed
+  ```
+
+- MDN 上典型的替换元素有：
+
+  - `<iframe>`、`<video>`、`<embed>`、`<img>` （最常见）
+
+- MDN 上特定情况下，是替换元素的有：
+  - `<option>`、`<audio>`、`<canvas>`、`<object> `、`<applet>` （不推荐使用）
 
 
 

@@ -2339,6 +2339,24 @@ curryAdd(10, 20)(30);
 curryAdd(10)(20)(30);
 ```
 
+**附：另一种柯里化的实现**
+
+```js
+function sum(...args) {
+    // 调用必返回 fn 函数，该函数上绑定 sumof 方法
+    // fn 可接收其他参数
+    const fn = function (...args2) {
+        return sum.call(this, ...args, ...args2); // 递归，合并参数
+    };
+    fn.sumof = () => {
+        return args.reduce((acc, cur) => acc + cur);
+    };
+    return fn;
+}
+
+sum(1, 3)(2, 3).sumof();
+```
+
 
 
 ### 8.2 call /apply / bind 🌟
