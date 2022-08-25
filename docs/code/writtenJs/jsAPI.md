@@ -1558,6 +1558,25 @@ Array.prototype.concat.apply([], document.querySelectorAll('div'));
 
 
 
+### 2.5 数组判断
+
+```js
+const a = [];
+// 类型判断：
+a instanceof Array
+Object.prototype.toString.call(a).slice(8, -1) === 'Array'
+// API
+Array.isArray(a)
+// 原型链
+a.constructor === Array
+a.__proto__ === Array.prototype
+Object.getPrototypeOf(a) === Array.prototype
+```
+
+
+
+
+
 ## 3 sort 数组排序 🌟
 
 - https://juejin.cn/post/6844903986479251464#heading-33
@@ -1667,7 +1686,7 @@ function quickSort(array) {
 
 ### 4.1 节流（throttle）
 
-#### 1. 时间戳版
+##### 1. 时间戳版
 
 - `Date.now()` 记录判断冷却时间是否达到，lastTime 记录上一次执行回调的时间。
 
@@ -1691,7 +1710,7 @@ function resize(e) {
 window.addEventListener('resize', throttle(resize, 1000));
 ```
 
-#### 2. 定时器版
+##### 2. 定时器版
 
 逻辑如下：
 
@@ -1829,12 +1848,11 @@ func(b);
 
 ⚠️ 这两个方法都没有遍历 symbol，如果要遍历 symbol，用 `getOwnPropertySymbols()`。
 
+其他，返回数组，且遍历结果包括 **可枚举** + **不可枚举**：
 
-
-返回数组：
-
-- **`Object.getOwnPropertyNames()`**：自身属性 + 不可枚举 + 非 Symbol 的属性名
-- **`Object.getOwnPropertySymbols()`**：自身属性 + 所有 Symbol 的属性名
+- **`Object.getOwnPropertyNames()`**：自身属性，非 Symbol  的属性名。
+- **`Object.getOwnPropertySymbols()`**：自身属性，所有 Symbol 的属性名。
+- **`Reflect.ownKeys()`**：自身的所有属性名，是上述两个方法的合体。
 
 
 
@@ -1987,14 +2005,20 @@ const newObj = lodash.cloneDeep(obj);
 
 ##### 自己实现
 
+缓存数据常常用 **WeakMap**。通过 weakMap 保持了对数据的缓存，又不会阻止无用数据的正常删除和内存回收，同时当缓存的数据被垃圾回收后，weakMap 中保存的引用也会自动删除。
+
 deepClone 代码要点：
 
 1. 入参：obj 待深拷贝值（基本类型/各种对象类型） +  WeakMap（用于记录已经拷贝的对象，防止循环引用）
    - 切记，map 在形参添加默认值 `new WeakMap()`；
-2. 简单拷贝：当数据类型是 null、Date、RegExp、非 `'object'` 是，可直接拷贝出结果。
-3. 读取 Map 解决循环引用
-4. 创建深拷贝对象（通过原型对象创建） + map 登记
-5. 进行深拷贝（Set、Map、object / array）
+2. 定义要克隆的类型：基础类型（如包装类型，用构造函数创建） + 继续遍历类型
+3. 简单拷贝：当数据类型是 null、基本数据类型、函数、非 `'object'`，直接返回。
+4. 读取入参类型
+5. 如果是基本类型，就调用 cloneBaseType 集中处理。
+6. 如果是继续遍历类型
+7. Map 解决循环引用
+8. 创建深拷贝对象（通过原型对象创建） + map 登记
+9. 进行深拷贝（Set、Map、object / array）
    - 注意赋值，统一为：`deepClone(value, map)` 进行递归深拷贝。
    - 拷贝 Set / Map
      - forEach 遍历 + set.add / map.set 添加
@@ -2004,41 +2028,51 @@ deepClone 代码要点：
 ```js
 // 1.入参：obj + new WeakMap
 function deepClone(obj, map = new WeakMap()) {
-  // 2.null、Date、RegExp、基本数据类型
+  // 2.定义要克隆的类型：
+  // 基础类型（包装函数）：直接构造函数创建
+  const baseTag = ["Boolean", "Number", "String", "Date", "Error", "RegExp"];
+  // 继续遍历的类型：需要deepClone
+  const deepTag = ["Map", "Set", "Array", "Object"];
+  
+  function cloneBaseType(target, type) {
+    if (type === "Boolean") return new Boolean(target);
+    else if (type === "Number") return new Number(target);
+    else if (type === "String") return new String(target);
+    else if (type === "Date") return new Date(target);
+    else if (type === "RegExp") return new RegExp(target);
+    else if (type === "Error") return new target.constructor(target); // typeError
+  }
+  // 3.直接返回：null + 基本数据类型
   if (obj === null) return obj;
-  if (obj instanceof Date) return new Date(obj);
-  if (obj instanceof RegExp) return new RegExp(obj);	
-  if (typeof obj !== 'object') return obj;
-
-  // 3.解决对象循环引用
+  if (typeof obj !== "object") return obj;
+  // 4.获取 obj 类型：
+  const type = Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
+  // 5.基础类型，集中处理
+  if (baseTag.includes(type)) return cloneBaseType(obj, type);
+  // 6.继续遍历类型
+  // 7.解决对象循环引用
   if (map.has(obj)) return map.get(obj);
-
-  const cloneObj = new obj.constructor();  // 通过原型对象创建
+	// 8.创建深拷贝对象
+  const cloneObj = new obj.constructor(); // 通过原型对象创建
   map.set(obj, cloneObj);
-
   // set
-  if (obj instanceof Set) {
+  if (type === "Set") {
     obj.forEach((value) => {
       cloneObj.add(deepClone(value, map));
     });
     return cloneObj;
   }
-
   // map
-  if (obj instanceof Map) {
-    obj.forEach(((value, key) => {
+  if (type === "Map") {
+    obj.forEach((value, key) => {
       cloneObj.set(key, deepClone(value, map));
-    }));
+    });
     return cloneObj;
   }
-
-  // object / array
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      cloneObj[key] = deepClone(obj[key], map);
-    }
-  }
-
+  // object / array: for in +  hasOwnProperty
+  Object.keys(obj).forEach((key) => {
+    cloneObj[key] = deepClone(obj[key], map);
+  });
   return cloneObj;
 }
 ```

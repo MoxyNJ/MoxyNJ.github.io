@@ -6,6 +6,20 @@ date: 2022-08-05
 tags: [React]
 ---
 
+> 来源：
+>
+> React 课程：https://ke.segmentfault.com/course/1650000023864436/section/1500000023864578
+>
+> Mini React：https://github.com/lizuncong/mini-react
+>
+> https://segmentfault.com/a/1190000039227345
+>
+> https://juejin.cn/post/6844903975112671239
+>
+> https://juejin.cn/post/7118259566868955167
+
+
+
 React 架构体系三大模块
 
 - 调度
@@ -744,7 +758,7 @@ Fiber 实现了代数效应（看代数效应的例子），可以近似的理�
 
 这是一种给予信任的契约合作机制：React 会根据自己的任务量，向浏览器申请适量的时间片。而浏览器会先执行更高优先级的任务，再把剩余时间分给 React，React 也会在规定的时间内完成任务执行，归还控制权。
 
-![img](images/React_Note.assets/16deecc37fdd60d7~tplv-t2oaga2asx-zoom-in-crop-mark:3024:0:0:0.awebp)
+![截屏2022-08-26 00.07.36](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-26%2000.07.36.png)
 
 那么，如何确定剩余时间呢？或者哪些任务是更高优先级的呢？
 
@@ -786,7 +800,7 @@ FIber 另一个概念是一种数据结构，或者说执行单元。
 
 `workLoop` ：它会从更新队列 (updateQueue) 中弹出更新任务来执行，每执行完一个 ‘`执行单元`‘ ，就检查一下剩余时间是否充足，如果充足就进行执行下一个 `执行单元`，反之则停止执行，保存现场，等下一次有执行权时恢复。
 
-![img](images/React_Note.assets/16deed1711f281b3~tplv-t2oaga2asx-zoom-in-crop-mark:3024:0:0:0.awebp)
+![截屏2022-08-26 00.08.11](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-26%2000.08.11.png)
 
 #### 3 一种数据结构
 
@@ -895,7 +909,9 @@ ReactDOM.render(<Index/>, document.getElementById('app'));
 
 - `fiberRoot.current = rootFiber;`
 
-![3.jpg](images/React_Note.assets/cb68640d39914c03bc77ea15616c7918~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
+![截屏2022-08-26 00.08.50](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-26%2000.08.50.png)
+
+
 
 **第二步：workInProgress 和 current**
 
@@ -915,8 +931,6 @@ useEffect 是异步调用的，useLayoutEffect 是同步调用的。
 
 
 ![截屏2022-08-07 00.18.02](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-07%2000.18.02.png)
-
-
 
 
 
@@ -1930,7 +1944,9 @@ React 事件系统可分为三个部分：
   - 每一个类型 element 都会有一个与之对应的 fiber 类型，element 变化引起更新流程都是通过 fiber 层面做一次调和改变，fiber 通过链表形式，构建出一颗 fiber 树。最终会在渲染阶段，转化为真实 DOM 并渲染在页面上。
   - 也就是说，React element 组成了 virtualDOM，在 render（协调）阶段转化为 fiber tree，在 commit(渲染) 阶段转化为真实DOM。
 
-![2.jpg](images/React_Note.assets/0a90368f24f0477aaf0d446a8f6736db~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
+![截屏2022-08-26 00.10.31](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-26%2000.10.31.png)
+
+
 
 所以：JSX 最终会转变为 `React.createElement()` 并执行，从而创建 React element（virtual DOM），最终合并到 fiber 节点上。而 fiber 节点之间通过链表连接，最终构造为一颗 fiber 树。
 
@@ -2114,21 +2130,3 @@ const useUpdateEffect = (callback, deps) => {
 
 - 缺点：callback 中不可以有 hooks，因为使用了 if 判断
   - 关联：hooks 为什么不能用 if。问题：Hooks 的特点之一，有序。
-
-
-
-
-
-
-
-> 来源：
->
-> React课程：https://ke.segmentfault.com/course/1650000023864436/section/1500000023864578
->
-> https://github.com/lizuncong/mini-react/blob/master/docs/render/%E6%B7%B1%E5%85%A5%E6%A6%82%E8%BF%B0%20React%E5%88%9D%E6%AC%A1%E6%B8%B2%E6%9F%93%E5%8F%8A%E7%8A%B6%E6%80%81%E6%9B%B4%E6%96%B0%E4%B8%BB%E6%B5%81%E7%A8%8B.md
->
-> https://segmentfault.com/a/1190000039227345
->
-> https://juejin.cn/post/6844903975112671239
->
-> https://juejin.cn/post/7118259566868955167

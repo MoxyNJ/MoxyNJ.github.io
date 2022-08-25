@@ -1052,13 +1052,90 @@ mySetInterval(() => {
 
 
 
+### 问题：实现字符串模版解析
 
+```js
+let template2 = "我是{{name}}，职业是{{job}}，工资有{{salary}}";
+let person = { name: "ninjee", job: "前端", salary: 30000 };
 
+function render(template, data) {
+  const reg = /\{\{(\w+)\}\}/; // 匹配：{{变量}}，w: 字符 [A-Za-z0-9_]，+: (1, Infinity)
+  if (reg.test(template)) {
+    // @ts-ignore
+    const name = reg.exec(template)[1];
+    template = template.replace(reg, data[name]);
+    // 递归，匹配下一个
+    return render(template, data);
+  }
+  return template;
+}
 
+render(template2, person); // 我是阿巴，职业前端，工资30000
+```
 
-## 坑：创建对象
+如果输入的是对象：
 
-- [JavaScript 创建对象之原型模式 (juejin.cn)](https://juejin.cn/post/6844903460903583758)
+```js
+let template = '你好，我们公司是{{company}}，我们属于{{group.name}}业务线，我们在招聘各种方向的人才，包括{{group.jobs[0]}}、{{group["jobs"][1]}}等。';
 
-- [JavaScript 创建对象之单例、工厂、构造函数模式 (juejin.cn)](https://juejin.cn/post/6844903460396236813)
+let obj = {
+  group: {
+    name: "天猫",
+    jobs: ["前端", "后端", "产品"],
+  },
+  company: "阿里巴巴",
+};
+
+function render(template, data) {
+  const origins = [];		// 字符串中的文字
+  const words = [];			// 字符串中的变量名	
+  let origin = "";
+  let word = "";
+  let flag = 0;	  // 0：没变量，1 已有一个左括号，2 已有两个左括号，3 第一个右括号
+  // 重制 flag 状态和 word 的存储
+  const defalutState = () => {
+    word = "";
+    flag = 0;
+  };
+	// 遍历
+  for (let i = 0; i < template.length; i++) {
+    if (template[i] === "{") {
+      if (flag == 0) {
+        flag = 1;
+      } else if (flag == 1) {
+        flag = 2;
+        origins.push(origin);
+        origin = "";
+      } else throw new Error("错误");
+    }
+    else if (template[i] === "}") {
+      if (flag == 2) flag = 3;
+      else if (flag == 3) {
+        words.push(word);
+        defalutState();
+      } else {
+        defalutState();
+      }
+    }
+    // 读取变量
+    else if (flag === 2) word += template[i];
+    else {
+      origin += template[i];
+      flag = 0;
+    }
+  }
+  if (origin) origins.push(origin);
+  // words: ['company', 'group.name', 'group.jobs[0]', 'group["jobs"][1]']
+  // origin ['你好，我们公司是', '，我们属于', '业务线，我们在招聘各种方向的人才，包括', '、', '等。']
+  let res = "";
+  for (let i = 0; i < Math.max(words.length, origins.length); i++) {
+    if (i < origins.length) res += origins[i];
+    if (i < words.length) res += eval("data." + words[i]);
+  }
+  return res;
+}
+
+const res = render(template, obj);
+// '你好，我们公司是阿里巴巴，我们属于天猫业务线，我们在招聘各种方向的人才，包括前端、后端等。'
+```
 

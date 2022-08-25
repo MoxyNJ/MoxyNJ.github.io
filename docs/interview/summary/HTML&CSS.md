@@ -1905,9 +1905,7 @@ drop-shadow(offset-x offset-y blur-radius spread-radius color)
 
 
 
-## 属性相关：
-
-#### 1 问题：clientX/Y, screenX/Y, offsetX/Y
+## 问题：clientX/Y, screenX/Y, offsetX/Y
 
 **这些值都是只读的**。都是检测鼠标位置的参数。
 
@@ -1954,11 +1952,130 @@ document.documentElement.clientHeight;
 
 
 
-CSS  link 和 import 的区别：
+## 问题：如何画 0.5px 的线
+
+在一个1080p的屏幕上，它的像素数量是1920 * 1080，即横边有1920个像素，而竖边为1080个。
+
+Mac 在 4k 显示器，默认分辨率为 1080p，它的 dpr = 4，即长和宽用 4 个像素表示1个像素。
+
+所以，设置 0.5px 的线，在这台显示器上用 2 个像素表示，显示更细，有美观效果。
+
+方案一：直接设置 `0.5px`，浏览器会对不满足 `1px` 的进行四舍五入，不同内核的解决方案还不同。
+
+方案二：`height: 1px + transform: scaleY(0.5)`  有些浏览器的显示会变虚。
+
+方案三：在 2 基础上，额外添加 `transform-origin: 50% 100%` 让缩放的基点往下移动 50%
+
+方案四：使用 SVG 绘制一个 0.5px 的线。
+
+```css
+<div class="line"></div>
+
+/* 方案三 */ 
+height: 1px;
+transform: scaleY(0.5);
+transform-origin: 50% 100%;
+```
 
 
 
+## 问题：link 和 @import 的区别
+
+CSS 有 4 种引入方式：
+
+- **内联样式**：即行内样式，通过标签的 style 属性，在标签上直接写样式。
+- **嵌入样式**：通过 style 标签，在网页上创建嵌入的样式表。
+- **外链样式**：通过 link 标签，链接外部样式文件到页面中。
+- **导入样式**：通过 CSS 提供的 @import 语法，在样式表中链接其他样式表。
+
+```less
+/* link */
+<link rel="stylesheet" type="text/css" href="index.css">
+
+/* @import */
+/* 必须出现在样式表中其他的样式之前，否则 @import 引用的样式表不会生效 */
+@import url("index.css")
+```
+
+**区别**：
+
+- **来源**。`<link>` 是 HTML 提供的标签；`@import` 是 CSS 提供的语法规则。
+- **加载时机**。link 标签引入的 CSS 被同时加载；@import 引入的 CSS 将 **在页面加载完毕后被加载**。
+- **兼容性**。 `link` 兼容性高，`@import` 在 IE5+ 才兼容。
+
+**`@import` 引入 CSS 的弊端**：
+
+- 使用 @import 引入 CSS 会影响浏览器的并行下载。
+
+  使用 @import 引用的 CSS 文件，只有在执行到 `@import` 才下载。所以在下载并解析主 CSS 文件后，浏览器才会知道还有 @import 的文件，然后才下载 + 解析 + 构建 CSSOM。
+
+- 多个 @import 会导致下载顺序紊乱
+
+  在 IE 中，`@import` 会引发资源文件的下载顺序被打乱，即排列在 `@import` 后面的 js 文件先于 `@import` 下 载。这导致 js 的执行会被阻塞，需要等待 HTML 代码更靠上的 CSS 文件下载+解析完毕，才能执行。
 
 
-=== 不常考的放下面 ======----------------------
+
+## 问题：BEM 命名规范
+
+一种前端 CSS 命名方法。块（block）、元素（element）、修饰符（modifier）的简写。
+
+规则如下：`block__element_modifier`
+
+- `- `中划线 ：连字符。多个单词的连接方式，**禁止驼峰命名**。
+- `__`  双下划线：`父元素__子元素`：`container-box__name-box`
+- `_` 单下划线：描述元素的状态，比如 active 选中时状态，错误状态：`box__button--danger`。
+
+**好处：**
+
+- 代码复用
+- 减少命名冲突
+- 命名结构清晰，识别度高，通过名称可简略看出 DOM 结构。
+
+
+
+## 问题：HTML 语义化标签
+
+[链接🔗](https://www.ninjee.co/docs/frontEnd/HTML&CSS#5-%E8%AF%AD%E4%B9%89%E7%B1%BB%E6%A0%87%E7%AD%BE)
+
+
+
+## 问题：initial, inherit, unset, revert 代表什么
+
+❗️放在可继承属性的问题之后。
+
+原则：
+
+- CSS 属性有些支持继承，有些不支持继承。
+- CSS 属性如果不设置，存在默认值 (初始值)。
+  - 继承属性，默认值不能设置，只能参考父元素（最终是根元素 HTML）
+  - 非继承属性，默认值可以任意设置。
+- 浏览器有一个默认样式表 User-Agent，用来对 (b/strong加粗、i/em倾斜、列表符号) 等定义初始样式。
+
+这四个参数可以在任意属性中使用：
+
+- `initial` 默认：让元素应用 CSS 最初的初始值。不是浏览器默认样式表，其也是后期定义的。
+- `inherited` 继承：可继承属性向上查找：父元素 >  HTML 根元素 > 浏览器默认样式表 > initial CSS 初始值。
+- `unset` 不设置：根据属性是否可继承，分为：
+  - 继承属性，效果为 `inherit` 继承。
+  - 非继承属性，效果为 `initial` 默认。
+- `revert` 恢复：继承属性效果为 `inherit`继承，非继承属性效果为 `浏览器默认样式`。
+
+
+
+## 问题：伪类/伪元素的应用
+
+**伪类：**
+
+- 兄弟元素的选取：`:nth-child`, `:nth-last-child`, `:nth-last-of-type()`, `:first-child`
+- 用户的聚焦 focus、链接 link、tab 的高亮 active 等。
+
+**伪元素：**
+
+- 解决高度坍塌问题。在父元素中的最后位置(`::after`)，创建一个空伪元素，并清除浮动。
+
+  `.container::after { content: ""; display: block;  clear: both; }`
+
+- `::after` 为文字添加末尾装饰，比如省略号：`...`
+- `::before` 为文字添加开头装饰，比如波浪线 `～`。不直接添加文字，达到只是视觉效果添加修饰，不改变文本含义，同时不影响搜索引擎对网站的抓取
+- `::after` 在文字前引入一个 icon。
 
