@@ -1787,9 +1787,55 @@ const user: P2 = {
 
 
 
+### interface 和 type 的区别是什么
+
+区别1：语法声明
+
+```tsx
+// 接口
+interface Point {
+    x: number;
+    y: number;
+}
+
+// 类型
+type Point = {
+    x: number;
+    y: number;
+};
+```
+
+区别2：约束
+
+接口：仅限于对象类型。是描述对象及其属性的一种方式。
+
+类型：类型别名声明可用于任何基元类型、联合或交集。**在这方面，接口被限制为对象类型**
 
 
-=== todo =============
 
-interface 和 type 的区别是什么
+区别3：类型可以通过 | 和 & 扩展
+
+```tsx
+// 并集
+type PartialPoint = PartialPointX | PartialPointY;
+
+// 交集
+type PartialPoint = PartialPointX & PartialPointY;
+```
+
+
+
+共同点：
+
+- 都可以被互相继承
+
+```tsx
+// 接口继承类型
+type PartialPointX = { x: number; };
+interface Point extends PartialPointX { y: number; }
+
+// 类型继承接口
+interface PartialPointX { x: number; }
+type Point = PartialPointX & { y: number; };
+```
 
