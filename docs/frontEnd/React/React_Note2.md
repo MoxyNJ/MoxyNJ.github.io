@@ -1,3 +1,11 @@
+---
+title: 2. React笔记（2）
+sidebar_position: 2
+slug: /frontEnd/React
+date: 2022-08-05
+tags: [React]
+---
+
 ### 🍊 组件间的通信方式（8种）
 
 父组件 => 子组件：
@@ -491,11 +499,11 @@ store：存储数据 state，提供派发方法 dispatch
 
 保存 action 操作的 **所有类型名 type**，方便查阅和修改。
 
+![image-20220905000125440](images/React_Note2.assets/image-20220905000125440.png)
 
 
-![redux-flow](react%E5%A4%8D%E4%B9%A0/b29d7032616345d0a969febfeadc67a2tplv-k3u1fbpfcp-watermark.awebp)
 
-![image-20211015160056888](react%E5%A4%8D%E4%B9%A0/image-20211015160056888.png)
+![image-20220905000133082](images/React_Note2.assets/image-20220905000133082.png)
 
 
 
@@ -540,7 +548,7 @@ store：存储数据 state，提供派发方法 dispatch
 
 
 
-![img](react%E5%A4%8D%E4%B9%A0/95e279721bec4ec4a9f3314a470d2f9ctplv-k3u1fbpfcp-watermark.awebp)
+![image-20220905000138844](images/React_Note2.assets/image-20220905000138844.png)
 
 利用：发布订阅结构，subscribe 和 unsubscribe。
 
@@ -548,7 +556,7 @@ store：存储数据 state，提供派发方法 dispatch
 
 ## 7.5 中间件 — 组件中的异步操作
 
-![img](react%E5%A4%8D%E4%B9%A0/bf8d8e9c32ff4980ac9835b91876ab75tplv-k3u1fbpfcp-watermark.awebp)
+![image-20220905000142086](images/React_Note2.assets/image-20220905000142086.png)
 
 把对网络请求的发送，获取网络资源，放到 redux 中。也就是利用 异步 action 获取网络资源。
 
@@ -557,7 +565,7 @@ store：存储数据 state，提供派发方法 dispatch
 - 这个**中间件的目的是在`dispatch`的`action`和最终达到的`reducer`之间，扩展一些自己的代码**
 - 比如日志记录、**异步网络请求**、添加代码调试功能等等
 
-![redux-middlware](react%E5%A4%8D%E4%B9%A0/78d03b01ff7c4e6281a54ea0ae0a1fa3tplv-k3u1fbpfcp-watermark.awebp)
+![image-20220905000146215](images/React_Note2.assets/image-20220905000146215.png)
 
 ####  `redux-thunk` 是如何做到让我们可以发送异步的请求呢？
 
@@ -645,7 +653,7 @@ recommend 组件中，有非常多的数据：
 
 一张图模拟这个过程：
 
-<img src="react%E5%A4%8D%E4%B9%A0/cb76e970eab64972905250166406af8etplv-k3u1fbpfcp-watermark.awebp" alt="immutable修改节点更新引用过程" style="zoom:67%;" />
+![image-20220905000155349](images/React_Note2.assets/image-20220905000155349.png)
 
 - `const im = Immutable`：创建 Immutable 
 - `Map()`、`List()`：创建映射、创建列表。
