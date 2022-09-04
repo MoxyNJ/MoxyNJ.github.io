@@ -380,11 +380,23 @@ weak 系列中，成员指向的对象是弱引用。简单说当 weakSet 中保
 
 
 
+### 问题：分页拉取-数据重复
+
+- https://juejin.cn/post/6938220313838616589
+
+解决有三个思路：
+
+- 前端一次获得完整的数据集，自行分割
+- 固定数据集范围
+  - 后端解决：比如 15分钟间隔，更新一次数据集，日志和时间戳绑定。
+- 无限滚动的页面，前端拼接内容时，过滤掉重复的数据集。
+
+
+
 ### 问题：可枚举 / 不可枚举
 
 - [枚举性](https://www.ninjee.co/docs/frontEnd/JavaScript/%E5%AF%B9%E8%B1%A1#32-%E5%8F%AF%E6%9E%9A%E4%B8%BE%E5%B1%9E%E6%80%A7--%E4%B8%8D%E5%8F%AF%E6%9E%9A%E4%B8%BE%E5%B1%9E%E6%80%A7)
 - [定义特性](https://www.ninjee.co/docs/frontEnd/JavaScript/%E5%AF%B9%E8%B1%A1#23-%E5%B1%9E%E6%80%A7%E7%9A%84%E7%89%B9%E6%80%A7)
-- 
 
 
 
