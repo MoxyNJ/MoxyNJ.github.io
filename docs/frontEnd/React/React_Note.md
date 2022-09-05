@@ -2111,6 +2111,180 @@ export default HOC(Index);
 
 
 
+### 🍊 组件间的通信方式（8种）
+
+父组件 => 子组件：
+
+1. Props
+2. Refs
+
+子组件 => 父组件：
+
+1. Callback Function
+2. Event Bubbling 事件冒泡
+
+兄弟组件之间：
+
+1. Parent Component：共同祖先
+
+不太相关的组件之间：
+
+1. Context
+2. 观察者模式 Event Bus
+3. Redux 等
+
+
+
+**（1）props + Callback Function**
+
+1. 【父组件】给【子组件】传递数据：通过 `props` 传递
+2. 【子组件】给【父组件】传递数据：通过 `props` 传递，要求父子组件给子传递一个回调函数，子组件通过调用这个函数，把数据传递给父组件。
+   - 在函数组件中的 hooks，useState 创建的 `setCount()` ，传递给子组件。
+
+需要使用 shallowEqual 优化，防止子组件频繁渲染：
+
+- 函数组件，memo 包裹子组件 + useMemo 值 + useCallback 函数；
+- 类组件，PureComponent 继承。
+
+
+
+**（2）Refs**
+
+父组件通过 `refs` 直接调用子组件实例
+
+- [useImperativeHandle](https://www.ninjee.co/docs/frontEnd/React#useimperativehandle)：用于父组件调用子组件的属性/方法。子组件对外暴露 / 提供部分功能
+
+- forwardRef：用于转发 ref。函数组件（有 props, ref 参数）传入 forwardRef，返回绑定好 ref 的新组件。
+
+```jsx
+const Father = () => {
+  const sonRef = useRef();
+  return (
+    <div>
+      <Son ref={sonRef} value="子组件内容" />
+      <button onClick={() => sonRef.current.handle1()}>点击打印 sonRef</button>
+    </div>
+  );
+};
+
+const Son = forwardRef((props, ref) => {
+  const input = useRef();
+  useImperativeHandle( ref, () => {
+    return {
+      handle1: foo
+    };
+  }, []);
+
+  const foo = () => {
+    console.log("foo function!");
+    console.log(input.current.value);
+  };
+
+  return (
+    <div>
+      <input type="text" defaultValue={props.value} ref={input} />
+    </div>
+  );
+});
+
+// 点父组件的 button 后，控制栏输出：foo function 子组件内容
+```
+
+
+
+**（3）Event Bubbling 事件冒泡**
+
+利用原生 dom 元素的事件冒泡机制，父组件拿到子组件的 dom 元素。
+
+```js
+const Father = () => {
+  return (<div
+      onClick={(e) => console.log(e.target.previousSibling.value) }
+    >
+      <Son />
+    </div>);
+};
+
+const Son = () => {
+  return (<div>
+      <input defaultValue="请输入内容..." />
+      <button>Click</button>
+    </div>);
+};
+
+// 点子组件的 button 后，控制栏输出：请输入内容...
+```
+
+
+
+**（4）context - provider**
+
+-   缺点1：context 是一个全局变量，当组件庞大复杂的时候，全局命名空间会变得繁杂，变量的来源和去向不清楚。
+-   缺点2：如果没有及时的在卸载组件时取消订阅，context 没有清空，造成内存泄露。
+
+消息订阅与发布机制
+
+1. 先订阅，再发布（理解：有一种隔空对话的感觉）
+2. 适用于任意组件间通信
+3. 要在类组件的 `componentWillUnmount` 中取消订阅
+
+```jsx
+// 【1】创建一个全局的上下文组件。
+const ThemeContext = React.createContext("light");
+
+// 【2】父，通过 ThemeContext.Provider包裹子组件，value 传递值。
+class Father extends React.Component {
+  render() {
+    return (
+      <ThemeContext.Provider value={{ name: "123" }}>
+        <MidComponent />
+      </ThemeContxt.Provider>
+    );
+  }
+}
+
+// 中间组件
+function MidComponent() {
+  return <div><ThemedButton /></div>;
+}
+
+//【3】孙，通过 contextType 声明要使用 context
+class ThemedButton extends React.Component {
+  static contextType = ThemeContext;
+  render() {
+    // 123
+    return <div>{this.context.name}</div>;  
+  }
+}
+
+//【4】孙，或者通过 Consumer，在 return 中直接拿到 value
+class ThemedButton extends React.Component {
+  render() {
+    // 123
+    return <ThemeContext.Consumer>{(value) => value.name}</ThemeContext.Consumer>
+  }
+}
+
+//【5】函数组件用 useContext 拿到 value
+function ThemedButton() {
+  const value = React.useContext(ThemeContext);
+  // 123
+  return <div>{value.name}</div>;
+}
+```
+
+**（5）Event Bus** 
+
+- https://juejin.cn/post/7101481154565865486
+- https://segmentfault.com/a/1190000023585646
+- https://codesandbox.io/s/wizardly-wave-rrmw5v?file=/src/Context.jsx
+
+**（6）redux**
+
+使用 redux 管理组件间的数据，达到完全可控。
+
+
+
 ## 自定义 hook
 
 ### 问题：阻止 useEffect 初始化调用
@@ -2130,3 +2304,262 @@ const useUpdateEffect = (callback, deps) => {
 
 - 缺点：callback 中不可以有 hooks，因为使用了 if 判断
   - 关联：hooks 为什么不能用 if。问题：Hooks 的特点之一，有序。
+
+
+
+## React Router
+
+### 🍊 redux 与 react-router 整合
+
+**好处 / 特点：**
+
+- 将 router 信息同步到 store 中，从 store 中获得。
+- 通过redux 的 dispatch actions 导航
+- 集成 Redux 可以支持在 Redux devtools 中路由改变的时间履行调试
+
+**流程，涉及到 [🔗](https://juejin.cn/post/6844904175671705614#heading-9)：**
+
+1. Redux 相关：
+   - `<Provider />` 传入创建好的 store，提供 redux 能力。包裹 `<App />`，是一个 root reducer。
+
+2. Router 相关：
+
+   - 创建 `history` 对象，利用 `createBrowserHistory()` 创建。
+
+   - 使用 `<connectRouter />`包裹 `<App />`， 返回绑定了 history 的 root reducer。
+     - `routerMiddleware(history)` 中间件绑定 history 到 reducer，实现用 api 修改 store 中的路由。
+     - 这里还涉及到 thunk、store 等知识，间上面的链接。
+
+```tsx
+import * as createHistory from 'history'
+const history = createHistory.createBrowserHistory()
+
+render(
+  <Provider store={store}>
+    <ConnectedRouter history={history}>
+      <App />
+    </ConnectedRouter>
+  </Provider>,
+  document.getElementById('app')
+)
+```
+
+
+
+### 🍊 React Router 流程
+
+```js
+import ReactDOM from 'react-dom';
+import Home from './page/Home'
+import About from './page/About'
+import Me from './page/Me'
+import { BrowserRouter, Link, Switch, Route } from 'react-router-dom'
+
+ReactDOM.render(
+  <BrowserRouter>
+    <nav>
+      <ul>
+        <li><Link to="/home" >Home</Link></li>
+        <li><Link to="/about" >About</Link></li>
+        <li><Link to="/me" >Me</Link></li>
+        <li><Link to="/other" >other</Link></li>
+        <li><Redirect to="/login" /></li>
+      </ul>
+    </nav>
+    <Switch>
+      <Route path="/home" component={Home}></Route>
+      <Route path="/about" component={About}></Route>
+      <Route path="/me" component={Me}></Route>
+      <Redirect from='/aboutMe' to='/Me'/></Redirect>
+    </Switch>
+  </BrowserRouter>,
+  document.getElementById('root')
+);
+```
+
+**当地址栏改变 url，组件的更新渲染都经历了什么？**
+
+拿 history 模式做参考。
+
+1. **`ConnectedRouter` 组件**。
+   - 当 url 改变，随之 history 对象改变，触发事件监听 `popstate` ，触发回调 `handlePopState`；
+     - hash 模式就是触发 `hashChange` 事件。
+   - 触发 history 对象的 `setstate()`，产生新的 `location` 对象，保存当前 URL 信息。
+2. **`Router` 组件。** 通过 **Provider context** 把 `hisotry`、`history.location`、`match` 传递下去。
+3. **`switch` 组件**。通过 Consumer context 拿到 URL，匹配符合的 `Route` 组件。
+4. **`Route` 组件**。渲染对应组件，同时通过 Consumer context，把 `hisotry`、`history.location`、`match` 通过 props 传递下去，让业务组件可以获得路有关信息。
+
+
+
+**主动 `history.push()` 来切换路由，组件的更新渲染经历了什么？**
+
+1. 生成最新 `location` 对象；
+2. 通过 `window.history.pushState()` 改变当前浏览器的 URL (路由)；
+3. **`ConnectedRouter` 组件**。**主动触发** `history.setState()`，传递新的 Location 对象，更新 URL 信息。
+4. 和上面第二步一样了。
+
+
+
+**路由组件的 props**
+
+传递 props 和 **很多路由相关信息** 给路由组件，子路由组件的 `this.props` 有：
+
+```jsx
+// this.props 中的三大属性：
+history:			// 对URL进行操作
+    go: ƒ go(n)
+    goBack: ƒ goBack()
+    goForward: ƒ goForward()
+    push: ƒ push(path, state)
+    replace: ƒ replace(path, state)
+
+location:
+    pathname: "/about"  // 当前URL信息
+    search: ""
+    state: undefined
+
+match: 
+	params: {}  // URL中的参数
+    path: "/about"
+    url: "/about"
+```
+
+
+
+
+
+### 🍊 文件结构 / 启动流程：
+
+public ---- 静态资源文件夹
+
+​			favicon.icon ------ 网站页签图标
+
+​            index.html -------- 主页面，项目只有一个 `.html` 文件，SPA（single page app）单页面应用。
+
+src ---- 源码文件夹
+
+​            App.js --------- App 组件，项目只有一个父组件，放到 `<div id="root"></div>` 中，其余自己添加的组件，都放到 App 组件中。 
+
+​            index.js ------- 入口文件，引入 react 核心库、react-dom 核心库、App 组件等必要的资源。
+
+​		    ...... 
+
+**启动流程：**
+
+1. 在 `src` 下 `index.js`:
+   - 引入 react 核心库 (React.Element)；
+   - 引入 react-dom 核心库 (render)；
+   - 引入 redux、router 等中间件。
+   - 引入 index CSS 样式；
+   - 引入根组件 App ；
+   - 触发 `ReactDOM.render()` 渲染 App 组件；
+     - 引入 App 组件时，就会把相应的 CSS、JS 代码全部引入。
+2. 在 `index.js` 文件执行后，React 通过 webpack 的配置文件，找到 `public` 下的 `index.html`：
+   - 依次执行 `index.html` 中的程序，
+3. 最终，渲染出 `index.html` 的页面。
+
+
+
+### 🍊 链接如何跳转
+
+**链接的跳转是依靠 BOM 中 window.history 实现的。**
+
+通过 `history.js` 库，简单介绍一下基本的实现原理：
+
+1. 提前准备工作：`let history = History.createBrowserHistory()`。通过 `history.js` 库，创建一个比直接调用 BOM 更方便的方式，来修改 BOM 中的 `window.history` 属性。
+2. 当用户点击 `a` 标签，触发了 `onClick` 回调函数：
+   1. 使用 `history.push()` 往历史记录中添加一个地址。
+   2. 使用 `return false` 阻止浏览器的自动跳转行为；
+3. 在函数 `history.listen(location = > { console.log("请求路由路径变化了", location)})` 的监听中，我们就可以通过 `location` 参数获得变化的路径，然后根据不同的路径再展示不同的组件到页面。
+
+
+
+### 🍊 SPA 定义
+
+1. 单页Web应用（single page web application，SPA）。
+2. 整个应用只有 **一个完整的页面**。
+3. 点击页面中的链接 **不会刷新** 页面，只会做页面的 **局部更新。**
+4. 数据都需要通过 ajax 请求获取, 并在前端异步展现。
+
+
+
+路由的定义：一个路由就是一个映射关系 (key / value)：
+
+- key 是一个路径，如`"/serch/users"`；
+- value 可能是 function（后端） 或 component（前端）。
+
+
+
+### 🍊 BrowserHistory 和 HashHistory 的区别
+
+BrowserHistory 是 H5 推出的 `history` 身上的 API，兼容性问题；
+
+HashHistory 是利用 hash值（锚点跳转），兼容性更强， `#` 锚点后的信息被当做前端内容，不会回传给后端服务器。
+
+- 进一步的，后端需要处理 `index.html` 地址的响应即可，而 Browser 还需要后端对子页面 URL 访问做出响应。
+
+```jsx
+// BrowserHistory的地址:
+127.0.0.1:5500/index.html/test1
+
+// HashHistory的地址，多了一个'#'，锚点的标记
+127.0.0.1:5500/index.html#/test1
+```
+
+
+
+### 🍊 NavLink 和 Link 组件有什么不同？
+
+Link 替换了 HTML 中的 `a` 标签，是 Route 中实现跳转功能的导航区。
+
+NavLink 组件比 Link 组件多了添加样式功能，可以在用户点击某个 NavLink 后，为这个标签添加类名：
+
+```js
+<NavLink activeClassName="blue" className="list-group-item" to="/about">About</Link>
+<NavLink activeClassName="blue" className="list-group-item" to="/home">Home</Link>
+<NavLink activeClassName="blue" className="list-group-item" to="/head">Header</Link>
+<NavLink activeClassName="blue" className="list-group-item" to="/foot">Footer</Link>
+```
+
+- 当该链接被激活时，就会把 `activeClassName` 的属性值添加为类名。如果不设置 `activeClassName` 属性，就会默认添加类名  `active` 。
+
+
+
+### 🍊 路由的模糊匹配与严格匹配
+
+**1 模糊匹配**
+
+如果地址栏输入以下两个链接：
+
+- /about
+- /home
+
+如果我们尝试跳转：`<Route path="/home/a/b" component={Home} />`，根据模糊匹配原则，虽然没有 `/a/b` 的地址，但是先匹配 `/home`，发现一致，则匹配成功，展示 Home 组件。
+
+
+
+我们希望当用户输入默认网址时，才会展示 Home 组件。这就需要对主页地址 `/` 设置 exact。在设置了精确匹配后，之后地址栏输入完全一致的主页地址，才会展示 Home 组件。
+
+- 如果不设置 `exact`，地址 `/about` 会首先匹配到 `path="/"`，也会展示 Home。如果用 switch，在 `<Switch>` 中只要匹配一次成功，就会停止匹配。所以不论地址输入哪一个网页，都会匹配到 Home 组件。
+
+
+
+**2 严格匹配**
+
+```jsx
+// 开启严格匹配
+<Route exact={true} path="/home" component={Home} />
+// 或
+<Route exact path="/home" component={Home} />
+```
+
+当我们注册路由时，`exact` 属性置为 true，就会开启精准匹配。必须所有地址完全一致，才可以匹配成功。
+
+- 如果不主动设置属性为 `true`，则默认是 `true`。
+
+一般情况下不会开启严格匹配。严格匹配的开启，可能会导致二级路由匹配失败的问题。
+
+
+
+
+
