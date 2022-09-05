@@ -2710,7 +2710,9 @@ getJSON("https://www.ninjee.co")
 
 1. 请求结束后，需要 **销毁** 本次请求产生的 **script 标签**和 **window上的回调函数**。
 2. callback 需要注册在 window 对象上，因为 script 加载后的执行作用域是 window 作用域。
-3. callback 名称要尽可能唯一。
+   - 浏览器会执行 callback，同时会把返回的数据作为参数。
+   - callback 要完成三件事：执行 `resolve()` 返回结果、销毁 callback 本身、销毁 script 标签。
+3. callback 名称要唯一。
 
 ```js
 // @ts-nocheck
@@ -2727,9 +2729,8 @@ const jsonp = ({ url, params, callback }) => {
       urlParams += `${key}=${params[key]}&`;
     });
     urlParams += `callback=${callback}`;
-    // "https://www.ninjee.co/test?name=ninjee&age=18&callback=handle"
+    // "https://www.ninjee.co/test?name=ninjee&age=18&callback=uniqueCallbackName"
     return url + urlParams;
-    // `https://www.ninjee.co/test?name=ninjee&age=18&callback=() => {\n    console.log\n    ("i'm callback~");\n}`
   };
 
   return new Promise((resolve, reject) => {
@@ -2739,7 +2740,8 @@ const jsonp = ({ url, params, callback }) => {
     scriptElement.src = generateUrl();
     // 元素添加到网页上
     document.body.appendChild(scriptElement);
-    // 收尾工作：在window上定义属性(名称为callback的函数代码，防止重名)，
+    // 在window上定义回调函数，当服务器返回响应时，script中会自动调用回调，把响应数据作为参数传入。
+    // 这里定义的 callback，会执行该 promise的resolve()，所以把结果又返回到了书写代码的地方。
     window[callback] = (res) => {
       try {
         resolve(res);
@@ -2754,23 +2756,16 @@ const jsonp = ({ url, params, callback }) => {
   });
 };
 
-// 使用
+
+// ===使用================
 const baseURL = "https://www.ninjee.co/test";
 const params = { name: "ninjee", age: 18 };
-//声明一个全局函数，用于接收服务器的响应数据。
-window.uniqueCallbackFunc = (res) => {
-  console.log(res);
-};
-
-const result = jsonp(baseURL, params, uniqueCallbackFunc);
-result
-  .then((res) => {
+const result = jsonp(baseURL, params, 'uniqueCallbackName');
+result.then((res) => {
   if (res.code === 0) console.log("响应成功：", res.value);
-	})
-  .catch((err) => {
+}).catch((err) => {
   console.log("发送失败：", err);
-	});
-
+});
 ```
 
 ### ES6
