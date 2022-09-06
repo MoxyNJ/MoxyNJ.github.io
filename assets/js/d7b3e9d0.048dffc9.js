@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[2933],{34712:function(e){e.exports=JSON.parse('{"name":"webpack","permalink":"/docs/tags/webpack","docs":[{"id":"interview/summary/webpack","title":"Webpack","description":"1. Webpack \u5b9a\u4e49","permalink":"/docs/interview/summary/webpack"}],"allTagsPath":"/docs/tags"}')}}]);

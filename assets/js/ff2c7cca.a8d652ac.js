@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[7706],{65028:function(e){e.exports=JSON.parse('{"name":"TypeScript","permalink":"/docs/tags/type-script","docs":[{"id":"interview/summary/Typescript","title":"Typescript","description":"TypeScript \u662f\u4ec0\u4e48","permalink":"/docs/interview/summary/Typescript"}],"allTagsPath":"/docs/tags"}')}}]);
