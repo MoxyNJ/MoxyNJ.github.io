@@ -1,7 +1,6 @@
 ---
 title: React
 sidebar_position:10
-slug: /frontEnd/React
 date: 2022-08-05
 tags: [React]
 ---
