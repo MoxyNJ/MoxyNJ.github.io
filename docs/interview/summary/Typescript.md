@@ -1,6 +1,6 @@
 ---
 title: Typescript
-sidebar_position: 3
+sidebar_position: 11
 date: 2022-03-03
 tags: [TypeScript]
 ---
