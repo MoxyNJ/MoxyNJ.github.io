@@ -5,8 +5,6 @@ date: 2022-03-03
 tags: [TypeScript]
 ---
 
-# 1 JavaSc**1** 概述
-
 ### TypeScript 是什么
 
 Typescript 为 JavaScript 丰富了类型检查功能，并不是取代 JavaScript。
