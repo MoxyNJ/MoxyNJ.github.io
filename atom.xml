@@ -13,7 +13,7 @@
         <id>/new/demo</id>
         <link href="https://ninjee.netlify.app/new/demo"/>
         <updated>2022-02-21T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[这是一篇测试文章。]]></summary>
+        <summary type="html"><![CDATA[这是一篇测试 Blog 日志的文章。]]></summary>
         <author>
             <name>Ninjee</name>
             <uri>https://github.com/MoxyNJ</uri>
