@@ -1082,6 +1082,39 @@ console.log(distinct(resources));
 
 
 
+#### 另：浅拷贝去重
+
+```js
+function func(array) {
+  // 边界：不是数组
+  if (!Array.isArray(array)) throw new Error("data must be an array");
+  if (array.length <= 1) return array;
+
+  const ans = [];
+  const map = new Map();
+  array.forEach((item) => {
+    const str = JSON.stringify(item);
+    console.log(map.get(item), str);
+
+    if (map.has(str)) {
+      return;
+    } else map.set(str, item);
+  });
+  const arr = [...map];
+  arr.forEach((item) => ans.push(item[1]));
+
+  return ans;
+}
+
+const arr = [123, "webank", [1, 2, 3], "123", { a: 1 }, "tencent", 123, [1, 2, 3], { a: 1 }];
+func(arr);
+//  [123, 'webank', [1, 2, 3], '123', { a: 1 }, 'tencent']
+```
+
+
+
+
+
 ### 2.2 数组扁平化
 
 ##### 实现 `Array.prototype.flat()`
@@ -2978,7 +3011,7 @@ function jsonToTree(data) {
   // 2. 根据pid查找父节点，并添加
   let res = {};
   data.forEach(item => {
-    const parent = map.get(item.pid, item);   // 找到父节点
+    const parent = map.get(item.pid);   // 找到父节点
     // 如果父节点不存在，则为顶级节点，用 res 指向
     if (!parent) res = item;
     else parent.children ? parent.children.push(item) : parent.children = [item];
