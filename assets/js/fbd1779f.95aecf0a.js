@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkninjee=self.webpackChunkninjee||[]).push([[2138],{59582:function(e){e.exports=JSON.parse('{"title":"algorithm","slug":"/category/algorithm","permalink":"/docs/category/algorithm","navigation":{"previous":{"title":"\u6982\u8ff0","permalink":"/docs/frontEnd/other"},"next":{"title":"\u6982\u8ff0","permalink":"/docs/code/algorithm"}}}')}}]);
