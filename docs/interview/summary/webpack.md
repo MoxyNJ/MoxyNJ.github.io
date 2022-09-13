@@ -181,7 +181,7 @@ function __webpack_require__(moduleId){
 
 
 
-## 2. 配置开发环境 -- npm、包管理器
+## 2. 配置开发环境
 
 -  创建一个工程：`npm init`
 -  也可以使用 `npm init -y`，直接生成了一个默认配置的 `package.json`，不需要一路回车。
@@ -524,207 +524,7 @@ if(module.hot) {      // 如果发现module中有hot属性，表明已经设置�
 
 
 
-## 5. webpack 性能优化
-
-1. 打包结果优化
-
-2. 构建过程优化
-
-3. Tree-Shaking
-
-
-
-### 5.1 打包体积优化
-
-webpack 自带的压缩方式
-
-1. 安装 `npm install webpack-bundle-analyzer` 可视化 webpack 分析器，打包过程中会出现分析后的页面
-2. 在 webpack.config.js 中，开头引入`const TerserPlugin = require('terser-webpack-plugin')`
-3. 配置：
-
-```js
-const TerserPlugin = require('terser-webpack-plugin')
-
-module.exports = {
-  optimization: {
-    minimizer: [new TerserPlugin({
-      cache: true,   // 使用缓存，加快构建速度
-      parallel： true,   // 开启多线程，提高打包速度
-      terserOptions: {
-      compress: {			// 	移除无用代码：断点、控制台输出等等
-      unsed: true,
-      drop_debugger: true, 
-      drop_console: true,
-      dead_code: true
-    }
-    }
-    })]
-  }
-}
-```
-
-
-
-执行后，可以通过 `webpack-bundle-analyzer` 查看哪些文件体积大，然后针对性的优化。
-
-![image-20220630213222846](images/webpack.assets/image-20220630213222846.png)
-
-
-
-WebPack 5 自带。
-
-内部本身就自带 js 压缩功能，他内置了 terser-webpack-plugin 插件，我们不用再下载安装。而且在 mode=“production” 的时候会自动开启 js 压缩功能。
-
-> 如果你要在开发环境使用，就用下面：
-
-```js
-  // webpack.config.js中
-  module.exports = {
-     optimization: {
-       usedExports: true, //只导出被使用的模块
-       minimize : true // 启动压缩
-     }
-  }
-```
-
-
-
-### 5.2 打包速度优化
-
-思路一，减少干活的量：从文件体积上减小。删掉体积大的，用不上的文件，不去打包，比如：
-
-```js
-module:{
-  rules: [
-    {
-      exclude: /node_loader/,
-    }
-  ]
-}
-```
-
-思路二，增加干活的人：采用多线程打包，可以根据cpu数量构建线程池，有两种常见的库：
-
-- `HappyPack`
-
-- `thread-loader`
-
-思路三，提前干活：预编译一些不常变化的模块。
-
-思路四，缓存：虽然时效性会差，但上次编译过的模块，如果没有修改，应该依然可用。
-
-思路五，使用更好的库，比如：
-
-- `fast-sass-loader`，快速的处理 sass 文件，比 `sass-loader` 速度更快。
-
-
-
-### 5.3 Tree-Shaking
-
-webpack 自带的优化方法，顾名思义，摇晃树把不好的树叶都晃下来，这里的实现原理是把文件中的无用代码全部消除。
-
-- 作用：例如定义了一个 util，里面很多公用的方法，但是很多方法没有用到，那么在 dev 环境打包时候，输出文件中就可以看到很多没用到的方法声明，但是在 product 生产环境打包时候，输出文件中就没有这些方法，消除掉这部分没用的代码。
-
-
-
-## 6 webpack 相关问题
-
-#### 问题：webpack 各文件的作用？
-
-| 文件名                |                                                     |
-| --------------------- | --------------------------------------------------- |
-| `node_modules` 文件夹 | 项目引入的模块都放置在这里                          |
-| `dist` 文件夹         | 打包成功后，文件会放置在这里                        |
-| `dist/index.html`     | 打包后，html 入口文件                               |
-| `dist/main.js`        | 打包后，js 文件                                     |
-|                       |                                                     |
-| `src` 文件夹          | 编写的代码文件都放置在这里                          |
-| `src/App.jsx`         | React 包裹在最外层的组件                            |
-| `src/index.jsx`       | React 接入 html 的入口文件                          |
-| `src/index.html`      | html 入口文件                                       |
-|                       |                                                     |
-| `package.json`        | 默认的配置文件                                      |
-| `package-lock.json`   |                                                     |
-| `webpack.config.js`   | webpack 额外的配置文件，通常在这里调整 webpack 设置 |
-| `.babelrc`            | 调整 babel 的设置文件                               |
-
-
-
-### 问题：plugin 是什么
-
-plugin 是节点纬度的操作。某一个事件节点，会触发特定的 plugin。
-
--   从机制上来说，plugin 基于 **事件监听** 实现。
-    -   Webpack 运行的生命周期中会广播出许多事件（钩子），Plugin 可以 **监听事件**，在合适的时机通过 Webpack 提供的 API 改变输出结果。
--   从结果上来说，plugin 是一个 **扩展器 / 拦截器**。
-    -   webpack 打包的是基于事件驱动的，plugin 通过监听 webpack 打包过程中的某些节点，从而通过 **回调函数** 执行各种任务。
-
-
-
-### 问题：loader 是什么
-
-loader 是文件纬度的操作。通过 loader 可以将各种格式的文件转化为浏览器可识别的格式。
-
-它具有三个特点：文件加载器、一个函数、单一职责。
-
--   它是 **文件加载器**。它能够加载资源文件，并对这些文件进行一些处理，诸如编译、压缩等。
-
--   它只是 **一个函数**，是一个封装的 JavaScript 模块。它接收其他代码，然后返回将其转化后的结果，并且一个文件还可以链式的经过多个 `loader` 转化（如 ` scss-loader => css-loader => style-loader` ）。
-
--   一个 `Loader` 的 **职责是单一的**，只需要完成一种转化。如果一个源文件需要经历多步转化才能正常使用，就通过多个 `Loader` 去转化。
-
-
-
-### 问题：区分： loader 和 plugin
-
-loader 是文件维度的操作，将 Webpack 不认识的、多种多样的格式内容转化为认识的、低版本的内容。
-
-- 比如使用 babel 把所有的 js 文件都进行转化，`babel-loader`
-- CSS 相关的引入：`css-loader`、`sass-loader`、`sass-loader`
-  - `style-loader` 通过动态添加 `style` 标签的方式，引入样式到节点上。
-  - `postcss `、`postcss-loader`、`postcss-preset-env` 自动添加CSS3属性前缀
-- 导入图片和使用地址：`url-loader`、`file-loader`
-- 解析 `.vue` 文件：`vue-loader`
-
-
-
-plugin 是节点维度的操作，比如 `index.html` 所谓入口文件，需要引入全部的 js  库等等。插件（Plugin）可以贯穿 Webpack 打包的生命周期，执行不同的任务
-
-- 使用 `html-webpack-plugin`，把打包好的 js 和 css 文件自动引入 HTML 中。
-
-- 使用 `clean-webpack-plugin`，在每次打包前，清空上次打包遗留的历史文件。
-
-
-
-### 问题：Webpack 是什么？
-
-一个现代 JavaScript 应用程序的静态模块打包器
-
-1. 默认：只对 js 进行处理，其他类型文件	需要配置 loader 或者插件进行处理。
-2. 打包：将各个依赖文件进行梳理打包，形成一个 JS 依赖文件。
-
-
-
-从历史看来，前端正在经历蓬勃发展：
-
-- 更方便的实现 html，出现 jsx
-- 更好用的实现 css，出现 sass less
-- 更好的模块化开发，出现 AMD，commonJs，ES6
-- 把各种新方案应用到支持较旧的浏览器中，出现 babel
-- 因为文件格式越来越多样，转化方式越来越多，出现了对打包方式、打包速度等优化的需求。
-- Webpack 应运而生，是一个模块打包的解决方案，也是一个融合前端新技术的平台；
-
-只要在 Webpack 中简单配置，就可以使用 jsx、TypeScript、babel 等各种各样的功能，所以，Webpack 是：
-
-- 是前端发展的产物：
-- 模块化打包方案；
-- 工程化方案。
-
-
-
-
-
-## 7. 包管理工具
+## 5. 包管理工具
 
 ### 问题：包管理工具的作用
 
@@ -958,4 +758,206 @@ npx 是 npm5.2 之后自带的一个命令。
 - 方式一：在终端中使用如下命令（在项目根目录下）:`./node_modules/.bin/webpack --version`
 - 方式二：修改 package.json 中的 scripts：`webpack": "webpack --version"`
 - 方式三：使用npx：`npx webpack --version`
+
+
+
+## 6. webpack 性能优化
+
+1. 打包结果优化
+
+2. 构建过程优化
+
+3. Tree-Shaking
+
+
+
+### 5.1 打包体积优化
+
+webpack 自带的压缩方式
+
+1. 安装 `npm install webpack-bundle-analyzer` 可视化 webpack 分析器，打包过程中会出现分析后的页面
+2. 在 webpack.config.js 中，开头引入`const TerserPlugin = require('terser-webpack-plugin')`
+3. 配置：
+
+```js
+const TerserPlugin = require('terser-webpack-plugin')
+
+module.exports = {
+  optimization: {
+    minimizer: [new TerserPlugin({
+      cache: true,   // 使用缓存，加快构建速度
+      parallel： true,   // 开启多线程，提高打包速度
+      terserOptions: {
+      compress: {			// 	移除无用代码：断点、控制台输出等等
+      unsed: true,
+      drop_debugger: true, 
+      drop_console: true,
+      dead_code: true
+    }
+    }
+    })]
+  }
+}
+```
+
+
+
+执行后，可以通过 `webpack-bundle-analyzer` 查看哪些文件体积大，然后针对性的优化。
+
+![image-20220630213222846](images/webpack.assets/image-20220630213222846.png)
+
+
+
+WebPack 5 自带。
+
+内部本身就自带 js 压缩功能，他内置了 terser-webpack-plugin 插件，我们不用再下载安装。而且在 mode=“production” 的时候会自动开启 js 压缩功能。
+
+> 如果你要在开发环境使用，就用下面：
+
+```js
+  // webpack.config.js中
+  module.exports = {
+     optimization: {
+       usedExports: true, //只导出被使用的模块
+       minimize : true // 启动压缩
+     }
+  }
+```
+
+
+
+### 5.2 打包速度优化
+
+思路一，减少干活的量：从文件体积上减小。删掉体积大的，用不上的文件，不去打包，比如：
+
+```js
+module:{
+  rules: [
+    {
+      exclude: /node_loader/,
+    }
+  ]
+}
+```
+
+思路二，增加干活的人：采用多线程打包，可以根据cpu数量构建线程池，有两种常见的库：
+
+- `HappyPack`
+
+- `thread-loader`
+
+思路三，提前干活：预编译一些不常变化的模块。
+
+思路四，缓存：虽然时效性会差，但上次编译过的模块，如果没有修改，应该依然可用。
+
+思路五，使用更好的库，比如：
+
+- `fast-sass-loader`，快速的处理 sass 文件，比 `sass-loader` 速度更快。
+
+
+
+### 5.3 Tree-Shaking
+
+webpack 自带的优化方法，顾名思义，摇晃树把不好的树叶都晃下来，这里的实现原理是把文件中的无用代码全部消除。
+
+- 作用：例如定义了一个 util，里面很多公用的方法，但是很多方法没有用到，那么在 dev 环境打包时候，输出文件中就可以看到很多没用到的方法声明，但是在 product 生产环境打包时候，输出文件中就没有这些方法，消除掉这部分没用的代码。
+
+
+
+
+
+## 7. webpack 相关问题
+
+### 问题：webpack 各文件的作用？
+
+| 文件名                |                                                     |
+| --------------------- | --------------------------------------------------- |
+| `node_modules` 文件夹 | 项目引入的模块都放置在这里                          |
+| `dist` 文件夹         | 打包成功后，文件会放置在这里                        |
+| `dist/index.html`     | 打包后，html 入口文件                               |
+| `dist/main.js`        | 打包后，js 文件                                     |
+|                       |                                                     |
+| `src` 文件夹          | 编写的代码文件都放置在这里                          |
+| `src/App.jsx`         | React 包裹在最外层的组件                            |
+| `src/index.jsx`       | React 接入 html 的入口文件                          |
+| `src/index.html`      | html 入口文件                                       |
+|                       |                                                     |
+| `package.json`        | 默认的配置文件                                      |
+| `package-lock.json`   |                                                     |
+| `webpack.config.js`   | webpack 额外的配置文件，通常在这里调整 webpack 设置 |
+| `.babelrc`            | 调整 babel 的设置文件                               |
+
+
+
+### 问题：plugin 是什么
+
+plugin 是节点纬度的操作。某一个事件节点，会触发特定的 plugin。
+
+-   从机制上来说，plugin 基于 **事件监听** 实现。
+    -   Webpack 运行的生命周期中会广播出许多事件（钩子），Plugin 可以 **监听事件**，在合适的时机通过 Webpack 提供的 API 改变输出结果。
+-   从结果上来说，plugin 是一个 **扩展器 / 拦截器**。
+    -   webpack 打包的是基于事件驱动的，plugin 通过监听 webpack 打包过程中的某些节点，从而通过 **回调函数** 执行各种任务。
+
+
+
+### 问题：loader 是什么
+
+loader 是文件纬度的操作。通过 loader 可以将各种格式的文件转化为浏览器可识别的格式。
+
+它具有三个特点：文件加载器、一个函数、单一职责。
+
+-   它是 **文件加载器**。它能够加载资源文件，并对这些文件进行一些处理，诸如编译、压缩等。
+-   它只是 **一个函数**，是一个封装的 JavaScript 模块。它接收其他代码，然后返回将其转化后的结果，并且一个文件还可以链式的经过多个 `loader` 转化（如 ` scss-loader => css-loader => style-loader` ）。
+    -   函数的柯里化。
+-   一个 `Loader` 的 **职责是单一**，只需要完成一种转化。如果一个源文件需要经历多步转化才能正常使用，就通过多个 `Loader` 去转化。
+
+
+
+### 问题：loader 和 plugin
+
+loader 是文件维度的操作，将 Webpack 不认识的、多种多样的格式内容转化为认识的、低版本的内容。
+
+- 比如使用 babel 把所有的 js 文件都进行转化，`babel-loader`
+- CSS 相关的引入：`css-loader`、`sass-loader`、`sass-loader`
+  - `style-loader` 通过动态添加 `style` 标签的方式，引入样式到节点上。
+  - `postcss `、`postcss-loader`、`postcss-preset-env` 自动添加CSS3属性前缀
+- 导入图片和使用地址：`url-loader`、`file-loader`
+- 解析文件：`vue-loader`、`ts-loader`、`markdown-loader`、`raw-loader`、`svg-sprite-loader`。
+
+
+
+plugin 是节点维度的操作，基于事件监听。比如 `index.html` 所谓入口文件，需要引入全部的 js  库等等。插件（Plugin）可以贯穿 Webpack 打包的生命周期，执行不同的任务
+
+- 使用 `copy-webpack-plugin`，将已经存在的单个文件或整个目录复制到本项目的构建目录。
+- 使用 `html-webpack-plugin`，把打包好的 js 和 css 文件自动引入 HTML 入口中。
+- 使用 `clean-webpack-plugin`，在每次打包前，清空上次打包遗留的历史文件。
+- 使用 `mini-css-extract-plugin`，将 CSS 单独提取，为每个 JS 文件创建一个对应的 CSS 文件。
+- 使用 `webpack.HotModuleReplacementPlugin`，HMR 模块热替换插件。部分修改，无需重新加载页面。
+- 使用 `webpack-bundle-analyzer`，可视化查看各打包 bundle 文件体积，
+
+
+
+### 问题：Webpack 是什么？
+
+一个现代 JavaScript 应用程序的静态模块打包器
+
+1. 默认：只对 js 进行处理，其他类型文件	需要配置 loader 或者插件进行处理。
+2. 打包：将各个依赖文件进行梳理打包，形成一个 JS 依赖文件。
+
+
+
+从历史看来，前端正在经历蓬勃发展：
+
+- 更方便的实现 html，出现 jsx
+- 更好用的实现 css，出现 sass less
+- 更好的模块化开发，出现 AMD，commonJs，ES6
+- 把各种新方案应用到支持较旧的浏览器中，出现 babel
+- 因为文件格式越来越多样，转化方式越来越多，出现了对打包方式、打包速度等优化的需求。
+- Webpack 应运而生，是一个模块打包的解决方案，也是一个融合前端新技术的平台；
+
+只要在 Webpack 中简单配置，就可以使用 jsx、TypeScript、babel 等各种各样的功能，所以，Webpack 是：
+
+- 是前端发展的产物：
+- 模块化打包方案；
+- 工程化方案。
 

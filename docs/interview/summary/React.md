@@ -5,29 +5,6 @@ date: 2022-08-05
 tags: [React]
 ---
 
-
-> 来源：
->
-> React 课程：https://ke.segmentfault.com/course/1650000023864436/section/1500000023864578
->
-> Mini React：https://github.com/lizuncong/mini-react
->
-> https://segmentfault.com/a/1190000039227345
->
-> https://juejin.cn/post/6844903975112671239
->
-> https://juejin.cn/post/7118259566868955167
-
-
-
-React 架构体系三大模块
-
-- 调度
-- 协调
-- 渲染
-
-
-
 ## React 设计理念
 
 ### 问题：React 运行机制 / 架构
@@ -2561,6 +2538,151 @@ NavLink 组件比 Link 组件多了添加样式功能，可以在用户点击某
 一般情况下不会开启严格匹配。严格匹配的开启，可能会导致二级路由匹配失败的问题。
 
 
+
+## 设计
+
+### 🍊 实现一个打星组件
+
+```jsx
+/*-- App.jsx --*/
+function App() {
+    return (
+        <div className="App">
+            <StarRating />
+        </div>
+    );
+}
+
+/*-- Star.jsx --*/
+import React, { useEffect, useState } from "react";
+
+/** 制作星级评分组件 */
+function StarRating(props) {
+  // 最终选中
+  const [rates, setRates] = useState(Array.from(new Array(5), () => false));
+  // 鼠标移动
+  const [select, setSelect] = useState(-1);
+
+  // 初始化
+  useEffect(() => {
+    const newRates = [true, true, true, false, false];
+    setRates(newRates);
+  }, []);
+
+  // 点击后，将选中的涂上颜色
+  const changeClick = (starIndex) => {
+    const newRates = Array.from(new Array(5), (item, index) => {
+      return index <= starIndex ? true : false;
+    });
+    setRates(newRates);
+  };
+
+  // 鼠标移动到区域内，记录下坐标
+  const changeMouse = (starIndex) => {
+    setSelect(starIndex);
+  };
+
+  // 判断Star是否涂上颜色
+  const getMarked = (index) => {
+    if (select === -1) return rates[index];
+    return index <= select;
+  };
+
+  return (
+    <div
+      onMouseMove={(e) => {
+        // @ts-ignore
+        changeMouse(e?.target?.getAttribute("star-key"));
+      }}
+      onMouseLeave={(e) => setSelect(-1)}
+      onClick={(e) => {
+        changeClick(e?.target?.getAttribute("star-key"));
+      }}
+      >
+      {Array.from(new Array(5), (item, index) => (
+        <Star starKey={index} key={index} marked={getMarked(index)} />
+      ))}
+    </div>
+  );
+}
+
+function Star({ starKey, marked = false }) {
+  return (
+    <span star-key={starKey} style={{ color: "yellowgreen", cursor: "pointer" }}>
+      {/* 空星，实星 */}
+      {marked ? "\u2605" : "\u2606"}
+    </span>
+  );
+}
+
+export default StarRating;
+```
+
+
+
+### 🍊 实现一个轮播图组件
+
+```jsx
+/*-- App.jsx --*/
+function App() {
+  return (
+    <div className="App">
+    <Carousel 
+    	carouselItems={[<div>item 1</div>, <div>item 2</div>, <div>item 3</div>]} />
+    </div>
+  );
+}
+
+/*-- Carousel.jsx --*/
+import React from "react";
+
+function Carousel(props) {
+  // active 当前轮播激活的索引
+  const [active, setActive] = React.useState(0);
+  const style = {
+    carousel: {
+      position: "relative",
+    },
+    carouselItem: {
+      position: "absolute",
+      visibility: "hidden",
+    },
+    visible: {
+      visibility: "visible",
+    },
+  };
+  React.useEffect(() => {
+    // 将 active 的值更新为下一个项的索引
+    setTimeout(() => {
+      const { carouselItems } = props;
+      // 因为active在render中使用了，active改变会影响视图而重新渲染，所以也会再次触发useEffect
+      setActive((active + 1) % carouselItems.length);
+    }, 1000);
+  });
+  const { carouselItems, ...rest } = props;
+  return (
+    <div
+      style={style.carousel}
+      >
+      {carouselItems.map((item, index) => {
+        // 激活就显示，否则隐藏
+        const activeStyle = active === index ? style.visible : {};
+        // 克隆出一个组件来渲染
+        return React.cloneElement(item, {
+          ...rest,
+          style: {
+            ...style.carouselItem,
+            ...activeStyle,
+          },
+          key: index,
+        });
+      })}
+    </div>
+  );
+}
+
+export default Carousel;
+```
 
 
 

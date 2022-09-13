@@ -3037,6 +3037,81 @@ jsonToTree(source);
 
 
 
+### 树转数组
+
+```js
+const root = [
+  {
+    id: 1,
+    name: "1x",
+    children: [
+      {
+        id: 11,
+        name: "11x",
+        children: [{ id: 111, name: "111x" }],
+      },
+      { id: 12, name: "12x" },
+    ],
+  },
+  {
+    id: 2,
+    name: "1x",
+    children: [
+      {
+        id: 21,
+        name: "21x",
+        children: [{ id: 211, name: "21x" }],
+      },
+      { id: 12, name: "12x" },
+    ],
+  },
+  { id: 3, name: "3x" },
+];
+
+function foo(root) {
+  const res = [];
+  root.forEach((item) => dfs(item));
+  console.log(res);
+  return res;
+
+  function dfs(node, parent = []) {
+    // 收集节点信息，加入结果中
+    const obj = {
+      id: node.id,
+      name: node.name,
+    };
+    if (parent.length) obj.parent = [...parent];
+    res.push(obj);
+
+    // 叶子: 直接返回节点
+    if (node.children == undefined || node.children.length == 0) return node.id;
+
+    // 非叶子: 收集children再返回。
+    const children = [];
+    obj.children = children;
+    for (const item of node.children) {
+      const res = dfs(item, [...parent, node.id]);
+      children.push(res);
+    }
+    return node.id;
+  }
+}
+
+foo(root);
+// 输出以下格式：
+// { id: 1, name: '1x', children: [ 11, 12 ] },
+// { id: 11, name: '11x', parent: [ 1 ], children: [ 111 ] },
+// { id: 111, name: '111x', parent: [ 1, 11 ] },
+// { id: 12, name: '12x', parent: [ 1 ] },
+// { id: 2, name: '1x', children: [ 21, 12 ] },
+// { id: 21, name: '21x', parent: [ 2 ], children: [ 211 ] },
+// { id: 211, name: '21x', parent: [ 2, 21 ] },
+// { id: 12, name: '12x', parent: [ 2 ] },
+// { id: 3, name: '3x' }
+```
+
+
+
 ### 解析 URL Params
 
 解析 URL 参数
