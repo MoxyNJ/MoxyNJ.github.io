@@ -1,11 +1,12 @@
 ---
-title: 排序
+title: 5. 排序
 sidebar_position: 5
-date: 2022-02-01
-keywords:sort
+date: 2022-09-18
+keywords: [sort, 排序]
+
 ---
 
-
+todo：进一步分析每个排序的特点（优点、缺点），使用场景，复杂度分析等。
 
 ![截屏2022-09-18 14.46.41](images/sort.assets/%E6%88%AA%E5%B1%8F2022-09-18%2014.46.41.png)
 
@@ -386,3 +387,4 @@ function radixSort(arr) {
 > 引用：
 >
 > - 部分内容不准确：[🔗](https://www.xiabingbao.com/post/sort/javascript-10-sort.html)
+
