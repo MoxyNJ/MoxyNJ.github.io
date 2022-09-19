@@ -400,6 +400,40 @@ weak 系列中，成员指向的对象是弱引用。简单说当 weakSet 中保
 
 
 
+### 问题：判断一个对象是否有某个属性
+
+```js
+const a = {test:123}
+
+// 对象的方法
+a.hasOwnProperty('test'); // true
+"test" in a // true ⚠️原型链上的也包含
+
+// 转数组
+Object.keys(a).indexOf("test"); // 0
+Object.keys(a).includes("test"); // true
+// 转 map set
+new Map(Object.entries(a)).has("test"); // true
+new Set(Object.keys(a)).has("test");   // true
+
+/** 获得属性的方法 **/
+obj.hasOwnProperty("name");		// 自有属性（不区分枚举）
+
+// Object系列，不考虑原型链上的属性
+	// - 只遍历自身可枚举：Symbol.iterator
+for...of
+Object.keys(object);
+Object.values(object); 
+Object.entries(object);
+	// - 不区分枚举
+Object.getOwnPropertyNames()	// 全部自有属性（不区分枚举）
+Object.getOwnPropertySymbols() // 全部自有Symbol属性（不区分枚举）
+	//  - Reflect
+Reflect.ownKeys()  // 全部属性名：String + Symbol（上面的属性相加）
+```
+
+
+
 
 
 ## 事件循环的题：

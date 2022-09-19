@@ -961,3 +961,13 @@ plugin 是节点维度的操作，基于事件监听。比如 `index.html` 所�
 - 模块化打包方案；
 - 工程化方案。
 
+
+
+### 问题：Webpack hash 作用
+
+在`webpack`中有三种`hash`可以配置，分别是`hash`、`chunkhash`、`contenthash`。
+
+- hash：项目级。整个项目，打包一次，改变一次 hash。所有文件 hash 值相同。
+- chunkhash：依赖代码块。从入口 entry 出发，到它的依赖，以及依赖的依赖，依赖的依赖的依赖，等等，一直下去，所打包构成的代码块 (模块的集合) 叫做一个chunk，也就是说，入口文件和它的依赖的模块构成的一个代码块，被称为一个chunk。 所以，一个入口对应一个chunk，多个入口，就会产生多个chunk 所以，单入口文件，打包后 chunkhash 和 hash 值是不同的，但是效果是一样的。
+- contenthash：只跟内容有关系，内容不变，哈希值不变。
+
