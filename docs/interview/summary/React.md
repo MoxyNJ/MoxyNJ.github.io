@@ -2539,6 +2539,60 @@ NavLink 组件比 Link 组件多了添加样式功能，可以在用户点击某
 
 
 
+### 问题：React中路由传递参数有几种方法？
+
+1. params（常用）
+
+```js
+<Route path='/path/:name' component={Path}/>
+<link to="/path/2">xxx</Link>
+this.props.history.push({pathname:"/path/" + name});
+// 读取参数
+this.props.match.params.name
+
+const params = useParams();
+// 特点：放入了URL中，刷新url参数依然存在。但长度受限制，且用户可以感知
+```
+
+2. query
+
+```js
+<Route path='/query' component={Query}/>
+<Link to={{ path : ' /query' , query : { name : 'sunny' }}}>
+this.props.history.push({pathname:"/query",query: { name : 'sunny' }});
+
+// 读取参数用: 
+this.props.location.query.name
+// 特点：参数可以传递任意数据结构。缺点：刷新地址栏，参数丢失
+```
+
+3. state
+
+```js
+<Route path='/sort ' component={Sort}/>
+<Link to={{ path:'/sort', state:{name:'sunny'}}}> 
+this.props.history.push({pathname:"/sort ",state : { name : 'sunny' }});
+//读取参数用: 
+this.props.location.query.state 
+const {state} = useLocation()
+// 特点：同 state
+```
+
+- `<HashRouter>` 不支持  `location.state`
+
+4. search(常用)
+
+```js
+<Route path='/web/departManange ' component={DepartManange}/>
+<link to="web/departManange?tenantId=12121212">xxx</Link>
+this.props.history.push({pathname:"/web/departManange?tenantId" + row.tenantId});
+// 读取参数用: 
+this.props.location.search
+new URLSearchParams((useLocation().search))
+```
+
+
+
 ## 设计
 
 ### 🍊 实现一个打星组件
@@ -2686,3 +2740,64 @@ export default Carousel;
 
 
 
+## 其他
+
+### 问题1：构建 React 项目？什么是前端工程化？
+
+前端工程师是一个思想，是为了我们项目的降本提效。
+
+- 技术选型、工作流、git 分支命名工作分配、代码规范、前后端/UI交流
+- 开发：开发规范（CSS 命名、JS 模块化区分、文件/组件拆分划分、组件化）
+- 单元测试：
+- 提测阶段：
+- 发布阶段：
+- code review
+- 埋点监测：量化指标性能优化 + 错误预警
+
+附：项目开发流程
+
+PRD初审、PRD复审、设计稿评审
+
+开发（工作分配、工作排期）、测试环境部署、联调 & 冒烟测试、
+
+测试用例评审、产品走查 & 提测、测试（4天）、预发环境部署
+
+上线
+
+
+
+### 问题3：React 15 16 17区别
+
+1. React 15：旧生命周期，更新不可中断
+2. React 16：新生命周期，fiber 架构，function 组件，异步更新可中断
+3. React 17：事件委托从 document -> app 根容器上。防止同一个项目中，不同React版本、不同框架等的事件冲突。
+
+
+
+### 问题：单向数据流
+
+有三个理解：
+
+1. React 官网中有提到单向数据流：
+   - 只的就是通过 props 进行数据传递。一个项目中，组件是按以树的结构组织起来的。上层的组件可以通过  props 向下层组件传递数据。也就是父组件可以单向的向子组件传递数据。
+2. React 中，每个组件内部也有一个单向数据流：
+   - 一个组件从功能的实现上看，有三个模块：
+     1. UI，组件最终展示的数据和界面；
+     2. action，对组件中数据的操作方式，比如增删改等操作；
+     3. State，组件数据保存的地方，组件的状态。
+   - 所以，在 UI、action、State 之间也是按照单向数据流传递的：
+     - 在 UI 页面中，用户通过交货产生了对数据的操作，触发 action；
+     - React 接收到特定的 action 操作，进而对组件的 State 进行修改；
+     - 组件的 State 一旦发生变化，就会触发 `render()` 重新渲染 UI ，页面发生变化。
+3. Redux 中，对数据的操作也是一个单项数据流：
+   - 一个 Store 从对数据的操作来看，有 3 个模块：
+     1. UI，组件最终展示的数据和界面；
+     2. Dispatch，组件中对数据的操作方式，比如增删改等操作；
+     3. Store，组件中保存数据的地方。
+        - Reducer，Store 中保存对数据操作的地方。Dispatch 触发 Reducer ，完成对数据的操作。
+        - State，Store 中保存数据的地方。
+     4. 所以，数据在UI、Dispatch、Store（Reducer、State）中也是一个单项数据流：
+        - 用户通过 UI 界面触发事件，引发 Dispatch 派发申请对数据进行操作；
+        - Dispatch 调用 Store 中的 Reducer，通过携带的 action 识别 Reducer 中对应的操作。然后修改数据；
+        - 修改后的数据会更新 Store 中的 State。
+        - 数据更新完毕后，会通知 React 组件，最终 `render()` 重新渲染 UI 界面。
