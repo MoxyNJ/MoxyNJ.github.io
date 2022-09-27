@@ -919,10 +919,11 @@ loader 是文件维度的操作，将 Webpack 不认识的、多种多样的格�
 
 - 比如使用 babel 把所有的 js 文件都进行转化，`babel-loader`
 - CSS 相关的引入：`css-loader`、`sass-loader`、`sass-loader`
-  - `style-loader` 通过动态添加 `style` 标签的方式，引入样式到节点上。
+  - `style-loader` 把 CSS 代码注⼊到 JavaScript 中，DOM 操作，动态添加 `style` 标签的方式，引入样式到节点。
   - `postcss `、`postcss-loader`、`postcss-preset-env` 自动添加CSS3属性前缀
 - 导入图片和使用地址：`url-loader`、`file-loader`
 - 解析文件：`vue-loader`、`ts-loader`、`markdown-loader`、`raw-loader`、`svg-sprite-loader`。
+- `eslint-loader`：通过 ESLint 检查 JavaScript 代码。
 
 
 
@@ -970,4 +971,39 @@ plugin 是节点维度的操作，基于事件监听。比如 `index.html` 所�
 - hash：项目级。整个项目，打包一次，改变一次 hash。所有文件 hash 值相同。
 - chunkhash：依赖代码块。从入口 entry 出发，到它的依赖，以及依赖的依赖，依赖的依赖的依赖，等等，一直下去，所打包构成的代码块 (模块的集合) 叫做一个chunk，也就是说，入口文件和它的依赖的模块构成的一个代码块，被称为一个chunk。 所以，一个入口对应一个chunk，多个入口，就会产生多个chunk 所以，单入口文件，打包后 chunkhash 和 hash 值是不同的，但是效果是一样的。
 - contenthash：只跟内容有关系，内容不变，哈希值不变。
+
+
+
+### 问题：webpack 构建流程
+
+- **初始化参数**：解析 webpack 配置参数，合并用户输入 shell 和 webpack.config.js 文件配置的参数，形成最后的配置结果；
+- **开始编译**：上一步得到的参数初始化 compiler 对象，注册所有配置的插件，插件监听webpack 构建生命周期的事件节点，做出相应的反应，执行对象的 run 方法开始执行编译；
+- **确定入口**：从配置的 entry 入口，开始解析文件构建 AST 语法树，找出依赖，递归下去；
+- **编译模块**：递归中根据文件类型和 loader 配置，调用所有配置的 loader 对文件进行转换，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过编译。
+- **完成模块编译并输出**：递归完事后，得到每个文件结果，包含每个模块以及他们之间的依赖关系，根据 entry 或分包配置生成代码块 chunk;
+- **输出完成**：输出所有的 chunk 到指定的文件目录；
+
+
+
+### 问题：热更新原理
+
+webpack 自己 **开启了express应用**。添加了对 webpack 编译的监听，建立和浏览器的websocket 长连接。
+
+- 当文件变化，触发 webpack 进行编译并完成后，通过 sokcet 消息告诉浏览器准备刷新。
+- 为了减少刷新的代价，就是 **不用刷新网页**，而是 **刷新某个模块*。
+
+webpack-dev-server 支持热更新，通过文件的 hash 值比对，找到需要更新的模块，浏览器再进行热替换。
+
+
+
+### 问题：webpack 优化前端性能
+
+⽤webpack优化前端性能是指优化webpack的输出结果，让打包的最终结果在浏览器运⾏快速⾼效。
+
+- **压缩代码**：删除多余的代码、注释、简化代码的写法等等⽅式。可以利⽤webpack的 UglifyJsPlugin 和 ParallelUglifyPlugin 来压缩JS⽂件， 利⽤ cssnano （css-loader?minimize）来压缩css
+- **利⽤CDN加速**: 在构建过程中，将引⽤的静态资源路径修改为 CDN 上对应的路径。可以利⽤ webpack 对于 output 参数和各 loader 的 publicPath 参数来修改资源路径。
+- **Tree Shaking**: 将代码中永远不会执行的⽚段删除掉。可以通过在启动 webpack 时追加参数 --optimize-minimize 来实现。
+- **Code Splitting**：懒加载。将代码按路由维度或者组件分块(chunk)，做到按需加载，同时可以充分利⽤浏览器缓存
+- **提取公共第三⽅库**： SplitChunksPlugin 插件来进⾏公共模块抽取，利⽤浏览器缓存可以⻓期缓存这些⽆需频繁变动的公共代码。
+
 
