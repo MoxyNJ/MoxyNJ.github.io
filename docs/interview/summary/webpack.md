@@ -1006,3 +1006,48 @@ webpack-dev-server 支持热更新，通过文件的 hash 值比对，找到需�
 - **Code Splitting**：懒加载。将代码按路由维度或者组件分块(chunk)，做到按需加载，同时可以充分利⽤浏览器缓存
 - **提取公共第三⽅库**： SplitChunksPlugin 插件来进⾏公共模块抽取，利⽤浏览器缓存可以⻓期缓存这些⽆需频繁变动的公共代码。
 
+
+
+### 问题：版本依赖规范
+
+npm 的包通常需要遵从 semver 版本规范： 
+
+- semver：https://semver.org/lang/zh-CN/ 
+- npm semver：https://docs.npmjs.com/misc/semver
+
+semver 版本规范是 `X.Y.Z`： 
+
+- X 主版本号（major）：新版本可能存在不兼容的 API 修改。
+- Y 次版本号（minor）：新版本新功能增加，但是兼容之前的版本。
+- Z 修订号（patch）：新版本没有新功能，修复了之前版本的 bug。
+
+语义化版本：
+
+在 `dependencies` 和 `devDependencies`  中的依赖，可以使用语义化版本号。重新安装依赖 `npm install` 后，会实现自动更新小版本或中版本，在不该动大版本的情况下，不需要用户手动修改版本号，就可以尽可能的使最新的版本。**通常 `package.json` 中的版本会添加一个 `^`。**
+
+- `^version`：会自动更新中版本和小版本；
+  - `^1.0.1`  ==> `1.x.x`
+- `~version`：会自动更新小版本；
+  - `~1.0.1` ===> `1.0.x`
+- `version`：不更新，只安装规定的版本。
+
+注意： `package-lock.json` 会锁定版本，**优先级比 `package.json` 更高**。
+
+
+
+### 问题：package-lock.json
+
+`package-lock.json` 的内容：
+
+- 通常 package-lock.json 的内容会比 package.json 多很多。这是因为 package-lock.json 里是会保存项目所有的依赖 (包括依赖的依赖) 的版本，下载地址等所以往往还会有一个树型的结构。
+
+**修改：**
+
+- 如果改了 package.json，且 package.json 和 lock 文件不同，那么执行 `npm i` 时 npm 会根据 package 中的版本号以及语义含义去下载最新的包，并更新至 `lock.json`。
+- 所以，package.json 和 lock 文件不同的条件下，会进行更新；如果两个文件没有冲突的时候就不会有更新产生。
+
+最后：
+
+- 使用 `npm ci` 安装依赖包，会严格按照 lock 文件去下载；
+- 使用 `npm i` 安装依赖包，会按照 package 去下载，如果有更新发生，会更新 lock 文件。
+

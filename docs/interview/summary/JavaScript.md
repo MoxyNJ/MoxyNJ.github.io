@@ -434,6 +434,59 @@ Reflect.ownKeys()  // 全部属性名：String + Symbol（上面的属性相加�
 
 
 
+### 问题：async & await 处理异常
+
+三种方式[🔗](https://juejin.cn/post/6844903998969872392)：
+
+- try catch。
+- 封装一个函数，在 await 时捕获 promise 产生的异常。
+- async 函数返回一个 promise，在这里捕获异常。
+
+方法二：
+
+```js
+// to.js
+export default function to(promise) {
+   return promise.then(data => {
+      return [null, data];
+   })
+   .catch(err => [err]);
+}
+
+import to from './to.js';
+
+// 使用：
+async function asyncTask(cb) {
+  let err, user, savedTask;
+
+  [err, user] = await to(UserModel.findById(1));
+  if(!user) return cb('No user found');
+
+  [err, savedTask] = await to(TaskModel({userId: user.id, name: 'Demo Task'}));
+  if(err) return cb('Error occurred while saving task');
+
+  if(user.notificationsEnabled) {
+    const [err] = await to(NotificationService.sendNotification(user.id, 'Task Created'));  
+    if(err) return cb('Error while sending notification');
+  }
+  cb(null, savedTask);
+}
+```
+
+方法三：
+
+```js
+async function task(){
+  return await req();
+}
+
+task().catch(e => console.error(e))
+```
+
+
+
+
+
 
 
 ## 事件循环的题：

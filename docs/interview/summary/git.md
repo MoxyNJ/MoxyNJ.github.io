@@ -287,3 +287,50 @@ alias gts='git status'
 
 ![未命名文件 (5).png](images/git.assets/716730b4b1cb45b48e84f4b01c8e000d~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
 
+
+
+### 问题：查看历史记录
+
+1. 切换到目录 cd...
+2. `git log --pretty=online 文件名`  列出当前文件的所有改动历史
+3. `git show hash值` 显示具体的某次改动
+
+[🔗](https://m.php.cn/tool/git/487194.html)
+
+其他方法：sourcetree 可视化查找、网页的 gitee 可视化查找。
+
+
+
+### 问题：git fetch， git pull，git pull --rebase 之间的区别
+
+1. `git fetch` 和 `git pull` 的区别
+
+在执行 `git pull` 后，代码会自动 merge 到本地的分支中，而 `git fetch` 会忽略掉这个 merge 操作，因此简单来说：
+
+```ini
+git pull = git fetch + git merge
+```
+
+2. `git pull` 和 `git pull --rebase` 区别
+
+`git pull` 命令默认包含了一个 `--merge` 参数，因此二者的区别其实就是 `merge` 和 `rebase` 的区别。
+
+**merge**
+
+`merge` 会创建一个新的 commit，如果合并时遇到了冲突，需要解决冲突后重新 commit。 ![在这里插入图片描述](https:////p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/175befc2f02f4d1f909ad5fd541cebff~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
+
+**rebase**
+
+![在这里插入图片描述](https:////p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ec7db69f93ee440a8a5b9b62dd68668c~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp) `rebase` 会将两个分支进行合并，同时合并之前的 commit 历史。如果出现冲突，解决冲突后执行以下命令即可：
+
+```bash
+git add
+git rebase --continue
+```
+
+
+
+
+
+
+
