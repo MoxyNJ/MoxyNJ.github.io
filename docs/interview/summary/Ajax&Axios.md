@@ -345,7 +345,7 @@ all.get("/testAJAX" , function (req , res) {
 
 
 
-## 6 fetch - AJAX
+## 6 fetch
 
 `fetch` 的基本使用：
 
