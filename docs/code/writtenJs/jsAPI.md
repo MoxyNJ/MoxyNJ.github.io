@@ -2075,9 +2075,8 @@ function deepClone(obj, map = new WeakMap()) {
     else if (type === "RegExp") return new RegExp(target);
     else if (type === "Error") return new target.constructor(target); // typeError
   }
-  // 3.直接返回：null + 基本数据类型
+  // 3.直接返回：null
   if (obj === null) return obj;
-  if (typeof obj !== "object") return obj;
   // 4.获取 obj 类型：
   const type = Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
   // 5.基础类型，集中处理
