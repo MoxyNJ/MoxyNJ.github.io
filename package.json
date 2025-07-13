@@ -1,6 +1,9 @@
 {
-  "name": "ninjee",
+  "name": "ninjee blog",
   "version": "0.0.2",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "private": true,
   "scripts": {
     "start": "docusaurus start --host 0.0.0.0",
