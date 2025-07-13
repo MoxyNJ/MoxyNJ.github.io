@@ -214,6 +214,8 @@ parseFloat({
 
 ![img](images/JavaScript%E7%9B%B8%E5%85%B3.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
 
+   <img src="images/JavaScript相关.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png" width="300" />
+
 解决 0.1 + 0.2 的问题，用 `toFixed(num)`
 
 -   `num.toFixed(num)`：**截断。**保留 num 位小数，格式化一个数值。
