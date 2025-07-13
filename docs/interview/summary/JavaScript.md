@@ -217,7 +217,7 @@ parseFloat({
 ![img](images/JavaScript%E7%9B%B8%E5%85%B3.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
 
 <img
-src={require('./images/JavaScript 相关.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png').default}
+src={require('.images/JavaScript%E7%9B%B8%E5%85%B3.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png').default}
 width="300"
 />
 
