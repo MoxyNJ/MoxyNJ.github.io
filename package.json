@@ -1,5 +1,5 @@
 {
-  "name": "ninjee blog",
+  "name": "ninjee-blog",
   "version": "0.0.2",
   "engines": {
     "node": ">=18.0.0"
