@@ -216,11 +216,6 @@ parseFloat({
 
 ![img](images/JavaScript%E7%9B%B8%E5%85%B3.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
 
-<img
-src={require('./images/JavaScript相关.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png').default}
-width="300"
-/>
-
 解决 0.1 + 0.2 的问题，用 `toFixed(num)`
 
 -   `num.toFixed(num)`：**截断。**保留 num 位小数，格式化一个数值。
@@ -312,7 +307,7 @@ num === 123; // false
 ).toString; // '123'
 ```
 
-### 问题：怎么判断一个 Fn 是通过 new 的方式调用？
+### 问题：判断 Fn 是否通过 new 的方式调用？
 
 1. （ES6）在调用 Fn 时，内部可通过 `new.target === true` 判断。只在构造函数执行时存在
 
@@ -328,6 +323,38 @@ num === 123; // false
     - 如果是 new Fn()，则 `this.__proto__ === Fn.prototype` 成立；
     - 如果调用 Fn 时用 call, apply 改变 this 则回不准确。
 3. 直接判断 `this` ，如果 this 是 window，undefined 则直接调，不是则通过 new。
+
+### 箭头函数为什么不能 new？
+
+1. 讲述 new 的过程；
+    - 创建一个新对象 `obj = {}` ；
+    - 新对象的原型链绑定为构造函数的 prototype：`obj.__proto__ = Fn.prototype`
+    - 绑定 `this` ，然后调用构造函数：`Fn.call(obj, "xxxxx")`；
+    - 返回对象 `obj`，如果构造函数有返回新对象，就返回新对象。
+2. 箭头函数没有自己的 this、arguments、prototype，不是构造函数，自然就不能用 new。
+    1. 报错：`TypeError: ArrowFn is not a constructor`
+3. 所以，天生没有 [[Construct]] 构造能力
+
+### 箭头函数可以作为构造函数吗？
+
+和上一个问题相同：
+
+1. 构造函数的本质
+    - 能被 new 调用的函数，必须具有内部的 [[Construct]] 方法；
+    - 同时拥有 prototype 属性（用于构造出的对象的原型链）。
+2. **不能，**因为它们没有构造能力（没有 [[Construct]] 内部方法），所以不能使用 new 调用。
+
+### 箭头函数和普通函数的区别?
+
+| **特性**               | **普通函数** function        | **箭头函数** ()=>{}                |
+| ---------------------- | ---------------------------- | ---------------------------------- |
+| 是否可构造（能否 new） | ✅ 可以（有 [[Construct]]）  | ❌ 不可以（报错）                  |
+| 是否有 this            | ✅ 有自己的 this（动态绑定） | ❌ 没有自己的 this，继承外层作用域 |
+| 是否有 arguments       | ✅ 有                        | ❌ 没有（用 rest 参数代替）        |
+| 是否有 super           | ✅ 有（在 class 中）         | ❌ 没有（继承外层）                |
+| 是否有 prototype       | ✅ 有                        | ❌ 没有                            |
+| 适合用作               | 构造函数 / 回调 / 普通函数   | 回调函数 / 内层闭包函数            |
+| this 指向              | 调用者决定                   | 定义时所在作用域决定（词法作用域） |
 
 ### 问题：类型判断的方式
 
@@ -380,31 +407,30 @@ new Date().valueOf(); // 1618753134122 毫秒数
 ```js
 const a = {test:123}
 
-// 对象的方法
-a.hasOwnProperty('test'); // true
+// in 操作符
 "test" in a // true ⚠️原型链上的也包含
 
-// 转数组
+// 获得属性的方法
+a.hasOwnProperty('test'); // true
+
+// 转数组+判断
 Object.keys(a).indexOf("test"); // 0
 Object.keys(a).includes("test"); // true
-// 转 map set
+// 转 map set + 判断
 new Map(Object.entries(a)).has("test"); // true
 new Set(Object.keys(a)).has("test");   // true
 
-/** 获得属性的方法 **/
-obj.hasOwnProperty("name");		// 自有属性（不区分枚举）
-
-// Object系列，不考虑原型链上的属性
-	// - 只遍历自身可枚举：Symbol.iterator
-for...of
-Object.keys(object);
-Object.values(object);
-Object.entries(object);
+// 不考虑原型链，只看自身
+  // - 可枚举：Symbol.iterator
+  for...of
+  Object.keys(object);
+  Object.values(object);
+  Object.entries(object);
 	// - 不区分枚举
-Object.getOwnPropertyNames()	// 全部自有属性（不区分枚举）
-Object.getOwnPropertySymbols() // 全部自有Symbol属性（不区分枚举）
+  Object.getOwnPropertyNames()	// 属性
+  Object.getOwnPropertySymbols() // Symbol属性
 	//  - Reflect
-Reflect.ownKeys()  // 全部属性名：String + Symbol（上面的属性相加）
+  Reflect.ownKeys()  // 全部属性名：属性 + Symbol属性
 ```
 
 ### 问题：async & await 处理异常
