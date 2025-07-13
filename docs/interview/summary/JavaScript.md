@@ -281,25 +281,23 @@ weak 特点：对象约束（成员只能是对象）、垃圾回收（弱引用
 
 Symbol 用来生成一个 **独一无二的值**。
 
-### 问题：为什么 Symbol/BigInt 不能 new
+### 问题：为什么 Symbol/BigInt 不能 new？
+
+Symbol 和 BigInt 虽然没有对应的「包装构造函数」可通过 new 使用，但它们依然拥有包装对象类型，并可调用方法。只是 new 语法被禁止。
+
+-   但是他们和下边的 Number 等一样，也有包装类型，只是不能 new 一个包装类型出来。
 
 在引用类型中，有三种原始值包装类型：String、Number、Boolean。
+他们既可以用 `new` 创建，也可以不使用 `new` 创建。
 
--   原始值："abc"、123 等不是对象，**原始值包装类型** 是用来把原始值包装成包装类型的对象。
--   使用 new 创建 string、number、boolean 会创建一个对象，而不再是基本数据类型。
+-   **原始值**：基本数据类型。直接创建，"abc"、123 等不是对象；
+-   **原始值包装类型** ：包装类型。用 `new` 创建，原始值包装成包装类型。
 
 ```js
-const num = new Number(123);
-typeof num; // "object"
-Object.prototype.toString.call(num); // '[object Number]'
+const num = new Number(123); // 包装类型
+Object.prototype.toString.call(num); // '[object Number]' 包装类型，是一个对象
 num == 123; // true
 num === 123; // false
-```
-
--   不使用 new 创建，则会发生自动类型转化，将入参转化为基本数据类型。
-
-```js
-Number("123"); // 123
 ```
 
 包装类型的主要目的，是可以让基本数据类型调用包装方法，**自动装箱/拆箱**
@@ -311,8 +309,6 @@ Number("123"); // 123
     123
 ).toString; // '123'
 ```
-
-**而 Symbol、BigInt 没有原始值的包装类型，自然也能不存在 new 创建。**
 
 ### 问题：怎么判断一个 Fn 是通过 new 的方式调用？
 
