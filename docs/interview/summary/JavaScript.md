@@ -314,22 +314,22 @@ Number("123"); // 123
 
 **而 Symbol、BigInt 没有原始值的包装类型，自然也能不存在 new 创建。**
 
-更进一步，如何鉴定是否用 new 调用？ `this instaneof xxx`
+### 问题：怎么判断一个 Fn 是通过 new 的方式调用？
 
--   new 调用的过程：创建空对象、绑定原型链，所以用 instanceof 可以检测出。
+1. （ES6）在调用 Fn 时，内部可通过 `new.target === true` 判断。只在构造函数执行时存在
 
-```js
-function mySymbol() {
-    console.log(this);
-    if (this instanceof mySymbol) {
-        throw new Error("Uncaught TypeError: mySymbol is not a constructor");
+    ```jsx
+    function Fn() {
+        new.target ? console.log("是通过 new 调用") : console.log("不是通过 new 调用");
     }
-}
-// 测试
-mySymbol(); // window
-new mySymbol(); // mySymbol {}
-// Uncaught TypeError: A is not a constructor
-```
+    Fn(); // 不是通过 new 调用
+    new Fn(); // 是通过 new 调用
+    ```
+
+2. `this instanceof Fn`，new 执行时，构造函数的原型链，绑定在 Fn.prototype 上。
+    - 如果是 new Fn()，则 `this.__proto__ === Fn.prototype` 成立；
+    - 如果调用 Fn 时用 call, apply 改变 this 则回不准确。
+3. 直接判断 `this` ，如果 this 是 window，undefined 则直接调，不是则通过 new。
 
 ### 问题：WeakMap/WeakSet 应用场景
 
