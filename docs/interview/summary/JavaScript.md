@@ -240,17 +240,21 @@ function financial(x) {
 
 ### 问题：WeakSet/Map 使用场景 / 注意事项
 
-weak 特点：对象约束（成员只能是对象）、垃圾回收（弱引用）、无法遍历、无法清空。
+weak 特点：对象约束（成员只能是对象）、弱引用（方便 GC 垃圾回收）、无法遍历、无法清空。
 
 -   注意：WeakMap 只支持 object 作为成员的 key。
 
-使用场景：
+目的：避免内存泄漏
 
-避免内存泄漏：关联某个对象的元数据，但不想影响该对象的垃圾回收时，用 WeakMap。
+-   关联某个对象的元数据，但不想影响该对象的垃圾回收时，用 WeakMap。
+
+使用场景：用来收集和统计数据
 
 -   例如缓存 DOM 元素的状态、绑定事件处理器数据，避免因为缓存导致内存无法释放；
 -   这样做，可以省去每次销毁对象时，还需要在绑定它的 map 上去做引用解除；
 -   典型的 Vue3 响应式，就使用 WeakMap 去跟踪对象的依赖关系的。
+
+-   [内存管理 + 垃圾回收](/docs/frontEnd/JavaScript/%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE%E5%92%8C%E9%97%AD%E5%8C%85#1-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86)，[WeakSet](/docs/frontEnd/JavaScript/Symbol,%20Set,%20Map#22-weakset)
 
 ### 问题：什么是栈空间、堆空间
 
@@ -326,16 +330,6 @@ num === 123; // false
     - 如果是 new Fn()，则 `this.__proto__ === Fn.prototype` 成立；
     - 如果调用 Fn 时用 call, apply 改变 this 则回不准确。
 3. 直接判断 `this` ，如果 this 是 window，undefined 则直接调，不是则通过 new。
-
-### 问题：WeakMap/WeakSet 应用场景
-
-weak 系列中，成员指向的对象是弱引用。简单说当 weakSet 中保存的对象，除 weakSet 保持引用之外，没有任何引用，则 GC 会对其进行垃圾回收。
-
-主要是为了解决潜在的 **内存泄露** 问题。
-
--   [内存管理 + 垃圾回收](/docs/frontEnd/JavaScript/%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE%E5%92%8C%E9%97%AD%E5%8C%85#1-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86)，[WeakSet](/docs/frontEnd/JavaScript/Symbol,%20Set,%20Map#22-weakset)
-
-**缓存数据**：在实现深拷贝时，就使用了 WeakMap，来收集所有已拷贝的对象。因为是弱引用，所以当 WeakMap 中引用的对象因没有其他用处而想销毁时，无需考虑深拷贝过程中 WeakMap 对其的引用关系，可直接销毁。所以 WeakMap 常常用来收集和统计数据，当数据在内存中销毁，WeakMap 中的引用也自动销毁。
 
 ### 问题：类型判断的方式
 
