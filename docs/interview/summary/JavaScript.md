@@ -135,7 +135,7 @@ Number.isNaN("abc"); // false
 
 ### 问题：防抖 / 节流的应用场景
 
-![image-20220817170155198](images/JavaScript.assets/image-20220817170155198.png)
+![image-20220817170155198[80]](images/JavaScript.assets/image-20220817170155198.png)
 
 **防抖 debounce**
 
@@ -181,7 +181,7 @@ JS 中的`Number`类型只能安全地表示`-9007199254740991 (-(2^53-1))` 和`
 
 javascript 中的数都是用 IEEE754 标准的双精度浮点数来表示的：
 
-![img](images/JavaScript.assets/17263be557add8c8~tplv-t2oaga2asx-zoom-in-crop-mark:3024:0:0:0.awebp)
+![img[60]](images/JavaScript.assets/17263be557add8c8~tplv-t2oaga2asx-zoom-in-crop-mark:3024:0:0:0.awebp)
 
 sign 为 0 表示正数，为 1 表示负数；exponent 表示科学计数法中的指数部分，实际存储的时候必须加上一个偏移值 1023；fraction 表示小数点后的部分，整数部分永远为 1，计算机不存储，但是运算的时候会加上。
 
@@ -247,8 +247,7 @@ parseFloat({
 -   使用第三方计算库（如 Big.js、Decimal.js、bignumber.js）；
 
 ### 问题：0.1+0.2=？0.6-0.4=？
-
-![img](images/JavaScript%E7%9B%B8%E5%85%B3.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
+![JavaScript浮点数精度问题示例图 [30]](images/JavaScript%E7%9B%B8%E5%85%B3.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
 
 解决 0.1 + 0.2 的问题，用 `toFixed(num)`
 

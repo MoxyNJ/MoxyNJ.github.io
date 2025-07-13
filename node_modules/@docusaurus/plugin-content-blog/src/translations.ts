@@ -5,9 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import type {BlogContent, BlogPaginated} from './types';
-import type {TranslationFileContent, TranslationFiles} from '@docusaurus/types';
-import type {PluginOptions} from '@docusaurus/plugin-content-blog';
+import type {TranslationFileContent, TranslationFile} from '@docusaurus/types';
+import type {
+  PluginOptions,
+  BlogContent,
+  BlogPaginated,
+} from '@docusaurus/plugin-content-blog';
 
 function translateListPage(
   blogListPaginated: BlogPaginated[],
@@ -27,7 +30,7 @@ function translateListPage(
   });
 }
 
-export function getTranslationFiles(options: PluginOptions): TranslationFiles {
+export function getTranslationFiles(options: PluginOptions): TranslationFile[] {
   return [
     {
       path: 'options',
@@ -51,7 +54,7 @@ export function getTranslationFiles(options: PluginOptions): TranslationFiles {
 
 export function translateContent(
   content: BlogContent,
-  translationFiles: TranslationFiles,
+  translationFiles: TranslationFile[],
 ): BlogContent {
   const {content: optionsTranslations} = translationFiles[0]!;
   return {

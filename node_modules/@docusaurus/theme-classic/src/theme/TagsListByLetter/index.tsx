@@ -5,17 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, {type ReactNode} from 'react';
+import {listTagsByLetters, type TagLetterEntry} from '@docusaurus/theme-common';
 import Tag from '@theme/Tag';
 import type {Props} from '@theme/TagsListByLetter';
-import {listTagsByLetters, type TagLetterEntry} from '@docusaurus/theme-common';
-
+import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
 function TagLetterEntryItem({letterEntry}: {letterEntry: TagLetterEntry}) {
   return (
     <article>
-      <h2>{letterEntry.letter}</h2>
+      <Heading as="h2" id={letterEntry.letter}>
+        {letterEntry.letter}
+      </Heading>
       <ul className="padding--none">
         {letterEntry.tags.map((tag) => (
           <li key={tag.permalink} className={styles.tag}>
@@ -28,7 +30,7 @@ function TagLetterEntryItem({letterEntry}: {letterEntry: TagLetterEntry}) {
   );
 }
 
-export default function TagsListByLetter({tags}: Props): JSX.Element {
+export default function TagsListByLetter({tags}: Props): ReactNode {
   const letterList = listTagsByLetters(tags);
   return (
     <section className="margin-vert--lg">

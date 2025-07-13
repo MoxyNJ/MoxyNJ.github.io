@@ -5,13 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-
-import DebugLayout from '@theme/DebugLayout';
+import React, {type ReactNode} from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import DebugLayout from '@theme/DebugLayout';
 import styles from './styles.module.css';
 
-export default function DebugMetadata(): JSX.Element {
+export default function DebugMetadata(): ReactNode {
   const {siteMetadata} = useDocusaurusContext();
   return (
     <DebugLayout>
@@ -21,10 +20,10 @@ export default function DebugMetadata(): JSX.Element {
       </div>
       <div>
         Site Version:{' '}
-        <code>{siteMetadata.siteVersion || 'No version specified'}</code>
+        <code>{siteMetadata.siteVersion ?? 'No version specified'}</code>
       </div>
       <h3 className={styles.sectionTitle}>Plugins and themes</h3>
-      <ul className={styles.list}>
+      <ul className="clean-list">
         {Object.entries(siteMetadata.pluginVersions).map(
           ([name, versionInformation]) => (
             <li key={name} className={styles.listItem}>

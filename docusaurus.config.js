@@ -1,6 +1,7 @@
 // @ts-check
 const path = require("path");
 const record = "晋ICP备2021017941号-2";
+const { themes } = require("prism-react-renderer");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -12,8 +13,13 @@ const config = {
     organizationName: "Ninjee", // GitHub user name.
     projectName: "MoxyNJ.github.io", // repo name.
     onBrokenLinks: "ignore",
-    onBrokenMarkdownLinks: "warn",
+    onBrokenMarkdownLinks: "ignore",
     favicon: "img/favicon.ico",
+    
+    // 自定义字段
+    customFields: {
+        mdx1Compat: true, // 尝试兼容 MDX 1 语法
+    },
 
     themeConfig:
         /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -29,7 +35,11 @@ const config = {
                     content: "Moxy, Ninjee, blog, javascript, typescript, python ,node, react, vue, web, 前端, 后端",
                 },
             ],
-            hideableSidebar: true,
+            docs: {
+                sidebar: {
+                    hideable: true,
+                },
+            },
             navbar: {
                 title: "Ninjee",
                 logo: {
@@ -70,8 +80,8 @@ const config = {
                                 to: "docs/frontEnd/React",
                             },
                             {
-                                label :"浏览器原理",
-                                to: "docs/frontEnd/浏览器原理"
+                                label: "浏览器原理",
+                                to: "docs/frontEnd/浏览器原理",
                             },
                             {
                                 label: "other",
@@ -126,28 +136,6 @@ const config = {
                     },
                 ],
             },
-            //TODO: algolia支持
-            algolia: {
-                // 方案一：algolia 24小时更新
-                // appId: "OITUMQ5615",
-                // apiKey: "0387d1c184aea75952516c04bb8d66de",
-                // indexName: "moxynj",
-                // container: '### REPLACE ME WITH A CONTAINER (e.g. div) ###',
-                // debug: false // Set debug to true if you want to inspect the modal
-                // 方案二：手动部署
-                appId: "AJRH2JRXVY",
-                apiKey: "e77e52eb1db6235fb4ddcb01a46274da",
-                indexName: "ninjee",
-                // 方案三：netlify 自动更新
-                // indexName: "netlify_6e8c93fe-0e5c-42a1-8f48-bb69ed96977c_master_all",
-                // apiKey: "ab5459a0712ffbe0dbd5e666660ea9a2",
-                // appId: "6H64QA8BXJ",
-                // siteId: "6e8c93fe-0e5c-42a1-8f48-bb69ed96977c",
-                // branch: "master",
-                // selector: "div#search",
-                // contextualSearch: false,
-                // placeholder: "search",
-            },
             footer: {
                 style: "dark",
                 links: [
@@ -198,8 +186,8 @@ const config = {
                 copyright: `<p>Copyright © ${new Date().getFullYear()} Ninjee Built with Docusaurus.</p><p><a href="http://beian.miit.gov.cn/" >${record}</a></p>`,
             },
             prism: {
-                theme: require("prism-react-renderer/themes/github"),
-                darkTheme: require("prism-react-renderer/themes/vsDark"),
+                theme: themes.github,
+                darkTheme: themes.vsDark,
                 additionalLanguages: ["javascript", "python"],
                 defaultLanguage: "typescript",
             },
@@ -228,7 +216,12 @@ const config = {
                     blogSidebarCount: 5,
                     postsPerPage: 10,
                     showReadingTime: true,
-                    readingTime: ({ content, frontMatter, defaultReadingTime }) => defaultReadingTime({ content, options: { wordsPerMinute: 300 } }),
+                    readingTime: ({ content, frontMatter, defaultReadingTime }) =>
+                        defaultReadingTime({
+                            content,
+                            locale: "zh", // 添加 locale 参数，与你的 i18n.defaultLocale 保持一致
+                            options: { wordsPerMinute: 300 },
+                        }),
                     feedOptions: {
                         type: "all",
                         title: "ninjee",
@@ -277,11 +270,28 @@ const config = {
                 ],
             },
         ],
+        [
+            require.resolve("@easyops-cn/docusaurus-search-local"),
+            {
+                hashed: true, // 默认 true，开启索引文件指纹
+                language: ["en", "zh"], // 指定多语言分词
+                highlightSearchTermsOnTargetPage: true,
+            },
+        ],
     ],
     stylesheets: [],
     i18n: {
         defaultLocale: "zh",
         locales: ["zh"],
+    },
+    markdown: {
+        mdx1Compat: {
+            comments: true,
+            admonitions: true,
+            headingIds: true,
+        },
+        format: 'detect',
+        mermaid: false,
     },
 };
 

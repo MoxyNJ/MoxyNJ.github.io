@@ -5,17 +5,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-
-import DebugLayout from '@theme/DebugLayout';
+import React, {type ReactNode} from 'react';
 import registry from '@generated/registry';
+import DebugLayout from '@theme/DebugLayout';
 import styles from './styles.module.css';
 
-export default function DebugRegistry(): JSX.Element {
+export default function DebugRegistry(): ReactNode {
   return (
     <DebugLayout>
       <h2>Registry</h2>
-      <ul className={styles.list}>
+      <ul className="clean-list">
         {Object.values(registry).map(([, aliasedPath, resolved]) => (
           <li key={aliasedPath} className={styles.listItem}>
             <div style={{marginBottom: '10px'}}>

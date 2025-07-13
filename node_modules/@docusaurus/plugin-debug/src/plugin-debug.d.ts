@@ -7,47 +7,64 @@
 
 /// <reference types="@docusaurus/module-type-aliases" />
 
+declare module '@docusaurus/plugin-debug' {
+  import type {LoadContext, Plugin} from '@docusaurus/types';
+
+  export default function pluginDebug(context: LoadContext): Plugin<undefined>;
+}
+
 declare module '@theme/DebugConfig' {
-  export default function DebugMetadata(): JSX.Element;
+  import type {ReactNode} from 'react';
+
+  export default function DebugMetadata(): ReactNode;
 }
 
 declare module '@theme/DebugContent' {
+  import type {ReactNode} from 'react';
   import type {AllContent} from '@docusaurus/types';
 
   export interface Props {
     readonly allContent: AllContent;
   }
-  export default function DebugContent(props: Props): JSX.Element;
+  export default function DebugContent(props: Props): ReactNode;
 }
 
 declare module '@theme/DebugGlobalData' {
-  export default function DebugGlobalData(): JSX.Element;
+  import type {ReactNode} from 'react';
+
+  export default function DebugGlobalData(): ReactNode;
 }
 
 declare module '@theme/DebugJsonView' {
+  import type {ReactNode} from 'react';
+
   export interface Props {
     readonly src: unknown;
     readonly collapseDepth?: number;
   }
-  export default function DebugJsonView(props: Props): JSX.Element;
+  export default function DebugJsonView(props: Props): ReactNode;
 }
 
 declare module '@theme/DebugLayout' {
   import type {ReactNode} from 'react';
 
-  export default function DebugLayout(props: {
-    children: ReactNode;
-  }): JSX.Element;
+  export default function DebugLayout(props: {children: ReactNode}): ReactNode;
 }
 
 declare module '@theme/DebugRegistry' {
-  export default function DebugRegistry(): JSX.Element;
+  import type {ReactNode} from 'react';
+
+  export default function DebugRegistry(): ReactNode;
 }
 
 declare module '@theme/DebugRoutes' {
-  export default function DebugRoutes(): JSX.Element;
+  import type {ReactNode} from 'react';
+
+  export default function DebugRoutes(): ReactNode;
 }
 
 declare module '@theme/DebugSiteMetadata' {
-  export default function DebugSiteMetadata(): JSX.Element;
+  import type {ReactNode} from 'react';
+
+  export default function DebugSiteMetadata(): ReactNode;
 }

@@ -5,61 +5,37 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import DefaultNavbarItem from '@theme/NavbarItem/DefaultNavbarItem';
+import React, {type ReactNode} from 'react';
 import {
-  useLatestVersion,
   useActiveDocContext,
+  useLayoutDoc,
 } from '@docusaurus/plugin-content-docs/client';
-import clsx from 'clsx';
-import {getInfimaActiveClassName} from '@theme/NavbarItem/utils';
+import DefaultNavbarItem from '@theme/NavbarItem/DefaultNavbarItem';
 import type {Props} from '@theme/NavbarItem/DocNavbarItem';
-import {useDocsPreferredVersion, uniq} from '@docusaurus/theme-common';
-import type {GlobalVersion} from '@docusaurus/plugin-content-docs/client';
-
-function getDocInVersions(versions: GlobalVersion[], docId: string) {
-  const allDocs = versions.flatMap((version) => version.docs);
-  const doc = allDocs.find((versionDoc) => versionDoc.id === docId);
-  if (!doc) {
-    const docIds = allDocs.map((versionDoc) => versionDoc.id).join('\n- ');
-    throw new Error(
-      `DocNavbarItem: couldn't find any doc with id "${docId}" in version${
-        versions.length ? 's' : ''
-      } ${versions.map((version) => version.name).join(', ')}".
-Available doc ids are:\n- ${docIds}`,
-    );
-  }
-  return doc;
-}
 
 export default function DocNavbarItem({
   docId,
   label: staticLabel,
   docsPluginId,
   ...props
-}: Props): JSX.Element {
-  const {activeVersion, activeDoc} = useActiveDocContext(docsPluginId);
-  const {preferredVersion} = useDocsPreferredVersion(docsPluginId);
-  const latestVersion = useLatestVersion(docsPluginId);
+}: Props): ReactNode {
+  const {activeDoc} = useActiveDocContext(docsPluginId);
+  const doc = useLayoutDoc(docId, docsPluginId);
+  const pageActive = activeDoc?.path === doc?.path;
 
-  // Versions used to look for the doc to link to, ordered + no duplicate
-  const versions = uniq(
-    [activeVersion, preferredVersion, latestVersion].filter(
-      Boolean,
-    ) as GlobalVersion[],
-  );
-  const doc = getDocInVersions(versions, docId);
-  const activeDocInfimaClassName = getInfimaActiveClassName(props.mobile);
+  // Draft and unlisted items are not displayed in the navbar.
+  if (doc === null || (doc.unlisted && !pageActive)) {
+    return null;
+  }
 
   return (
     <DefaultNavbarItem
       exact
       {...props}
-      className={clsx(props.className, {
-        [activeDocInfimaClassName]:
-          activeDoc?.sidebar && activeDoc.sidebar === doc.sidebar,
-      })}
-      activeClassName={activeDocInfimaClassName}
+      isActive={() =>
+        pageActive ||
+        (!!activeDoc?.sidebar && activeDoc.sidebar === doc.sidebar)
+      }
       label={staticLabel ?? doc.id}
       to={doc.path}
     />

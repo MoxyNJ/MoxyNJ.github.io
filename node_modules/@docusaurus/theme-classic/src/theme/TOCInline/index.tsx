@@ -5,16 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import type {Props} from '@theme/TOCInline';
-import styles from './styles.module.css';
+import React, {type ReactNode} from 'react';
 import TOCItems from '@theme/TOCItems';
+import type {Props} from '@theme/TOCInline';
+
+import styles from './styles.module.css';
 
 export default function TOCInline({
   toc,
   minHeadingLevel,
   maxHeadingLevel,
-}: Props): JSX.Element {
+}: Props): ReactNode {
   return (
     <div className={styles.tableOfContentsInline}>
       <TOCItems

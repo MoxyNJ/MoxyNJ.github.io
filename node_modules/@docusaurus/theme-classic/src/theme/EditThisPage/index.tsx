@@ -5,26 +5,22 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, {type ReactNode} from 'react';
 import Translate from '@docusaurus/Translate';
-
-import type {Props} from '@theme/EditThisPage';
-import IconEdit from '@theme/IconEdit';
 import {ThemeClassNames} from '@docusaurus/theme-common';
+import Link from '@docusaurus/Link';
+import IconEdit from '@theme/Icon/Edit';
+import type {Props} from '@theme/EditThisPage';
 
-export default function EditThisPage({editUrl}: Props): JSX.Element {
+export default function EditThisPage({editUrl}: Props): ReactNode {
   return (
-    <a
-      href={editUrl}
-      target="_blank"
-      rel="noreferrer noopener"
-      className={ThemeClassNames.common.editThisPage}>
+    <Link to={editUrl} className={ThemeClassNames.common.editThisPage}>
       <IconEdit />
       <Translate
         id="theme.common.editThisPage"
         description="The link label to edit the current page">
         Edit this page
       </Translate>
-    </a>
+    </Link>
   );
 }

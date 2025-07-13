@@ -29,12 +29,13 @@ export default function DebugLayout({
   children,
 }: {
   children: ReactNode;
-}): JSX.Element {
+}): ReactNode {
   return (
     <>
       <Head>
         <html lang="en" />
         <title>Docusaurus debug panel</title>
+        <meta name="robots" content="noindex" />
       </Head>
 
       <div>
