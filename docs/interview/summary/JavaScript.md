@@ -122,6 +122,8 @@ keywords:
 
 **isNaN() 是 es5 中的语法，而 Number.isNaN() 是 es6 的新语法**
 
+- NaN 是 JavaScript 中 一个合法的数字值，它属于 Number 类型，表示数学运算失败的结果。
+
 -   `isNaN` 用来判断一个值是否为 NaN。但是，**只对数值有效**，如果传入其他值，会被先转成数值。
 
     -   比如，传入字符串的时候，字符串会被先转成 NaN，所以最后返回 true。也就是说，isNaN 为 true 的值，有可能不是 NaN，而是一个字符串。
@@ -131,6 +133,15 @@ keywords:
 ```js
 isNaN("abc"); // true
 Number.isNaN("abc"); // false
+
+typeof NaN             // "number"
+typeof Infinity        // "number"
+typeof 123             // "number"
+typeof Number('abc')   // "number"（因为结果是 NaN）
+
+NaN === NaN // false ❌
+Number.isNaN(value);  // ✅ 推荐（严格判断）
+Object.is(NaN, NaN);  // true ✅
 ```
 
 ### 问题：防抖 / 节流的应用场景
