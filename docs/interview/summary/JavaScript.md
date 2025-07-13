@@ -247,7 +247,7 @@ parseFloat({
 -   使用第三方计算库（如 Big.js、Decimal.js、bignumber.js）；
 
 ### 问题：0.1+0.2=？0.6-0.4=？
-![JavaScript浮点数精度问题示例图 [30]](images/JavaScript%E7%9B%B8%E5%85%B3.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
+![JavaScript浮点数精度问题示例图 [30]](images/JavaScript.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
 
 解决 0.1 + 0.2 的问题，用 `toFixed(num)`
 

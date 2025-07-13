@@ -14,6 +14,7 @@ const config = {
     projectName: "MoxyNJ.github.io", // repo name.
     onBrokenLinks: "ignore",
     onBrokenMarkdownLinks: "ignore",
+    onBrokenAnchors: "ignore",
     favicon: "img/favicon.ico",
     
     // 自定义字段
@@ -48,21 +49,6 @@ const config = {
                     srcDark: "img/ninjee-icon.png",
                 },
                 items: [
-                    // 注释blog相关功能
-                    // {
-                    //   label: "归档",
-                    //   position: "right",
-                    //   items: [
-                    //     {
-                    //       label: "标签",
-                    //       to: "tags",
-                    //     },
-                    //     {
-                    //       label: "最近...",
-                    //       to: "archive",
-                    //     },
-                    //   ],
-                    // },
                     {
                         label: "前端知识",
                         position: "right",
@@ -209,26 +195,7 @@ const config = {
                     path: "docs",
                     sidebarPath: "sidebars.js",
                 },
-                blog: {
-                    path: "blog",
-                    routeBasePath: "/",
-                    blogSidebarTitle: "最近...",
-                    blogSidebarCount: 5,
-                    postsPerPage: 10,
-                    showReadingTime: true,
-                    readingTime: ({ content, frontMatter, defaultReadingTime }) =>
-                        defaultReadingTime({
-                            content,
-                            locale: "zh", // 添加 locale 参数，与你的 i18n.defaultLocale 保持一致
-                            options: { wordsPerMinute: 300 },
-                        }),
-                    feedOptions: {
-                        type: "all",
-                        title: "ninjee",
-                        copyright: `<p>Copyright © ${new Date().getFullYear()} ninjee Built with Docusaurus.</p>`,
-                        //
-                    },
-                },
+                blog: false,
                 theme: {
                     customCss: [require.resolve("./src/css/custom.css")],
                 },
