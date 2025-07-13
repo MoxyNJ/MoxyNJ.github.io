@@ -247,6 +247,7 @@ parseFloat({
 -   使用第三方计算库（如 Big.js、Decimal.js、bignumber.js）；
 
 ### 问题：0.1+0.2=？0.6-0.4=？
+
 ![JavaScript浮点数精度问题示例图 [30]](images/JavaScript.assets/1630157012636-bb9e556a-a082-4130-8d0b-7a85406efedc.png)
 
 解决 0.1 + 0.2 的问题，用 `toFixed(num)`
@@ -520,10 +521,51 @@ setTimeout(() => {
 // timer1
 ```
 
+```js
+const async1 = async () => {
+    console.log("async1");
+    setTimeout(() => {
+        console.log("timer1");
+    }, 2000);
+    const res = await new Promise((resolve) => {
+        console.log("promise1"); // 同步执行
+        resolve("OK");
+    });
+    // 后续受到 await 异步执行
+    console.log("async1 end", res);
+    return "async1 success";
+};
+console.log("script start");
+
+async1().then((res) => console.log(res));
+console.log("script end");
+Promise.resolve(1) //   这里把 1 顺次传递，因为下面的 then 方法没有接收 res。
+    .then(2)
+    .then(Promise.resolve(3))
+    .catch(4)
+    .then((res) => console.log(res));
+
+setTimeout(() => {
+    console.log("timer2");
+}, 1000);
+
+// [同步]
+// script start
+// async1
+// promise1
+// script end
+// [ promise 异步]
+// async1 end OK
+// async1 success
+// 1
+// [ 宏任务 异步]
+// timer2
+// timer1
+```
+
 ==== 坑 ===========================================
 
 **常用 API：**
 
--   string / number (包装对象) 常用 api：[🔗](https://juejin.cn/post/6985349103681011725#heading-12)
 -   array 常用 api：[🔗](/docs/frontEnd/JavaScript/z-ArrayAPI).
 -   object 常用 api：[🔗](/docs/frontEnd/JavaScript/%E5%AF%B9%E8%B1%A1#8-object-api).
