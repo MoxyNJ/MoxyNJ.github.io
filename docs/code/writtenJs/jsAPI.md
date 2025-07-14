@@ -2727,7 +2727,7 @@ function getJSON(url) {
 
 
 // 使用：
-getJSON("https://www.ninjee.co")
+getJSON("https://www.ninjee.top")
   .then((res) => {
   console.log(res);
 })
@@ -2761,7 +2761,7 @@ const jsonp = ({ url, params, callback }) => {
       urlParams += `${key}=${params[key]}&`;
     });
     urlParams += `callback=${callback}`;
-    // "https://www.ninjee.co/test?name=ninjee&age=18&callback=uniqueCallbackName"
+    // "https://www.ninjee.top/test?name=ninjee&age=18&callback=uniqueCallbackName"
     return url + urlParams;
   };
 
@@ -2790,7 +2790,7 @@ const jsonp = ({ url, params, callback }) => {
 
 
 // ===使用================
-const baseURL = "https://www.ninjee.co/test";
+const baseURL = "https://www.ninjee.top/test";
 const params = { name: "ninjee", age: 18 };
 const result = jsonp(baseURL, params, 'uniqueCallbackName');
 result.then((res) => {

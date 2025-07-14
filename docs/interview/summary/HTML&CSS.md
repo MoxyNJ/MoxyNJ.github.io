@@ -2035,7 +2035,7 @@ CSS 有 4 种引入方式：
 
 ## 问题：HTML 语义化标签
 
-[链接🔗](https://www.ninjee.co/docs/frontEnd/HTML&CSS#5-%E8%AF%AD%E4%B9%89%E7%B1%BB%E6%A0%87%E7%AD%BE)
+[链接🔗](docs/frontEnd/HTML&CSS#5-%E8%AF%AD%E4%B9%89%E7%B1%BB%E6%A0%87%E7%AD%BE)
 
 
 
