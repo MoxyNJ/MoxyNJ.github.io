@@ -122,55 +122,55 @@ const config = {
                     },
                 ],
             },
-            footer: {
-                style: "dark",
-                links: [
-                    {
-                        title: "分享",
-                        items: [
-                            {
-                                label: "前端",
-                                to: "docs/frontEnd/JavaScript",
-                            },
-                            {
-                                label: "算法笔记",
-                                to: "docs/code/algorithm",
-                            },
-                            {
-                                label: "我的项目",
-                                to: "project",
-                            },
-                        ],
-                    },
-                    {
-                        title: "社交媒体",
-                        items: [
-                            {
-                                label: "关于我",
-                                to: "/about",
-                            },
-                            {
-                                label: "GitHub",
-                                href: "https://github.com/moxyNJ",
-                            },
-                            {
-                                label: "掘金",
-                                href: "https://juejin.cn/user/2005151873514024",
-                            },
-                        ],
-                    },
-                    {
-                        title: "Blog",
-                        items: [
-                            {
-                                label: "Ninjee 的前端篮子",
-                                to: "https://www.ninjee.top",
-                            },
-                        ],
-                    },
-                ],
-                copyright: `<p>Copyright © ${new Date().getFullYear()} Ninjee Built with Docusaurus.</p><p><a href="http://beian.miit.gov.cn/" >${record}</a></p>`,
-            },
+            // footer: {
+            //     style: "dark",
+            //     links: [
+            //         {
+            //             title: "分享",
+            //             items: [
+            //                 {
+            //                     label: "前端",
+            //                     to: "docs/frontEnd/JavaScript",
+            //                 },
+            //                 {
+            //                     label: "算法笔记",
+            //                     to: "docs/code/algorithm",
+            //                 },
+            //                 {
+            //                     label: "我的项目",
+            //                     to: "project",
+            //                 },
+            //             ],
+            //         },
+            //         {
+            //             title: "社交媒体",
+            //             items: [
+            //                 {
+            //                     label: "关于我",
+            //                     to: "/about",
+            //                 },
+            //                 {
+            //                     label: "GitHub",
+            //                     href: "https://github.com/moxyNJ",
+            //                 },
+            //                 {
+            //                     label: "掘金",
+            //                     href: "https://juejin.cn/user/2005151873514024",
+            //                 },
+            //             ],
+            //         },
+            //         {
+            //             title: "Blog",
+            //             items: [
+            //                 {
+            //                     label: "Ninjee 的前端篮子",
+            //                     to: "https://www.ninjee.top",
+            //                 },
+            //             ],
+            //         },
+            //     ],
+            //     copyright: `<p>Copyright © ${new Date().getFullYear()} Ninjee Built with Docusaurus.</p><p><a href="http://beian.miit.gov.cn/" >${record}</a></p>`,
+            // },
             prism: {
                 theme: themes.github,
                 darkTheme: themes.vsDark,
