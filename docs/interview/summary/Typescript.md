@@ -3,6 +3,7 @@ title: Typescript
 sidebar_position: 11
 date: 2022-03-03
 tags: [TypeScript]
+draft: true
 ---
 
 ### TypeScript 是什么
