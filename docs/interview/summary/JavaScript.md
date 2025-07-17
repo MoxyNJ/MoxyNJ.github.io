@@ -122,7 +122,7 @@ keywords:
 
 **isNaN() 是 es5 中的语法，而 Number.isNaN() 是 es6 的新语法**
 
-- NaN 是 JavaScript 中 一个合法的数字值，它属于 Number 类型，表示数学运算失败的结果。
+-   NaN 是 JavaScript 中 一个合法的数字值，它属于 Number 类型，表示数学运算失败的结果。
 
 -   `isNaN` 用来判断一个值是否为 NaN。但是，**只对数值有效**，如果传入其他值，会被先转成数值。
 
@@ -134,14 +134,14 @@ keywords:
 isNaN("abc"); // true
 Number.isNaN("abc"); // false
 
-typeof NaN             // "number"
-typeof Infinity        // "number"
-typeof 123             // "number"
-typeof Number('abc')   // "number"（因为结果是 NaN）
+typeof NaN; // "number"
+typeof Infinity; // "number"
+typeof 123; // "number"
+typeof Number("abc"); // "number"（因为结果是 NaN）
 
-NaN === NaN // false ❌
-Number.isNaN(value);  // ✅ 推荐（严格判断）
-Object.is(NaN, NaN);  // true ✅
+NaN === NaN; // false ❌
+Number.isNaN(value); // ✅ 推荐（严格判断）
+Object.is(NaN, NaN); // true ✅
 ```
 
 ### 问题：防抖 / 节流的应用场景
@@ -446,137 +446,45 @@ new Set(Object.keys(a)).has("test");   // true
   Reflect.ownKeys()  // 全部属性名：属性 + Symbol属性
 ```
 
-### 问题：async & await 处理异常
+### 🍊 四套查找规则
 
-三种方式[🔗](https://juejin.cn/post/6844903998969872392)：
+-   作用域：静态关系。与代码结构和闭包有关，决定了作用域链（全局、函数、块作用域）；
+    -   查变量名、闭包访问、箭头函数 this 都依赖它。
+-   调用栈：动态时产物。在运行时，每执行一个函数，就会创建函数执行上下文，放入栈中；
+    -   影响执行顺序、错误堆栈、上下文环境等。
+-   this：调用者决定。每个函数执行上下文都有一个 this。`func.call(this, …args)`；
+    -   与调用方式有关：new、显式(apply, call, bind)、隐式(`obj.fn()`)、默认绑定(`fn()`)
+-   原型链：通过 `[[prototype]]` 连接起来的对象，构成了原型链；
+    -   对象内属性的调用从原型链中查；
 
--   try catch。
--   封装一个函数，在 await 时捕获 promise 产生的异常。
--   async 函数返回一个 promise，在这里捕获异常。
+### js 为什么要有引用类型？
 
-方法二：
+本质上是讨论：为什么不能所有值都用“基本类型”（如 Number、String、Boolean）表示，非要引入对象（Object）、数组（Array）、函数（Function）等“引用类型”呢？
 
-```js
-// to.js
-export default function to(promise) {
-    return promise
-        .then((data) => {
-            return [null, data];
-        })
-        .catch((err) => [err]);
-}
+-   基本类型：变量保存的是具体的值，无法两个变量无法共同指向同一个值；
+-   引用类型：变量保存的是一个堆内存中的引用地址，多个变量可以指向同一个对象；
 
-import to from "./to.js";
+原因：
 
-// 使用：
-async function asyncTask(cb) {
-    let err, user, savedTask;
+1. 继承和引用。所有函数、类、实例、闭包，这些需要继承机制的东西，都需要引用类型。
+2. 复杂结构。这样设计，就可以利用对象构建出更复杂的数据结构，Js 一切类型皆对象。
+3. 共享和传递。多处代码引用同一个对象，实现状态共享、数据同步。
 
-    [err, user] = await to(UserModel.findById(1));
-    if (!user) return cb("No user found");
+### 遍历对象的所有属性
 
-    [err, savedTask] = await to(TaskModel({ userId: user.id, name: "Demo Task" }));
-    if (err) return cb("Error occurred while saving task");
+1. `for...in...`：es3 操作符。遍历自身的 + 继承的，可枚举属性，不包含 symbol；
+2. `Object.keys()`：es6 操作符：遍历自身的，可枚举属性值，不包含 symbol；
 
-    if (user.notificationsEnabled) {
-        const [err] = await to(NotificationService.sendNotification(user.id, "Task Created"));
-        if (err) return cb("Error while sending notification");
-    }
-    cb(null, savedTask);
-}
-```
+## 设计模式
 
-方法三：
-
-```js
-async function task() {
-    return await req();
-}
-
-task().catch((e) => console.error(e));
-```
-
-## 事件循环的题：
-
-```js
-const async1 = async () => {
-    console.log("async1");
-    setTimeout(() => {
-        console.log("timer1");
-    }, 2000);
-    await new Promise((resolve) => {
-        // promise没有resolve后续不会执行
-        console.log("promise1");
-    });
-    console.log("async1 end");
-    return "async1 success";
-};
-console.log("script start");
-async1().then((res) => console.log(res));
-console.log("script end");
-Promise.resolve(1) // 	这里把 1 顺次传递，因为下面的 then 方法没有接收 res。
-    .then(2)
-    .then(Promise.resolve(3))
-    .catch(4)
-    .then((res) => console.log(res));
-setTimeout(() => {
-    console.log("timer2");
-}, 1000);
-
-// script start
-// async1
-// promise1
-// script end
-// 1
-// timer2
-// timer1
-```
-
-```js
-const async1 = async () => {
-    console.log("async1");
-    setTimeout(() => {
-        console.log("timer1");
-    }, 2000);
-    const res = await new Promise((resolve) => {
-        console.log("promise1"); // 同步执行
-        resolve("OK");
-    });
-    // 后续受到 await 异步执行
-    console.log("async1 end", res);
-    return "async1 success";
-};
-console.log("script start");
-
-async1().then((res) => console.log(res));
-console.log("script end");
-Promise.resolve(1) //   这里把 1 顺次传递，因为下面的 then 方法没有接收 res。
-    .then(2)
-    .then(Promise.resolve(3))
-    .catch(4)
-    .then((res) => console.log(res));
-
-setTimeout(() => {
-    console.log("timer2");
-}, 1000);
-
-// [同步]
-// script start
-// async1
-// promise1
-// script end
-// [ promise 异步]
-// async1 end OK
-// async1 success
-// 1
-// [ 宏任务 异步]
-// timer2
-// timer1
-```
-
-==== 坑 ===========================================
-
-**常用 API：**
-
--   array 常用 api：[🔗](/docs/frontEnd/JavaScript/z-ArrayAPI).
--   object 常用 api：[🔗](/docs/frontEnd/JavaScript/%E5%AF%B9%E8%B1%A1#8-object-api).
+| **模式名**        | **作用简述**                    | **JS 示例**                        |
+| ----------------- | ------------------------------- | ---------------------------------- |
+| **单例模式**      | 保证一个类只有一个实例          | 全局状态管理器、EventBus           |
+| **工厂模式**      | 创建对象时，隐藏复杂的构造逻辑  | Axios 请求实例封装                 |
+| **观察者模式**    | 一对多通知机制                  | DOM 事件监听、Vue 响应式           |
+| **发布-订阅模式** | 解耦多个模块的事件传递          | EventEmitter、Redux 的中间件       |
+| **策略模式**      | 封装一组可互换算法              | 表单校验规则、折扣策略             |
+| **装饰器模式**    | 动态给对象添加功能              | 中间件链、函数增强（如节流、防抖） |
+| **适配器模式**    | 让两个接口不兼容的模块协作      | 接口格式转换、封装旧 API           |
+| **命令模式**      | 将操作封装成对象，支持撤销/重做 | 编辑器撤销、浏览器前进后退         |
+| **代理模式**      | 控制对对象的访问                | Vue 3 的 Proxy 实现响应式          |
