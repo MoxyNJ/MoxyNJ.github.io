@@ -1,6 +1,6 @@
 ---
 title: 项目二：通用框架
-sidebar_position: 74
+sidebar_position: 72
 date: 2022-08-05
 tags: [通用框架]
 ---
