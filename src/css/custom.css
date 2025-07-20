@@ -43,6 +43,8 @@
     /* 进度条背景 */
     --progress-bar-background-color: #f3f3f3;
 
+    --doc-sidebar-width: 230px !important;
+
     /* 卡片背景 */
     --card-background: #ffffff;
 
@@ -667,9 +669,14 @@ html[data-theme="dark"] .footer_eye {
     fill: var(--ifm-color-primary-light);
 }
 
+.pagination-nav {
+    margin-top: 0 !important;
+}
+
 .pagination-nav__link {
     /* border: none; */
     margin: 2em 0;
+    height: auto;
     background: linear-gradient(90deg, var(--ifm-color-primary-light) 11.3%, var(--ifm-color-primary) 161.54%);
     box-shadow: 0px 0px 32px rgb(0 105 165 / 35%);
     color: white;
