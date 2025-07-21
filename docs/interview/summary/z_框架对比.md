@@ -123,8 +123,6 @@ Vue 的双向绑定是依靠响应式系统（getter/setter 或 Proxy）+ 模板
 2. 优化阶段：根据依赖关系，标记 PatchFlag 更新点，用于后续跳过不必要的 diff；
 3. 生成阶段：将 AST 转化为可执行的渲染函数代码（字符串），最终会返回一个 render 函数；
 
-运行阶段：执行 render 函数 → 得到 VNode → diff → DOM
-
 运行阶段：
 
 1. 执行 render 函数，生成虚拟 DOM（VNode ）；
@@ -172,34 +170,33 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
     - 每个业务逻辑单位（控制器、服务等）被组织在 @Module() 中。
     - 支持模块之间导入/导出 Provider，遵循单一职责、封装边界清晰。
 
-### 核心工具 / 执行顺序 / 面向切面编程：
+### 核心工具 / 执行顺序 / 面向切面编程
 
-执行顺序，请求处理的完整流程：
+执行顺序，请求处理的**完整流程**：
 
-1. 中间件
-2. 守卫
-3. 拦截器（请求阶段）
-4. 管道
-5. 控制器方法处理
-6. 拦截器（响应阶段）
-7. 异常过滤器（发生异常时）
+1. 请求阶段：中间件 → 守卫 → 拦截器 → 管道；
+2. controller：控制器方法处理 handle；
+3. 响应阶段：拦截器
+4. 发生异常：异常过滤器
 
-8. 中间件：请求会被 middleware 处理，这一层可以复用 express 的中间件生态，实现 session 功能。这个 middleware 也可以是 class 实现，可以注入其他 provider。
+**面向切面编程**：
+
+1. 中间件：请求会被 middleware 处理，这一层可以复用 express 的中间件生态，实现 session 功能。这个 middleware 也可以是 class 实现，可以注入其他 provider。
     - 适用于：处理原始 HTTP 请求/响应
         - 日志记录：记录所有请求的  IP、方法、URL  和响应时间
         - 身份验证基础设施：解析 JWT token，设置 req.user
-9. 守卫：在具体的路由会经历 Guard 的处理，它可以通过 ExecutionContext 拿到目标 class、handler 的 metadata 等信息，可以实现权限验证等功能。
+2. 守卫：在具体的路由会经历 Guard 的处理，它可以通过 ExecutionContext 拿到目标 class、handler 的 metadata 等信息，可以实现权限验证等功能。
     - 适用于：基于条件的访问控制
         - 权限控制：检查用户是否有权访问特定资源
         - 角色验证：验证用户是否拥有执行操作的角色
-10. 拦截器：Interceptor 可在请求前做处理，可通过 ExecutionContext 拿到 class、handler 信息。
+3. 拦截器：Interceptor 可在请求前做处理，可通过 ExecutionContext 拿到 class、handler 信息。
     - 适用于：转换请求/响应，添加横切逻辑
         - 响应转换：统一响应格式为 {status, message, data}
         - 缓存：将耗时操作（数据查询）的结果临时存储起来，当相同请求再次到来时，直接返回缓存的结果，而不必重新执行操作。
-11. 管道：在到达 handler 之前，还会对参数用 Pipe 做下检验和转换。
+4. 管道：在到达 handler 之前，还会对参数用 Pipe 做下检验和转换。
     - 适用于：数据转换和验证
     - 参数验证：验证 request 参数是否正确；
     - 数据转换：将 string 参数转换为 number 等；
-12. handler：逻辑处理，调用 controller 中的函数去解决；
-13. 拦截器：Interceptor 在请求后处理逻辑；
-14. 异常过滤器：在任何位置抛出异常，都会用 Exception Filter 处理，返回统一的响应信息。
+5. handler：逻辑处理，调用 controller 中的函数去解决；
+6. 拦截器：Interceptor 在请求后处理逻辑；
+7. 异常过滤器：在任何位置抛出异常，都会用 Exception Filter 处理，返回统一的响应信息。
