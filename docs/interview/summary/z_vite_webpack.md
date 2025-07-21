@@ -19,29 +19,29 @@ tags: [Vite, Webpack]
 
 -   基于发布订阅模式，让 webpack 可以在各个阶段灵活的注册和执行回调函数，以实现各个阶段的生命周期 hook，从而让 plugin 可以插入到这些生命周期中，增强 webpack 构建流程。
 
-### **loader pitch**
+### loader pitch
 
 -   是 webpack 中 loader 的一个特殊阶段和函数，它允许 loader 在正常处理资源之前插入自定义逻辑，影响后续 loader 的执行流程。
 
 1. 如果是 Normal 阶段: loader 上的 常规方法，按照 `前置(pre)、普通(normal)、行内(inline)、后置(post)` 的顺序调用。
 2. 应用 style-loader：模块源码的转换， 发生在这个阶段。
 
-### **style-loader 原理**
+### style-loader 原理
 
 1. css-loader：解析 CSS 文件的 `@import` 和 `url()` 依赖，将 CSS 转换为 JavaScript 模块；
 2. style-loader 则负责将模块内容注入 DOM。
 
-### **webpack 是怎么处理 commonjs/esm**
+### webpack 是怎么处理 commonjs/esm
 
 1. 内部通过 babel 构建 AST 抽象语法数；
 2. 根据模块类型，调用不同的模块工厂函数，构建成品。
 
-### **移动端这块的问题，适配不同屏幕**
+### 移动端这块的问题，适配不同屏幕
 
 1. postcss plugin，px-to-vw 实现自适应。定义设计稿宽度：375，然后自动计算。
 2. 通常不会转换 1px，因为 1px 通常是边框，换成 vw 可能粗细不同设备不统一。
 
-### **模块联邦**
+### 模块联邦
 
 类似于 npm 包，但是通过动态 import 的形式。需要经过 http 拉取 js 文件。不同模块独立部署，上线；支持共享组件、函数等封装个个体模块。
 
@@ -81,7 +81,7 @@ Vite 默认的代码分割机制在处理动态导入时的命名方式：
 -   然后调用 `vite.config` 中配置的 `name.hash.js` 打包策略，增加 hash 值。
 -   这样打包路由之间不会存在相互引用，自然也就没有缓存问题了。
 
-### **Loader 与 Plugin 的区别**
+### Loader 与 Plugin 的区别
 
 Loader (加载器)
 
@@ -102,7 +102,7 @@ Plugin (插件)
 | Loader   | **单个文件内容的转换**                   | buildModule 期间                           |
 | Plugin   | **编译全流程、资源、输出、生命周期管理** | 多个阶段可插入，如 compilation, emit, done |
 
-### **Webpack 构建流程**
+### Webpack 构建流程
 
 1. **初始化阶段：**创建 Compiler 实例(上下文控制)，加载配置，注册插件，准备生命周期钩子。
 2. **开始编译（compiler.run）：**启动 Compilation 实例，表示一次构建过程。
@@ -115,7 +115,7 @@ Plugin (插件)
 4. **Chunk 构建：**根据入口和代码拆分规则，生成 Chunk。Tree-shaking 逻辑在这里。
 5. **构建 + emit**：构建 bundle、JS/CSS 文件，并输出到配置的 output.path 目录。
 
-### **Loader 的执行顺序和时机**
+### Loader 的执行顺序和时机
 
 **Loader 的匹配时机**
 
@@ -137,7 +137,7 @@ Webpack 在构建时，递归的处理每一个依赖模块，对于具体的某
     3. 再由 css-loader  解析依赖，导入关系；
     4. 最后由  style-loader 将 CSS 注入 DOM；
 
-### 🍊 Plugin 的**执行顺序和时机**
+### 🍊 Plugin 的执行顺序和时机
 
 Plugin 通过 webpack 生命周期的钩子插入，在各个阶段可介入：
 
@@ -160,7 +160,7 @@ CompressionPlugin：在输出前生成 gzip、brotli 压缩文件
 | done | 完整构建结束 | 打印构建信息 |
 | failed | 构建失败时 | **🌈  自定义告警：发送告警、企业通知、自动清理** |
 
-### **Tree-Shaking 的构建流程**
+### Tree-Shaking 的构建流程
 
 是一个多阶段优化过程，发生在构建 chunk 时。依赖于之前的依赖图分析，并在最终代码生成时真正删除未使用的代码。
 
@@ -182,7 +182,7 @@ CompressionPlugin：在输出前生成 gzip、brotli 压缩文件
 
 1. 不会，tree-shake 是基于静态分析的。只要 class 内这个模块被引用，就会打包；无法动态识别具体的某个方法是否被调用。
 
-### **打包产物类型有哪些？**
+### 打包产物类型有哪些？
 
 模块类型（Module Format） 分类：
 
@@ -235,7 +235,7 @@ var liveBusinessList = (function() {
     <script nomodule src="legacy.js"></script>
     ```
 
-### **产物体积优化**
+### 产物体积优化
 
 SDK 体积：
 
@@ -256,7 +256,7 @@ SDK 体积：
 4. 差异化打包：提供 ESM 和 legacy 两个版本的构建，现代浏览器可以省略很多 polyfill。
 5. CDN 引入依赖：将大型公共库设为外部依赖，通过 CDN 引入；使用 externals 配置排除打包；
 
-### **热更新原理**
+### 热更新原理
 
 webpack 自己  **开启了 express 应用**。添加了对 webpack 编译的监听，建立和浏览器的 websocket 长连接。
 
