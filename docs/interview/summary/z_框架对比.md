@@ -227,9 +227,9 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
 2. Koa：有 ctx 共享对象，聚合了请求、响应、共享上下文等信息，可在不同中间件传递。
 3. NestJs：封装了通用上下文对象 ExecutionContext，适配不同平台 HTTP、RPC、WebSocket。并且可以通过装饰器注入 req / Res 对象，通过 getHandler 获取元信息，支持复杂业务场景。
 
-## NodeJs
+## Node 概述
 
-### 事件循环：[🔗 ](https://www.ninjee.top/docs/interview/summary/%E6%B5%8F%E8%A7%88%E5%99%A8?_highlight=%E4%BA%8B%E4%BB%B6&_highlight=%E5%BE%AA%E7%8E%AF#node-%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF)
+事件循环：[🔗 ](/docs/interview/summary/浏览器#-node-事件循环)
 
 Node.js 是一个基于 V8 引擎的 JavaScript 运行时，使用 libuv 提供跨平台的异步 I/O 能力，通过模块系统和事件循环机制构建起高并发、高可用的服务端运行架构。
 
