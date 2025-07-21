@@ -226,3 +226,10 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
 1. Express：没有共享的 context 对象。而是使用拆分的 req 请求体 + res 响应体。
 2. Koa：有 ctx 共享对象，聚合了请求、响应、共享上下文等信息，可在不同中间件传递。
 3. NestJs：封装了通用上下文对象 ExecutionContext，适配不同平台 HTTP、RPC、WebSocket。并且可以通过装饰器注入 req / Res 对象，通过 getHandler 获取元信息，支持复杂业务场景。
+
+
+
+## NodeJs
+
+
+
