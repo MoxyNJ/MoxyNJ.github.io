@@ -16,7 +16,7 @@ const config = {
     onBrokenMarkdownLinks: "ignore",
     onBrokenAnchors: "ignore",
     favicon: "img/favicon.ico",
-    
+
     // 自定义字段
     customFields: {
         mdx1Compat: true, // 尝试兼容 MDX 1 语法
@@ -96,24 +96,25 @@ const config = {
                     {
                         label: "面试",
                         position: "right",
-                        items: [
-                            {
-                                label: "总结",
-                                to: "docs/interview/summary",
-                            },
-                            // {
-                            //   label: "计算机网络",
-                            //   to: "docs/interview/internet",
-                            // },
-                            // {
-                            //   label: "操作系统",
-                            //   to: "docs/interview/os",
-                            // },
-                            {
-                                label: "物联网",
-                                to: "docs/interview/iot",
-                            },
-                        ],
+                        to: "docs/category/%E6%80%BB%E7%BB%93",
+                        // items: [
+                        //     {
+                        //         label: "总结",
+                        //         to: "docs/interview/summary",
+                        //     },
+                        // {
+                        //   label: "计算机网络",
+                        //   to: "docs/interview/internet",
+                        // },
+                        // {
+                        //   label: "操作系统",
+                        //   to: "docs/interview/os",
+                        // },
+                        // {
+                        //     label: "物联网",
+                        //     to: "docs/interview/iot",
+                        // },
+                        // ],
                     },
                     {
                         label: "我的项目",
@@ -257,7 +258,7 @@ const config = {
             admonitions: true,
             headingIds: true,
         },
-        format: 'detect',
+        format: "detect",
         mermaid: false,
     },
 };
