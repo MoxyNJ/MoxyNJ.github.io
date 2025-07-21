@@ -200,3 +200,29 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
 5. handler：逻辑处理，调用 controller 中的函数去解决；
 6. 拦截器：Interceptor 在请求后处理逻辑；
 7. 异常过滤器：在任何位置抛出异常，都会用 Exception Filter 处理，返回统一的响应信息。
+
+### **Express、Koa、NestJS 对比**
+
+| **特性**        | **Express**                       | **Koa**                   | **NestJS**                                                                    |
+| --------------- | --------------------------------- | ------------------------- | ----------------------------------------------------------------------------- |
+| 1. 中间件模型   | (req,res,next) 链式调用           | async (ctx,next) 洋葱模型 | 装饰器驱动 + 多模块化管道（middleware, guards, pipes, interceptors, filters） |
+| 2. Context 对象 | 分散：req/res 分离                | ctx 聚合（封装 req/res）  | ExecutionContext 抽象，封装 req/res 适配多平台（HTTP、WebSocket、gRPC）       |
+| 3. 异步语法     | 早期 callback；支持 promise/async | 原生 async/await 设计     | 完整 async/await，结合 RxJS（可选）                                           |
+| 4. 类型支持     | JS 原生；TS 靠社区类型声明        | 同 Express                | 原生 TypeScript                                                               |
+
+**Context 上下文对象**
+
+-   是框架在处理请求时创建的一个中间层封装，用来统一访问 HTTP 请求（req）和响应（res）相关数据和方法，并在中间件链/控制器中传递。
+
+它封装了：
+
+-   请求的参数访问：query, body, params, headers；
+-   响应的输出内容：status, body, setHeader；
+-   中间件共享的数据；
+-   平台无关的封装（如 HTTP or WebSocket）。
+
+三个平台的对比：
+
+1. Express：没有共享的 context 对象。而是使用拆分的 req 请求体 + res 响应体。
+2. Koa：有 ctx 共享对象，聚合了请求、响应、共享上下文等信息，可在不同中间件传递。
+3. NestJs：封装了通用上下文对象 ExecutionContext，适配不同平台 HTTP、RPC、WebSocket。并且可以通过装饰器注入 req / Res 对象，通过 getHandler 获取元信息，支持复杂业务场景。
