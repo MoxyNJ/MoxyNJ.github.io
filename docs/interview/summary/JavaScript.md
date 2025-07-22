@@ -1,5 +1,5 @@
 ---
-title: JavaScript相关
+title: JavaScript
 sidebar_position: 0.8
 date: 2022-08-08
 keywords:
@@ -474,6 +474,11 @@ new Set(Object.keys(a)).has("test");   // true
 
 1. `for...in...`：es3 操作符。遍历自身的 + 继承的，可枚举属性，不包含 symbol；
 2. `Object.keys()`：es6 操作符：遍历自身的，可枚举属性值，不包含 symbol；
+
+### JS 设计为单线程语言的原因
+
+-   初衷：JavaScript 是为浏览器交互而生的。职责是操作 DOM、响应用户事件、控制页面弹窗等行为。如果是多线程，可能存在多个线程改同一个 DOM，浏览器需要实现线程锁机制。这增加了开发成本，设计过重。
+-   DOM 是非线程安全的。浏览器的渲染引擎（Blink）和 JS 引擎都可以共享这块儿资源。如果 JS 多线程，无法和渲染引擎进行协调。所以规定 DOM 操作只能在主线程完成。
 
 ## 设计模式
 
