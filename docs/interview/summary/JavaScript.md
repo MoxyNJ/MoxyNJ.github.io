@@ -38,17 +38,17 @@ keywords:
 原理：内部函数，使用外部函数的变量，就形成了闭包。
 目的：私有化数据，把变量放在私有化函数里，通过私有化来保持数据。
 
-1.  节流、防抖：保持对回调函数、timer 的引用。[🔗](/docs/code/writtenJs/jsAPI#4-%E9%98%B2%E6%8A%96%E8%8A%82%E6%B5%81-)
+1. 节流、防抖：保持对回调函数、timer 的引用。[🔗](/docs/code/writtenJs/jsAPI#4-%E9%98%B2%E6%8A%96%E8%8A%82%E6%B5%81-)
 
-    -   通过 timer 记录最近一次触发事件的时机。使用 timer 私有化定时器，保持对定时器时间的引用，保持数据。确定触发时机后， 会调用回调函数。
+    - 通过 timer 记录最近一次触发事件的时机。使用 timer 私有化定时器，保持对定时器时间的引用，保持数据。确定触发时机后， 会调用回调函数。
 
         节流，降低事件的触发的频率。防抖，确保事件必须大于延迟事件后才触发。
 
-2.  柯里化（高阶函数）：[🔗](/docs/code/writtenJs/jsAPI#81-%E6%9F%AF%E9%87%8C%E5%8C%96-curry-)单一职责原则，把多步骤逻辑进行拆分，达到复用。闭包保存了每个步骤的处理结果，以便调用下一个逻辑时使用，达到了复用效果。
+2. 柯里化（高阶函数）：[🔗](/docs/code/writtenJs/jsAPI#81-%E6%9F%AF%E9%87%8C%E5%8C%96-curry-)单一职责原则，把多步骤逻辑进行拆分，达到复用。闭包保存了每个步骤的处理结果，以便调用下一个逻辑时使用，达到了复用效果。
 
-    -   柯里化的使用场景：log 日志打印
+    - 柯里化的使用场景：log 日志打印
 
-3.  高阶函数：满足任意条件： 1：函数可以作为参数被传递 2：函数可以作为返回值输出
+3. 高阶函数：满足任意条件： 1：函数可以作为参数被传递 2：函数可以作为返回值输出
 
 **问题四：闭包的缺点**
 
@@ -401,7 +401,7 @@ new Date().valueOf(); // 1618753134122 毫秒数
 
 ### 问题：分页拉取-数据重复
 
--   https://juejin.cn/post/6938220313838616589
+-   <https://juejin.cn/post/6938220313838616589>
 
 解决有三个思路：
 
@@ -439,10 +439,10 @@ new Set(Object.keys(a)).has("test");   // true
   Object.keys(object);
   Object.values(object);
   Object.entries(object);
-	// - 不区分枚举
-  Object.getOwnPropertyNames()	// 属性
+ // - 不区分枚举
+  Object.getOwnPropertyNames() // 属性
   Object.getOwnPropertySymbols() // Symbol属性
-	//  - Reflect
+ //  - Reflect
   Reflect.ownKeys()  // 全部属性名：属性 + Symbol属性
 ```
 
