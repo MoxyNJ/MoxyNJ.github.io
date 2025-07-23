@@ -828,13 +828,15 @@ Chrome 团队正在重构布局代码，让这两个步骤分开。
 
     -   **渲染进程** 则从管道中读取字节流，然后让 HTML 解析器动态地解析为 DOM 树。
 
-![image](images/01-Chrome.assets/1bfcd419acf6402c20ffc1a5b1909d8c-1889675.png)
+![image[40]](images/01-Chrome.assets/1bfcd419acf6402c20ffc1a5b1909d8c-1889675.png)
 
-### JavaScript 和 CSS 文件的加载（下载），会阻塞 DOM 树的构建（Parse HTML）吗？
+### Js 和 CSS 文件是否阻塞 DOM
+
+JavaScript 和 CSS 文件的加载（下载），会阻塞 DOM 树的构建（Parse HTML）吗？
 
 **结论：CSS 文件不阻塞 DOM 的生成，不阻塞 Javascript 的加载，但是会阻塞 JavaScript 的执行。**
 
-**🌈🌈 JavaScript 文件阻塞 DOM 树构建：**
+**JavaScript 文件阻塞 DOM 树构建：**
 
 如果在渲染进程中 HTML 解析器在逐行解析 HTML 文件时，当解析到 `<script>` 标签，渲染引擎会判断这是一段脚本，此时 HTML 解析器就会暂停 DOM 的解析，因为接下来的 JavaScript 可能要修改当前已经生成的 DOM 结构。这时候 HTML 解析器暂停工作，JavaScript 引擎介入，并执行 script 标签中的这段脚本。当这段脚本执行完毕后，HTML 解析器才会继续解析 DOM。
 
@@ -878,7 +880,7 @@ Chrome 团队正在重构布局代码，让这两个步骤分开。
 
 具体参见下面的问题：`script` 标签中的 `async` 和 `defer` 属性有什么作用？
 
-**🌈🌈 CSS 间接阻塞 DOM 树构建：**
+**CSS 间接阻塞 DOM 树构建：**
 
 如果代码里 **先** 引用了外部的 CSS 文件，那么在执行 **后面的** JavaScript 之前，要等待这个 CSS 文件下载完成，并解析生成 CSSOM 对象之后，才能执行 JavaScript 脚本。
 
@@ -919,7 +921,7 @@ Chrome 团队正在重构布局代码，让这两个步骤分开。
 
 -   这样 JavaScript 只会在最后时刻去改变 DOM 生成，在此之前不会影响到 DOM 的正常解析。而在头部的 CSS 文件也会尽可能的提前解析，不去阻塞 JavaScript 的执行，从而使页面尽快的完成 **DOM 解析** 和 **样式计算**。
 
-### `script` 标签中的 `async` 和 `defer` 属性有什么作用？
+### `script` 标签中 `async` 和 `defer` 属性
 
 在 HTML 中会遇到以下三类 `script`：
 
@@ -931,7 +933,7 @@ Chrome 团队正在重构布局代码，让这两个步骤分开。
 
 下面分析：
 
-![image-20220814220521700](images/01-Chrome.assets/image-20220814220521700.png)
+![image-20220814220521700[30]](images/01-Chrome.assets/image-20220814220521700.png)
 
 **script**
 
@@ -965,7 +967,9 @@ Chrome 团队正在重构布局代码，让这两个步骤分开。
 -   带有 `async` 属性的 Js 文件可能阻塞，也可能不阻塞。
 -   带有 `defer` 属性的 Js 文件不会阻塞 DOM 树构建。
 
-### 如何优化 CSS 和 JavaScript 阻塞 DOM 树的构建（Parse HTML）？
+### 优化：CSS 和 Js 加载对 DOM 构建
+
+如何优化 CSS 和 JavaScript 阻塞 DOM 树的构建（Parse HTML）？
 
 -   官方优化：Chrome 浏览器对此做了一个优化，**预解析操作**。当渲染引擎收到字节流之后，会开启一个 **预解析线程**，用来分析 HTML 文件中包含的 JavaScript、CSS 等相关文件，解析到相关文件之前，预解析线程会提前下载这些文件。
 -   自己优化：
@@ -978,105 +982,6 @@ Chrome 团队正在重构布局代码，让这两个步骤分开。
             -   `onLoad`: 等待页面的所有资源都加载完成才会触发，这些资源包括 css、js、图片视频等。
 
 ## 5. 性能优化
-
-### CSS 如何影响首次加载的白屏时间
-
-白屏时间是如下这个时间段：
-
--   从导航阶段刚完成、渲染阶段刚开启：渲染进程获取到 HTML 文件，开始解析。
--   到渲染阶段完成：页面显示渲染后到网页。
-
-这其中，CSS 文件需要被解析为浏览器可以使用的 CSSOM。
-
-下面通过 **三种情况** 分析 CSS 解析 CSSOM 这个过程，在什么情况下阻塞 DOM，什么情况下阻塞渲染：
-
-**🌈 情况 1：HTML 文件没有引入 JavaScript 脚本。**
-
-```css
-//theme.css
-div {
-    color: coral;
-    background-color: black;
-}
-```
-
-```html
-<html>
-    <head>
-        <link href="theme.css" rel="stylesheet" />
-    </head>
-    <body>
-        <div>geekbang com</div>
-    </body>
-</html>
-```
-
-执行流程如下：
-
-1.  渲染进程请求 HTML 文件后，会等待一段空闲时间（此时网络进程去联系服务器）。
-2.  渲染进程开始从网络进程中获取到 HTML 文件的字节流，边获取边解析 HTML。
-3.  渲染进程完成 DOM 构建后，请求 CSS 文件，会等待一段时间（此时网络进程去联系服务器）。
-4.  渲染进进程从网络进程获取到 CSS 文件后，边获取边构建 CSSOM。
-5.  渲染进程完成 CSSOM 构建，然后依次完成布局树、图层树、绘制、栅格化等操作；
-6.  浏览器进程最终把渲染好的页面展示出来。
-
-![image](images/01-Chrome.assets/70a7ea0212ff35fc2be79f1d574ed518.png)
-
-这其中，构建 CSOM 之前，有一段空间时间，是网络进程构建请求，然后通过 TCP 连接获取 CSS 文件的等待时间。
-
-**🌈 情况 2：HTML 文件引入了 JavaScript 脚本。**
-
-```css
-//theme.css
-div {
-    color: coral;
-    background-color: black;
-}
-```
-
-```html
-<html>
-    <head>
-        <link href="theme.css" rel="stylesheet" />
-    </head>
-    <body>
-        <div>geekbang com</div>
-        <script>
-            //	引入了JavaScript脚本
-            console.log("time.geekbang.org");
-        </script>
-        <div>geekbang com</div>
-    </body>
-</html>
-```
-
--   在解析 DOM 的过程中，如果遇到了 JavaScript 脚本，那么需要先暂停 DOM 解析去执行 JavaScript，因为 JavaScript 有可能会修改当前状态下的 DOM。
--   而执行 JavaScript 脚本前，还需要完成对 CSS 文件的解析（CSS 文件位置在 JavaScript 脚本的上边），因为 JavaScript 有可能会读取 CSS 对元素应用的样式。
-
-这就形成了 DOM 解析等待 JavaScript 执行、JavaScript 执行等待这些 CSS 文件转化为 CSSOM 阻塞链。
-
-![image](images/01-Chrome.assets/f85f8778f273710ca559a52027ed731c.png)
-
-**🌈 情况 3：CSS 和 JavaScript 是外部文件**
-
-```html
-<html>
-    <head>
-        <link href="theme.css" rel="stylesheet" />
-    </head>
-    <body>
-        <div>geekbang com</div>
-        <script src="foo.js"></script>
-        <div>geekbang com</div>
-    </body>
-</html>
-```
-
-CSS 和 JavaScript 都是外部文件，需要加载。此时若引入 Chrome 预解析线程，则情况如下：
-
-在接收到 HTML 数据之后，预解析线程会开始预解析 HTML 文件中的资源。当 HTML 预解析器识别出来了有 CSS 文件和 JavaScript 文件需要下载，然后就并行发起这些文件的下载请求。这样，就会缩短 JavaScript 阻塞时间。
-
-![image](images/01-Chrome.assets/7641c75a80133e747aa2faae8f4c8d1f.png)
 
 ### 缩短首次加载时的白屏时间
 
@@ -1354,3 +1259,102 @@ If-None-Match:"4f80f-13c-3a1xb12a"
 -   浏览器：收到数据，展示用户登录的状态信息。
 
 ![image](images/01-Chrome.assets/d9d6cefe8d3d6d84a37a626687c6ecb3.png)
+
+### CSS 如何影响首次加载的白屏时间
+
+白屏时间是如下这个时间段：
+
+-   从导航阶段刚完成、渲染阶段刚开启：渲染进程获取到 HTML 文件，开始解析。
+-   到渲染阶段完成：页面显示渲染后到网页。
+
+这其中，CSS 文件需要被解析为浏览器可以使用的 CSSOM。
+
+下面通过 **三种情况** 分析 CSS 解析 CSSOM 这个过程，在什么情况下阻塞 DOM，什么情况下阻塞渲染：
+
+**🌈 情况 1：HTML 文件没有引入 JavaScript 脚本。**
+
+```css
+//theme.css
+div {
+    color: coral;
+    background-color: black;
+}
+```
+
+```html
+<html>
+    <head>
+        <link href="theme.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div>geekbang com</div>
+    </body>
+</html>
+```
+
+执行流程如下：
+
+1.  渲染进程请求 HTML 文件后，会等待一段空闲时间（此时网络进程去联系服务器）。
+2.  渲染进程开始从网络进程中获取到 HTML 文件的字节流，边获取边解析 HTML。
+3.  渲染进程完成 DOM 构建后，请求 CSS 文件，会等待一段时间（此时网络进程去联系服务器）。
+4.  渲染进进程从网络进程获取到 CSS 文件后，边获取边构建 CSSOM。
+5.  渲染进程完成 CSSOM 构建，然后依次完成布局树、图层树、绘制、栅格化等操作；
+6.  浏览器进程最终把渲染好的页面展示出来。
+
+![image[40]](images/01-Chrome.assets/70a7ea0212ff35fc2be79f1d574ed518.png)
+
+这其中，构建 CSOM 之前，有一段空间时间，是网络进程构建请求，然后通过 TCP 连接获取 CSS 文件的等待时间。
+
+**🌈 情况 2：HTML 文件引入了 JavaScript 脚本。**
+
+```css
+//theme.css
+div {
+    color: coral;
+    background-color: black;
+}
+```
+
+```html
+<html>
+    <head>
+        <link href="theme.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div>geekbang com</div>
+        <script>
+            //	引入了JavaScript脚本
+            console.log("time.geekbang.org");
+        </script>
+        <div>geekbang com</div>
+    </body>
+</html>
+```
+
+-   在解析 DOM 的过程中，如果遇到了 JavaScript 脚本，那么需要先暂停 DOM 解析去执行 JavaScript，因为 JavaScript 有可能会修改当前状态下的 DOM。
+-   而执行 JavaScript 脚本前，还需要完成对 CSS 文件的解析（CSS 文件位置在 JavaScript 脚本的上边），因为 JavaScript 有可能会读取 CSS 对元素应用的样式。
+
+这就形成了 DOM 解析等待 JavaScript 执行、JavaScript 执行等待这些 CSS 文件转化为 CSSOM 阻塞链。
+
+![image[40]](images/01-Chrome.assets/f85f8778f273710ca559a52027ed731c.png)
+
+**🌈 情况 3：CSS 和 JavaScript 是外部文件**
+
+```html
+<html>
+    <head>
+        <link href="theme.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div>geekbang com</div>
+        <script src="foo.js"></script>
+        <div>geekbang com</div>
+    </body>
+</html>
+```
+
+CSS 和 JavaScript 都是外部文件，需要加载。此时若引入 Chrome 预解析线程，则情况如下：
+
+在接收到 HTML 数据之后，预解析线程会开始预解析 HTML 文件中的资源。当 HTML 预解析器识别出来了有 CSS 文件和 JavaScript 文件需要下载，然后就并行发起这些文件的下载请求。这样，就会缩短 JavaScript 阻塞时间。
+
+![image](images/01-Chrome.assets/7641c75a80133e747aa2faae8f4c8d1f.png)
