@@ -86,16 +86,18 @@ tags: [通用框架]
 
 pnpm / Lerna / Yarn
 
--   依赖提升：自动提升依赖到根 node_modules 中，解决 "幽灵依赖" 问题；
--   扁平化 node_modules 结构
+-   依赖提升：自动提升依赖到根 node_modules 中，避免多个子包安装同一个版本额依赖；
+-   扁平化 node_modules 结构：减少多层嵌套，尽量提升到根目录中；
+-   解决 "幽灵依赖" 问题：当一个包没有显式声明依赖，却因为别的包恰好装了，就能正常使用这个依赖。
+    - 升级依赖行为不一致，测试通过但生产挂了。禁止不声明就使用，强制依赖。
 
 ### 打包和依赖管理
 
 1. 根目录执行 `yarn build` 触发所有子包的 build 脚本；
 2. app 和 pc 包都使用 Vue CLI 进行打包，各自有独立的 `vue.config.js` 配置；
-3. **依赖链接：**子包对 server 包有依赖声明（package.json）中。当一个 package 依赖另一个 package 时，Yarn 会创建一个符号链接（symlink）；
-4. **依赖追踪：**子包对 server 中暴露的功能有 import 导入，那么在子包 build 时，依赖构建过程中会追踪到 server 中真实的源代码位置；
-5. **一起打包：**webpack 会将 server 包中的相关代码一起打包到最终的 bundle 中；
+3. **依赖链接**：子包对 server 包有依赖声明（package.json）中。当一个 package 依赖另一个 package 时，Yarn 会创建一个符号链接（symlink）；
+4. **依赖追踪**：子包对 server 中暴露的功能有 import 导入，那么在子包 build 时，依赖构建过程中会追踪到 server 中真实的源代码位置；
+5. **一起打包**：webpack 会将 server 包中的相关代码一起打包到最终的 bundle 中；
     - server 包完全不需要单独构建。
 
 **monorepo 依赖管理**
