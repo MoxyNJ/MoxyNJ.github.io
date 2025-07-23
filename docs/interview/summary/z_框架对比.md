@@ -5,7 +5,7 @@ date: 2022-08-05
 tags: [Vue, Svelte, React]
 ---
 
-### Vue3 / Svelte / React 的 diff DOM
+### Vue3 / Svelte / React 的 diff
 
 **（1）React：基于虚拟 DOM + Fiber 架构**
 
@@ -76,7 +76,7 @@ CSS 隔离：Shadow DOM，或者给子应用的 CSS 样式全部增加前缀。
 2. 再次访问子应用时：不会重复拉 HTML 以及相关的资源，因为有缓存，会重新 `mount()`。
     - 如果有 SDK 脚本，不会重复下载和执行，全局变量和对象会被清除，需在 mount 中重新调初始化逻辑。
 
-### 子应用通信 / window 挂变量
+### 子应用通信 / window 对象
 
 1. 在基座中注册子应用时，可以传递 props。props 中增加一个写入方法，子应用调；
 2. Actions 通信 (`推荐`)，基座定义 initGlobalState 公共变量区，子应用可以在 props 拿到并读写；
@@ -112,12 +112,12 @@ Vue3 流程：
 3. 副作用函数中，不同于 React，存在 `if/else` 等逻辑，关系是动态变化的。
     - 所以在每次执行 `effect` 之前，都会清空之前收集的依赖，重新收集本次访问的依赖。
 
-### vue 双向数据绑定 v-model
+### vue 双向数据 v-model
 
 是 Vue 的语法糖，背后是 prop + event，依靠响应式系统（getter/setter 或 Proxy）。
 本质是把一个外部值传进来（prop），又通过事件将用户修改同步出去（emit）。
 
-### vue 有 computed，react 是怎么处理的
+### vue 的 computed，react 有什么
 
 -   computed 是基于响应式依赖自动追踪的 “缓存计算属性”，只有依赖项变化时才重新计算，否则返回缓存值。
 -   React 使用 useMemo() 实现同样的缓存功能，只是它需要额外在增加依赖数组，没有实现自动化的响应式追踪机制。
