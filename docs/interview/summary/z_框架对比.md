@@ -56,7 +56,7 @@ JS 隔离思路：
 2. 但 Proxy 不兼容低版本 IE。于是有 Snapshot 快照沙箱，当前挂载的子应用如果在 window 上登记全局变量，就会被记下。
     - 在挂载子应用时，会浅拷贝一份当前 window，然后把上一次的快照应用到 window 上；
     - 在卸载子应用时，会先 diff 下当前 window 和快照的区别，作为下次恢复子应用的依据同时删除新增的全局变量，恢复环境。
-    - 缺点：只会有一个快照变量保存，在 window 保存快照和灰度状态时，可以读取到 window 上的脏数据。同时不允许有两个子应用并存。
+    - 缺点：只会有一个快照变量保存，在 window 保存快照和恢复状态时，可以读取到 window 上的脏数据。同时不允许有两个子应用并存。
 3. iframe
     - 天然隔离 widnow、CSS 样式、全局状态等。但每个 frame 有独立的上下文环境，性能会降低，同时主子应用通信困难。
 
@@ -68,10 +68,10 @@ CSS 隔离：Shadow DOM，或者给子应用的 CSS 样式全部增加前缀。
 
 ### qiankun 的缓存机制
 
-如果开启 kee-alive，流程是：
+如果开启 keep-alive，流程是：
 
 1. 第一次访问子应用：拉取 HTML 文件（纯字符串），解析内容，拉取相关的 CSS、JS 等资源；
-    - 等待基座触发子应用 `mount()` 时，才会在沙箱中执行这些资源。具体来说，如果是 Vue，就会执行暴露的 createAp 方法，挂载整个页面。
+    - 等待基座触发子应用 `mount()` 时，才会在沙箱中执行这些资源。具体来说，如果是 Vue，就会执行暴露的 createApp 方法，挂载整个页面。
     - 在切走子应用时，会触发 `umount()` 生命周期，执行暴露给子应用基座的卸载方法。最后完全销毁 DOM、事件、沙箱。但是会缓存 JS 执行的模块定义、CSS 解析后的样式规则。
 2. 再次访问子应用时：不会重复拉 HTML 以及相关的资源，因为有缓存，会重新 `mount()`。
     - 如果有 SDK 脚本，不会重复下载和执行，全局变量和对象会被清除，需在 mount 中重新调初始化逻辑。
@@ -80,35 +80,42 @@ CSS 隔离：Shadow DOM，或者给子应用的 CSS 样式全部增加前缀。
 
 1. 在基座中注册子应用时，可以传递 props。props 中增加一个写入方法，子应用调；
 2. Actions 通信 (`推荐`)，基座定义 initGlobalState 公共变量区，子应用可以在 props 拿到并读写；
-3. 自定义事件，子应用触发一个 CustomEvent，并负担参数；基座实时监听，并处理参数。
+3. 自定义事件，子应用触发一个 CustomEvent，并附带参数；基座实时监听，并处理参数。
 4. 在非严格沙箱环境下，基座可以在注册子应用时，增加 globalVarWhiteList 全局变量访问白名单，子应用可以直接 `window.xxx` 访问这些变量。
-5. PostMessage：iframe 的通信方式。获取到对方 widnow 后，进行 postMessage，对方监听
+5. PostMessage：iframe 的通信方式。获取到对方 window 变量后，进行 postMessage，对方监听
 
 ## Vue
 
 ### Vue2/3 响应式
 
--   Vue 2 响应式用的是 Object.defineProperty 劫持属性，只能劫持已有字段；
+-   Vue 2 通过 Object.defineProperty 劫持每个响应式属性的 getter 和 setter，实现依赖收集与派发更新；
+    -   局限性：
+        -   新增/删除属性无法被监听，vue 只能完整的重新劫持对象，无法按需劫持；
+        -   响应式缺陷，如 length 等一些变更方法无法触发更新，只对特定的数组方法进行劫持；
+        -   对象内所有属性都需劫持，深层嵌套对象需要递归劫持，性能较差，同时依赖更新时可能导致整个组件更新。
 -   Vue 3 用的是 Proxy 实现响应式代理，可以深层递归、动态追踪所有对象操作，性能更优。
     -   使用 Proxy 拦截对象访问，通过 track 收集依赖、trigger 派发更新，构建了一个细粒度、按需追踪的响应式系统。
+    -   解决了：
+        -   动态监听任意属性：不需要提前劫持，可以响应后续添加的属性；
+        -   Proxy + Reflect 支持数组方法、Map、Set 等完整的数据操作拦截；
+        -   更新粒度不再是整个对象，而是可以监听到具体哪个子属性存在依赖关系；
+        -   只有在产生依赖关系时，才懒劫持、惰性创建依赖关系，而不需在定义对象时完整的监听。
 
 Vue3 流程：
 
-1. 调用 `reactive()` 时，会返回一个 Proxy 对象，内部封装了 getter / setter 两个拦截器。
+1. 创建响应式对象：调用 `reactive()` 时，会返回一个 Proxy 对象，内部封装了 getter / setter 两个拦截器。
     1. 访问属性时，会触发 getter，进而调用 track 进行依赖收集，记录当前的副作用函数；
     2. 修改属性时，会触发 setter，进而调用 trigger，查找所在依赖这个 target 的副作用函数，然后依次触发这些函数的重新执行。
-2. 调用 `effect(() => state.count)` 时，会立即执行内部函数，并标记为“当前活跃副作用”。
+2. 执行副作用函数：调用 `effect(() => state.count)` 时，会立即执行内部函数，并标记为 currentEffect。
     1. 在执行过程中，访问了响应式对象的属性，会触发调用 `getter` → `track` ，然后收集当前的副作用函数。放在，`targetMap` 全局依赖图，是一个 WeakMap 用于收集和查找依赖。
     2. 当依赖的属性变更时，则调用 `setter` → `trigger` ，调用这个副作用。
-3. 副作用函数内存在 `if/else` 等逻辑，不同于 React，这里是动态变化的。依赖关系需要更新。
-    1. 所以在每次执行 `effect` 之前，都会清空之前收集的依赖，重新收集本次访问的依赖。
+3. 副作用函数中，不同于 React，存在 `if/else` 等逻辑，关系是动态变化的。
+    - 所以在每次执行 `effect` 之前，都会清空之前收集的依赖，重新收集本次访问的依赖。
 
 ### vue 双向数据绑定 v-model
 
-Vue 的双向绑定是依靠响应式系统（getter/setter 或 Proxy）+ 模板编译生成的监听与更新逻辑，做到数据变动更新视图、用户输入更新数据。`<input v-model="msg" />`
-
-1. 数据绑定：在初始化时将 data.msg 变成响应式，Proxy 劫持 setter 和 getter；读取时记录依赖，赋值时视图更新；
-2. 视图监听：编译模板时，Vue 为 v-model 元素自动加上 `:value` 和 `@input:` ，用户输入更新数据，触发 setter → 更新视图；
+是 Vue 的语法糖，背后是 prop + event，依靠响应式系统（getter/setter 或 Proxy）。
+本质是把一个外部值传进来（prop），又通过事件将用户修改同步出去（emit）。
 
 ### vue 有 computed，react 是怎么处理的
 
@@ -133,8 +140,12 @@ Vue 的双向绑定是依靠响应式系统（getter/setter 或 Proxy）+ 模板
 Vue 中常见的组件逻辑复用方式包括：
 
 1. mixins：混入多个逻辑对象，属性合并；
+    - 多个 mixin 的 data、methods、hooks 会在组件创建时合并到组件本身。
+    - 命名冲突不可见，继承来源不清晰，不利于维护。
 2. extends：继承单一逻辑对象，单一来源扩展；
+    - 扩展性较差。
 3. Vue 3 推荐：组合式 API（Composition API） 和 自定义 hooks（可复用函数）。
+    - 自定义 hook 可将 props、methods 抽离拆分，复用逻辑。
 
 ### 组件封装思路
 
@@ -157,7 +168,7 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
 1. IOC（控制反转）+ DI（依赖注入）
     - 核心是通过装饰器 + 元数据反射 来注册类及其依赖
     - `@Injectable()` 标记服务为可注入，Nest 的容器（IoC Container）负责实例化和注入
-    - 控制权从开发者手动 new 转为框架自动管理（解耦、可测试、可替换）
+    - 控制权从开发者的手动 `new`，转为框架自动管理（解耦、可测试、可替换）
     - 底层实现：
         - Nest 的 IoC 容器（内部维护一个 token → provider 的映射）；
         1. 装饰器 `@Injectable, @Controller`：会将 构造函数传递给装饰器中，以此能获取构造函数需要的入参，获取依赖关系。
@@ -167,8 +178,8 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
     - 典型场景：权限控制、日志埋点、统一错误处理、响应封装。
     - 底层实现：在函数调用前后，通过对 Controller 中方法的高阶包装，进行调用前后的拦截。
 3. 模块化架构（Module）
-    - 每个业务逻辑单位（控制器、服务等）被组织在 @Module() 中。
-    - 支持模块之间导入/导出 Provider，遵循单一职责、封装边界清晰。
+    - 每个业务逻辑单位（如 controller、service 等）被整合在一个 `@Module()` 中。
+    - 支持模块之间导入/导出 `Provider`，遵循单一职责、封装边界清晰。
 
 ### 核心工具 / 执行顺序 / 面向切面编程
 
@@ -181,25 +192,25 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
 
 **面向切面编程**：
 
-1. 中间件：请求会被 middleware 处理，这一层可以复用 express 的中间件生态，实现 session 功能。这个 middleware 也可以是 class 实现，可以注入其他 provider。
-    - 适用于：处理原始 HTTP 请求/响应
+1. **中间件**：请求会被 middleware 处理，这一层可以复用 express 的中间件生态。可以是 class 实现，也可以注入其他 provider。
+    - 适用于：处理原始 HTTP 请求
         - 日志记录：记录所有请求的  IP、方法、URL  和响应时间
-        - 身份验证基础设施：解析 JWT token，设置 req.user
-2. 守卫：在具体的路由会经历 Guard 的处理，它可以通过 ExecutionContext 拿到目标 class、handler 的 metadata 等信息，可以实现权限验证等功能。
+        - 身份验证基础设施：解析 JWT token，设置 req.user，解析 session 等。
+2. **守卫**：接下来会经过 Guard 的处理，它可以通过**上下文对象** ExecutionContext 拿到目标 class、handler 的 metadata 等信息，可以实现权限验证等功能。
     - 适用于：基于条件的访问控制
         - 权限控制：检查用户是否有权访问特定资源
         - 角色验证：验证用户是否拥有执行操作的角色
-3. 拦截器：Interceptor 可在请求前做处理，可通过 ExecutionContext 拿到 class、handler 信息。
+3. **拦截器**：Interceptor 在请求前/后做处理，可通过 **上下文对象** ExecutionContext 拿到 class、handler 信息。
     - 适用于：转换请求/响应，添加横切逻辑
         - 响应转换：统一响应格式为 {status, message, data}
         - 缓存：将耗时操作（数据查询）的结果临时存储起来，当相同请求再次到来时，直接返回缓存的结果，而不必重新执行操作。
-4. 管道：在到达 handler 之前，还会对参数用 Pipe 做下检验和转换。
+4. **管道**：在到达 handler 之前，还会对参数用 Pipe 做下检验和转换。
     - 适用于：数据转换和验证
     - 参数验证：验证 request 参数是否正确；
     - 数据转换：将 string 参数转换为 number 等；
-5. handler：逻辑处理，调用 controller 中的函数去解决；
-6. 拦截器：Interceptor 在请求后处理逻辑；
-7. 异常过滤器：在任何位置抛出异常，都会用 Exception Filter 处理，返回统一的响应信息。
+5. **handler**：真正的逻辑处理，调用 controller 中的函数去解决；
+6. **拦截器**：Interceptor 在请求后处理逻辑；
+7. **异常过滤器**：在任何位置抛出异常，都会用 Exception Filter 处理，返回统一的响应信息。
 
 ### **Express、Koa、NestJS 对比**
 
@@ -268,8 +279,8 @@ Node.js 是一个基于 V8 引擎的 JavaScript 运行时，使用 libuv 提供�
     - Node 用 C++/JS 实现了系统级模块：fs, http, net, os, process, timers, stream；
     - 有些模块是用 JS 包装的，有些直接调用原生 API
 3. JS 与 C++ 的绑定层（Binding）
-    - 将 C++ 实现的模块通过绑定函数（如 NODE*MODULE, napi*\*）暴露给 JS；
-    - 让 JS 能调用底层能力，例如：fs.readFile() → 调用 C++ 实现 → libuv I/O → 操作系统
+    - 将 C++ 实现的模块通过绑定函数暴露给 JS；
+    - 让 JS 能调用底层，例如：fs.readFile() → 调用 C++ 实现 → libuv I/O → 操作系统
 
 **第四层：libuv**（Node 的异步 I/O 引擎）
 
@@ -284,7 +295,7 @@ Node 的核心调度器，提供：
 
 **第五层：操作系统 / 系统调用层**
 
-libuv 封装了不同平台的系统调用接口，提供统一抽象给 Node 使用。但最终所有的操作都会调用操作系统提供的底层 API，如：
+libuv 封装了不同平台的系统调用接口，提供统一抽象给 Node 使用。最终所有的操作都会调用操作系统提供的底层 API，如：
 
 -   Linux 的 epoll、macOS 的 kqueue、Windows 的 IOCP；
 -   文件系统 API：open, read, write；
