@@ -150,10 +150,7 @@ Plugin 通过 webpack 生命周期的钩子插入，在各个阶段可介入：
 | compilation      | 创建 compilation 实例 | HtmlWebpackPlugin：生成/修改 HTML 文件，操作资源     |
 | make             | 从入口递归构建依赖图  | **🌈  自定义插件：动态生成依赖、做源码分析**         |
 | afterCompile     | 所有模块编译完成      | BannerPlugin：在打包文件头部插入版权、版本等注释信息 |
-| emit             | 输出前，修改 assets   | CopyWebpackPlugin：复制静态资源到 output 目录        |
-
-CompressionPlugin：在输出前生成 gzip、brotli 压缩文件
-**🌈 自定义插件：可以监控构建产物体积** |
+| emit             | 输出前，修改 assets   | 复制静态资源到 output 目录、压缩文件，🌈 自定义监控产物体积|
 | afterEmit | 文件写入后 | **🌈  自定义插件：可用于通知、日志记录** |
 | done | 完整构建结束 | 打印构建信息 |
 | failed | 构建失败时 | **🌈  自定义告警：发送告警、企业通知、自动清理** |
