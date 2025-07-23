@@ -1204,7 +1204,7 @@ window.addEventListener("resize", debounce(resize, 1000));
 
 强缓存、协商缓存。通过一个具体案例来说明情况：
 
-![image](images/01-Chrome.assets/5fc2f88a04ee0fc41a808f3481287408-16315245739758.png)
+![image[40]](images/01-Chrome.assets/5fc2f88a04ee0fc41a808f3481287408-16315245739758.png)
 
 上图是当浏览器对同一个地址，在不同时间段向服务器发送 HTTP 请求时的处理方式：
 
