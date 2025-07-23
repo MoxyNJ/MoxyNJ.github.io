@@ -73,13 +73,12 @@ tags: [Vite, Webpack]
 **解决方案：**
 
 Vite 默认的代码分割机制在处理动态导入时的命名方式：
+- 一句话：提前识别所有懒加载组件，命名并拆分它们的 chunk（避免打入入口文件）。
 
--   在 `outputOptions` 勾子阶段，自定义 router Bundle Plugin 插件，自动识别 router.js 中的路由动态导入的组件，将他们单独打包为 `chunk-目录-文件名.js`
--   在执行 `rollupOptions` 的主文件打包名 `index.js` ，其他 chunk 打包 `name.hash.js` 之前；
--   主文件使用哈希命名：index_xxxxx.js（防缓存），动态导入的模块使用简单命名：index.js；
--   自定义 routerBundlePlugin，对路由 router.js 中动态导入的 `() => import(xx.js)` 进行判断，然后增加 hash 后缀，每个路由组件名称为 `chunk-目录名-文件名.js` 。
--   然后调用 `vite.config` 中配置的 `name.hash.js` 打包策略，增加 hash 值。
--   这样打包路由之间不会存在相互引用，自然也就没有缓存问题了。
+-   在 `outputOptions` 勾子阶段，引入 router Bundle Plugin 插件，识别 router.js 中的路由动态导入的组件，将他们单独打包为 `chunk-目录-文件名.js`
+-   在 `rollupOptions` 阶段，配置vite打包策略，入口不带hash:`index.js`，chunk 增加 hash：`chunk-目录名-文件名.[hash].js`;
+-   这样，Vite 构建输出为 index.js，CI/CD 发布过程中重命名为 index_20250725.js，供后端模板引用；
+-   这样打包路由之间不会存在相互引用，避免浏览器加载index.js入口文件，解决白屏问题。
 
 ### Loader 与 Plugin 的区别
 
