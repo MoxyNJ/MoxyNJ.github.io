@@ -256,7 +256,7 @@ function financial(x) {
 
 ## New
 
-### 为什么 Symbol/BigInt 不能 new？
+### Symbol/BigInt 不能 new
 
 Symbol 和 BigInt 虽然没有对应的「包装构造函数」可通过 new 使用，但它们依然拥有包装对象类型，并可调用方法。只是 new 语法被禁止。
 
@@ -285,7 +285,7 @@ num === 123; // false
 ).toString; // '123'
 ```
 
-### 判断 Fn 是否通过 new 的方式调用？
+### 判断 Fn 是否通过 new 调用
 
 1. （ES6）在调用 Fn 时，内部可通过 `new.target === true` 判断。只在构造函数执行时存在
 
@@ -303,6 +303,14 @@ num === 123; // false
 3. 直接判断 `this` ，如果 this 是 window，undefined 则直接调，不是则通过 new。
 
 ## 类型判断
+
+### 区分 Array 和 Object
+
+- `Array.isArray(value)` 区分数组；
+- `Object.prototype.toString.call(val)`：`"[object Array]"`，`"[object Object]"`
+- 构造函数：`[].constructor === Array`，`({}).constructor === Object`
+  - instanceof 也是：`[] instanceof Array    // true`
+- 不能用 `typeof`，这个是判断基本数据类型的方法。
 
 ### 类型判断的方式
 
