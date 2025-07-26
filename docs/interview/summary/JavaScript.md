@@ -360,12 +360,12 @@ new Date().valueOf(); // 1618753134122 毫秒数
 1. `for...in...`：es3 操作符。遍历自身的 + 继承的，可枚举属性，不包含 symbol；
 2. `Object.keys()`：es6 操作符：遍历自身的，可枚举属性值，不包含 symbol；
 
-### 问题：可枚举 / 不可枚举
+### 可枚举 / 不可枚举
 
 -   [枚举性](/docs/frontEnd/JavaScript/%E5%AF%B9%E8%B1%A1#32-%E5%8F%AF%E6%9E%9A%E4%B8%BE%E5%B1%9E%E6%80%A7--%E4%B8%8D%E5%8F%AF%E6%9E%9A%E4%B8%BE%E5%B1%9E%E6%80%A7)
 -   [定义特性](/docs/frontEnd/JavaScript/%E5%AF%B9%E8%B1%A1#23-%E5%B1%9E%E6%80%A7%E7%9A%84%E7%89%B9%E6%80%A7)
 
-### 问题：判断一个对象是否有某个属性
+### 对象是否有某个属性
 
 ```js
 const a = {test:123}
