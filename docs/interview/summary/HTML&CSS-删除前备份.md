@@ -5,6 +5,7 @@ date: 2022-08-14
 keywords:
     - HTML
     - CSS
+draft: true
 ---
 
 ## 正常流
@@ -500,6 +501,83 @@ flex item（6）：
 -   `gap` ：是 上面两个的简写。
 
 ![image-20211122165252887[20]](images/HTML&CSS.assets/image-20211122165252887.png)
+
+## 5. 文字 / 排版的属性
+
+### CSS2.2
+
+**具体每个属性的用法，再看一下书中勾画的部分**
+
+line-height：文字的行高 / 行间距。
+
+vertical-align：设置文字垂直对齐方式。
+
+text-indent：字符的缩进（可以设置隐藏文字）。
+
+text-align：对齐元素（左对齐、右对齐、左右散开对齐）。
+
+letter-spacing：设置单个字符之间的间距。
+
+word-spacing：设置单词之间的间距（约等于增 / 减空格的宽度）。
+
+word-break：换行时机。
+
+word-wrap：换行时机（CSS3 改名为 overflow-wrap）。
+
+white-spoace：处理空白字符的方式（比如多个遇到多个连续空格，最后只显示一个）。
+
+text-decoration：content area 文字内容区域四周的边框（可以定义一个下划线）。
+
+text-transform：字符全部大写 / 小写。
+
+-   应用 1：身份证输入，末尾字母 X，用户虽然输入了小写，用该属性转换为大写；
+-   应用 2：验证码输入，网站的验证码不区分大小写，用户输入了小写，用该属性转换为大写。
+
+伪元素 / 伪类
+
+`::first-letter` 选择器：选中段落的首字符
+
+`:first-line` 选择器：选中段落的首字符
+
+#### font 系列
+
+@font-face：CSS 的一种变量。利用 font-family 和 src 属性，可以自定义 / 替换原本的字体，也可以引入多种格式的字体。
+
+font：是 font 系列的综合。
+
+color：字体颜色
+
+font-family：字体系列。
+
+font-weight：字重。文字的粗细程度。
+
+font-style：斜体风格。normal, italic, oblique。
+
+font-variant：小体形大写字母
+
+### CSS 的颜色
+
+**color**
+
+rgba(255, 255, 255, .7)：
+
+hsla(240, 100%, 50%, .7)：色调、饱和度、亮度。
+
+**background**
+
+background-color：插入背景颜色
+
+background-position：背景的位置的偏移值
+
+background-repeat：背景图像的重复。默认在水平和垂直方向上重复。
+
+background-attachement：背景图像的位置是在视口内固定，或者随着包含它的区块滚动。
+
+background-image：设置一个或者多个背景图像。
+
+background-size：背景图片大小。
+
+background-clip：裁剪背景图片。元素背景（背景图片或颜色）是否延伸到边框、内边距盒子、内容盒子下面。
 
 ## 7 居中对齐
 
