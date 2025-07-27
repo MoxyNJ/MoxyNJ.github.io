@@ -1,4 +1,19 @@
 ---
+# id: introduction
+title: 概述
+# sidebar_position: 0
+# slug: /frontEnd/JavaScript
+# keywords:
+  # - JavaScript
+  # - ES6
+  # - js
+  # - JavaScript语法
+  # - js语法
+draft: true
+---
+
+<!-- 暂时注释掉，因为需要用 总结 做第一个页面 -->
+<!-- ---
 id: introduction
 title: 概述
 sidebar_position: 0
@@ -9,7 +24,8 @@ keywords:
   - js
   - JavaScript语法
   - js语法
----
+draft: true
+--- -->
 
 这里记录 JavaScript 语法的相关笔记，主要包括：
 - JavaScript 的执行过程

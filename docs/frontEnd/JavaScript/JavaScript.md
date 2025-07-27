@@ -1,6 +1,8 @@
 ---
-title: JavaScript
-sidebar_position: 0.8
+id: introduction
+title: 总结-JavaScript
+sidebar_position: 0
+slug: /frontEnd/JavaScript
 date: 2022-08-08
 keywords:
     - 面试题
@@ -306,11 +308,11 @@ num === 123; // false
 
 ### 区分 Array 和 Object
 
-- `Array.isArray(value)` 区分数组；
-- `Object.prototype.toString.call(val)`：`"[object Array]"`，`"[object Object]"`
-- 构造函数：`[].constructor === Array`，`({}).constructor === Object`
-  - instanceof 也是：`[] instanceof Array    // true`
-- 不能用 `typeof`，这个是判断基本数据类型的方法。
+-   `Array.isArray(value)` 区分数组；
+-   `Object.prototype.toString.call(val)`：`"[object Array]"`，`"[object Object]"`
+-   构造函数：`[].constructor === Array`，`({}).constructor === Object`
+    -   instanceof 也是：`[] instanceof Array    // true`
+-   不能用 `typeof`，这个是判断基本数据类型的方法。
 
 ### 类型判断的方式
 
@@ -425,8 +427,6 @@ new Set(Object.keys(a)).has("test");   // true
 | **适配器模式**    | 让两个接口不兼容的模块协作      | 接口格式转换、封装旧 API           |
 | **命令模式**      | 将操作封装成对象，支持撤销/重做 | 编辑器撤销、浏览器前进后退         |
 | **代理模式**      | 控制对对象的访问                | Vue 3 的 Proxy 实现响应式          |
-
-
 
 ### WeakSet/Map 使用场景
 
