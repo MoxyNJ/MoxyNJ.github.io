@@ -20,6 +20,8 @@ import Button from "../Button";
 
 import styles from "./styles.module.css";
 
+import { Analytics } from "@vercel/analytics/react"
+
 const Hero = (): JSX.Element => {
   const {
     // 当前语言
@@ -102,6 +104,7 @@ const Hero = (): JSX.Element => {
         }
       </div>
       <HeroMainImage />
+      <Analytics />
     </animated.div>
   );
 };

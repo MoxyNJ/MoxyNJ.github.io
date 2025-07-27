@@ -36,6 +36,7 @@
     "@fortawesome/react-fontawesome": "^0.1.11",
     "@mui/material": "^5.4.3",
     "@popperjs/core": "^2.11.2",
+    "@vercel/analytics": "^1.5.0",
     "babel-plugin-import": "^1.13.3",
     "classnames": "^2.2.6",
     "dayjs": "^1.10.7",
