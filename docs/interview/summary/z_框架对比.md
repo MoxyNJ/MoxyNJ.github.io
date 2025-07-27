@@ -179,7 +179,7 @@ Vue3 流程：
 是 Vue 的语法糖，背后是 prop + event，依靠响应式系统（getter/setter 或 Proxy）。
 本质是把一个外部值传进来（prop），又通过事件将用户修改同步出去（emit）。
 
-### vue 的 computed，react 有什么
+### computed在react的替代
 
 -   computed 是基于响应式依赖自动追踪的 “缓存计算属性”，只有依赖项变化时才重新计算，否则返回缓存值。
 -   React 使用 useMemo() 实现同样的缓存功能，只是它需要额外在增加依赖数组，没有实现自动化的响应式追踪机制。
@@ -299,6 +299,8 @@ NestJS 借助面向对象 + 函数式编程 + TypeScript 装饰器 + IOC/AOP 模
 1. Express：没有共享的 context 对象。而是使用拆分的 req 请求体 + res 响应体。
 2. Koa：有 ctx 共享对象，聚合了请求、响应、共享上下文等信息，可在不同中间件传递。
 3. NestJs：封装了通用上下文对象 ExecutionContext，适配不同平台 HTTP、RPC、WebSocket。并且可以通过装饰器注入 req / Res 对象，通过 getHandler 获取元信息，支持复杂业务场景。
+
+
 
 ## 通识
 
