@@ -7,7 +7,27 @@ tags: [React]
 
 ## Fiber
 
-### React 的运行机制：
+### 空闲时间判断
+
+问：React 是如何判断浏览器还有多少空闲时间来执行低优先级任务的？是否使用了 requestIdleCallback？
+
+答：React 没有直接使用 requestIdleCallback，而是通过内部的调度器 scheduler 模块模拟了类似的机制。
+
+不用 requestIdleCallback 的原因
+
+-   requestIdleCallback 是浏览器原生 API，用于在主线程空闲时执行任务，适合后台任务；
+-   存在兼容性问题，Safari、IE 不兼容；
+-   调度不可预测，受到浏览器策略影响较大；
+-   不够实时，对动画 / 渲染类任务控制不细致，如标签页不可视时，可能不会触发回调；
+
+React 内部实现了一个调度器（scheduler），它：
+
+-   使用 MessageChannel + setTimeout 等组合，模拟 requestIdleCallback；
+-   通过时间片切分任务（Time Slicing）；
+-   内部维护任务优先级、过期时间，动态判断当前是否要让步；
+    -   `shouldYield()` 记录每一帧的起始时间，减去当前时间，判断是否还有剩余时间（如超过 5ms 就放弃）
+
+### React 的运行机制
 
 -   React 运行有三个阶段：调度、协调、渲染
 
@@ -45,7 +65,7 @@ React 把同步更新，变为异步可中断进行更新，也就是说 React �
 -   兼容性：提供了统一的事件对象接口，内部抹平了不同浏览器的兼容性差异；
 -   控制事件传播：React 模拟 DOM 事件的捕获与冒泡过程，对外统一 API，这样在批处理、调度事件池等，更好地做性能优化。
 
-### 问题：一次点击事件触发的流程
+### 一次点击事件触发的流程
 
 如点击一个 button 按钮，触发 onClick 事件。
 
@@ -82,7 +102,7 @@ React 事件系统可分为三个部分：
 
 依次执行数组里面的事件回调函数，如果遇到 `event.isPropagationStopped === true` 就会中断后续的回调执行，达到阻止冒泡的效果。
 
-### 问题：Component、PureComponent 、memo()
+### Component、PureComponent 、memo()
 
 **`PureComponent` 组件创建了默认的 `shouldComponentUpdate` 行为。**
 
@@ -155,7 +175,7 @@ useMemo：useMemo 可以缓存人意内容，useCallback 是 useMemo 语法糖�
     3. 函数引用：useCallback() 缓存，避免子组件不必要刷新；
 2. 可以使用 HOC 对 React.memo() 进行封装，或者使用 Hook 对 useMemo 进行封装；
 
-### 组件 return JSX，编译时会被转义成什么 JS 代码
+### JSX 会被转义为
 
 JSX 是不能被浏览器直接运行的，它在编译阶段用 Babel 转译成普通的 JavaScript 函数调用代码。
 
@@ -197,7 +217,7 @@ React 内部的缓存机制：在当前组件的多次 render 过程中缓存“
 -   流程上，要先读取上次缓存的值，然后比较 deps 依赖是否发生变化。
 -   如果变化则执行并更新缓存；如果没有变化则返回上次缓存的值。
 
-### useLayoutEffect 和 useEffect 的区别
+### useLayoutEffect 和 useEffect 区别
 
 -   useEffect 是异步的副作用，在 DOM 更新 + 浏览器绘制后执行，不会阻塞页面渲染；
     -   数据请求，事件监听。渲染优先，可以避免卡顿。
@@ -207,7 +227,7 @@ React 内部的缓存机制：在当前组件的多次 render 过程中缓存“
 -   requestAnimationFrame 是浏览器提供的异步 api，在下一帧绘制前触发。
     -   rAF 不会阻塞页面渲染，适合设置一些连续帧动画。
 
-### 问题：state 的批量更新
+### state 的批量更新
 
 关联问题：setState 的更新流程、state 是同步更新 (同步执行) 还是异步更新？
 
