@@ -217,7 +217,7 @@ React 内部的缓存机制：在当前组件的多次 render 过程中缓存“
 -   流程上，要先读取上次缓存的值，然后比较 deps 依赖是否发生变化。
 -   如果变化则执行并更新缓存；如果没有变化则返回上次缓存的值。
 
-### useLayoutEffect 和 useEffect 区别
+### useLayoutEffect / useEffect
 
 -   useEffect 是异步的副作用，在 DOM 更新 + 浏览器绘制后执行，不会阻塞页面渲染；
     -   数据请求，事件监听。渲染优先，可以避免卡顿。
@@ -226,6 +226,8 @@ React 内部的缓存机制：在当前组件的多次 render 过程中缓存“
     -   会阻塞浏览器绘制，谨慎使用。
 -   requestAnimationFrame 是浏览器提供的异步 api，在下一帧绘制前触发。
     -   rAF 不会阻塞页面渲染，适合设置一些连续帧动画。
+
+
 
 ### state 的批量更新
 
@@ -258,6 +260,8 @@ React 使用 dispatchEvent 同一调度所有元素 fiber 上绑定的事件，�
 
 **所以，如果采用异步环境更新 state，就会导致多次的 render 调用，也会导致视图的多次渲染，影响性能。**
 
+
+
 ## HOC
 
 HOC（高阶组件）是 React 中一种复用组件逻辑的技术。其本质是一个函数，接收一个组件作为参数，对这个组件进行功能增强后，返回一个新组件。
@@ -269,3 +273,297 @@ HOC（高阶组件）是 React 中一种复用组件逻辑的技术。其本质�
 3. 组件注入：可以增加一些默认的 props，比如 userInfo、theme 等公共配置；
 4. 条件渲染：固定的一些 Error 通用处理，可以通过 HOC 注入，判断 props；
 5. 除此之外，也可以将一些数据请求，比如表单分页逻辑写在 HOC 中，组件内可专注于 UI 的实现。不过这种现在也可以用 hook 去实现，可读性更高一些。
+
+
+
+## Hooks 介绍
+
+数据更新驱动：useState、useReducer
+
+执行副作用：useEffect、useLayoutEffect
+
+状态获取/传递：useContext、useRef、useImperativeHandle
+
+状态派生/保存：useMemo、useCallback
+
+
+
+#### useState
+
+```js
+const [ state , setState ] = useState(initData);
+```
+
+- state：目的提供给 UI ，作为渲染视图的数据源。
+- setState：改变 state 的函数，推动函数组件渲染的触发函数。
+- initData：获得 state 的初始值。有两种情况，如果是具体值，直接作为初始值。 如果是函数，执行函数的返回值做为初始化值。
+
+**注意事项**：
+
+- **“所谓异步”**，在函数组件一次执行上下文中，state 的值是固定不变的。
+  - 且当前执行上下文中获取不到 setState 改变的值，只有在下一次 render 后才能获取到。
+- **浅对比**，如果 setState 传入了相同的值，组件就不会触发 render 更新。
+
+
+
+#### useReducer
+
+useReducer 是 react-hooks 提供的能够在无状态组件中运行的，类似 redux 的功能 api。
+
+useReducer 是 useState hooks 的扩展。在逻辑相对复杂的情况下，可以用 reducer 的 switch 进行判断，通过 dispatch 达到对同一个 state 有不同的更新方法。
+
+```js
+const [ state , dispatch ] = useReducer((state, action) => {
+  switch(action.type) {
+      //增加、减少、清空、赋值..
+      return newState;
+  }
+});
+
+// 使用：
+dispatch({ type: "increment" });
+```
+
+- state：目的提供给 UI ，作为渲染视图的数据源。
+- dispatch：改变 state 的函数，推动函数组件渲染的触发函数。和 useState 的 setState 一样。
+- reducer：相当于 redux 的 reducer。是一个入参有 旧state + action、内部有 switch 的纯函数。函数内部实现了根据不同的 type，对 state 进行操作并返回，从而更新 state。
+
+使用方式：
+
+1. **封装**。当对 state 更新的逻辑相对复杂，可以通过 useReducer 包装。
+2. **复用**。如果多个组件均有一个相同的判断方式（可以用同一个 switch 判断），那么单独定义一个 reducer 纯函数，然后不同的组件 import 引入这个 reducer 即可。
+
+
+
+#### useEffect
+
+```js
+useEffect(()=>{
+  // code..
+  return destory;
+},[dep1, dep2])
+```
+
+- 第一个参数为 callback，主体为 useEffect 的回调函数，当依赖发生变化时执行。
+- return destory 销毁函数，作为下一次 callback 执行之前调用，用于清除上一次 callback 产生的副作用。
+- 第二个参数为依赖，是一个数组，当依赖项改变，就会执行上一次的销毁函数，新的回调函数。
+  - 如果不添加任何依赖，组件 render 就会触发，挂载 / 更新都会触发；
+  - 如果添加空数组 `[]`，组件只有在挂载时触发。
+
+useEffect 是 **异步调用** 的。关联知识：渲染（commit阶段工作流程）：
+
+- before mutation：创建微任务，给 `useEffect` 的回调函数设定 normal Scheduler Priority，加入任务队列。
+- layout：绑定 useEffect 的销毁 + 回调函数。
+- commit 完成，等待主线程任务完成（DOM 更新，视图绘制完毕）。异步执行 useEffect 的（上一次）销毁函数 + （本次）回调函数。
+
+**useEffect 回调函数不会阻塞浏览器绘制视图。**
+
+**使用方式**：
+
+- 回调函数：初始化 state、异步数据请求、注册事件监听、设置定时器；
+- 销毁函数：注销事件监听、清楚定时器。
+
+
+
+#### useLayoutEffect
+
+参数逻辑和 useEffect 相同，只是触发时机不同，useLayoutEffect 同步调用。在渲染阶段：
+
+- mutation 阶段：执行 useLayoutEffecta 的销毁函数；
+- layout 阶段：执行 useLayoutEffect 的回调函数。
+
+**使用方式：**
+
+- 回调函数：在最后绘制 dom 前，需要对 dom 进行调整，注意不要死循环。
+
+
+
+useEffect 和 useLayoutEffect 的区别：
+
+1. 前者异步调用，后者同步调用（参考在 commit 阶段的处理流程）。
+2. 前者不会阻塞浏览器绘制，后者的回调函数会阻塞浏览器绘制。
+
+所以，如果要对 DOM 进行修改，则不可以在 useEffect 中设置， useEffect 执行是在浏览器绘制视图之后，接下来又改 DOM ，会导致浏览器再次回流和重绘。而 useLayoutEffect 在 commit 阶段同步执行，阻塞浏览器的绘制，重新进入协调阶段，则页面不会发生画面闪现，抖动的问题。
+
+
+
+#### useContext
+
+useContext 可以代替 `context.Consumer` 来获取 Provider 中保存的 value 值，而不需要创建 `comsumer`。
+
+- 使用 `Context` 可以避免的组件的层层 `props` 嵌套的问题。但是使用 `context.Consumer` 拿值时，会包裹一层 `<Comsumer>` 组件。
+
+使用 useContext hook 可以不用 `<Consumer>` 嵌套。
+
+**使用方式**：获取全局的class 前缀，或者国际化，UI 主题颜色等。
+
+```jsx
+/* 用useContext方式 */
+const DemoContext1 = ()=> {
+  const value = useContext(Context);
+  return <div> my name is { value.name }</div>
+}
+
+/* 用Context.Consumer 方式 */
+const DemoContext2 = ()=>{
+  return <Context.Consumer>
+    { (value)=> <div> my name is { value.name }</div> }
+  </Context.Consumer>
+}
+
+export default ()=>{
+  return <div>
+    <Context.Provider value={{ name:'alien' , age:18 }} >
+      <DemoContext1 />
+      <DemoContext2 />
+    </Context.Provider>
+  </div>
+}
+```
+
+
+
+#### useRef
+
+useRef 用来保持一个对象的引用。接受一个状态 initState 作为初始值，返回一个 ref 对象。该对象的 `.current` 属性就是 ref 对象保持引用的对象（initState），也可以通过 `.current` 来改变引用状态。
+
+```js
+const cur = React.useRef(initState);
+cur.current  // ref element
+```
+
+特点：不论该组件如何更新，该引用都不会被销毁，而一直保存在内存中不变。
+
+**使用方式**：通常用来保持对 DOM 元素的引用，或对一个固定状态的引用。
+
+```jsx
+const DemoUseRef = () =>{
+  const dom = useRef(null);
+  const handerSubmit = () =>{
+    console.log(dom.current);
+    //  打印dom节点：<div>表单组件</div>  
+  }
+  return <div>
+    <div ref={dom}>表单组件</div>
+    {/* ref 标记当前dom节点 */}
+    <button onClick={()=>handerSubmit()}>提交</button> 
+  </div>
+}
+```
+
+
+
+#### useImperativeHandle
+
+用于父组件调用子组件的属性/方法。子组件对外暴露 / 提供部分功能，供父组件调用。
+
+
+
+引：**`React.forwardRef()`** 用于转发 ref。
+
+- 把一个函数组件（有 props, ref 两个参数）传入 forwardRef，会返回一个 绑定好 ref 的新组件。
+
+下面的例子中，通过 forwardRef，Father 传递给 Son 一个 sonRef 对象。而 Son 接收到 sonRef 后，把它绑定在 input DOM 元素上。这样，父组件就持有了一个子组件中 input 元素的引用。
+
+```jsx
+import React,{useRef,forwardRef} from 'react'
+
+const Son = forwardRef((props, ref) => {
+  return <div>
+    <input type="text" defaultValue={props.value} ref={ref} />
+  </div>
+})
+
+const Father = () => {
+  const sonRef = useRef(null);
+  return <div>
+    <Son ref={sonRef} value='子组件' />
+    <button onClick={() => console.log(sonRef.current)}>点击打印 sonRef</button>
+   
+  </div>
+}
+
+// 点击子组件的 button 后，控制栏输出：<input type="text" value="子组件"></input>
+```
+
+> 代码：https://codesandbox.io/s/festive-elion-4w514b?file=/src/App.js
+
+上面的例子可以看到，对于 Son 来说，入参 `ref` 就是父组件发来的，用于调用子组件的引用。但有时子组件需要对父组件暴露更多指定的属性和方法，这是就需要 `useImperativeHandle` 对其打包。
+
+**useImperativeHandle**  接收三个参数：
+
+- ref：父组件传递过来的 ref，也就是将要绑定的 ref 引用。
+- callback：初始化时会调用该函数，返回一个对象，这个对象会绑定在 ref 引用上，被父组件引用。
+- deps：数组，成员是依赖项，当依赖发生改变，就会重新执行 callback，重新添加绑定。
+
+```jsx
+const SonComponent = forwardRef((props, ref) => {
+
+  useImperativeHandle(ref,() => {
+    return {
+      handle1: () => {},
+      handle2: () => {}
+      // ..
+    }
+  }, deps);
+
+}
+```
+
+**使用场景**：当父组件需要使用子组件部分属性和方法，而子组件不希望把自己全部内容都对外暴露时，通过 `forward.Ref` + `useImperativeHandle` 的配合，可以针对性的暴露部分功能。实现父组件调用子组件的部分方法。
+
+- 父组件是一个提交组件，n 个子组件是表单。父组件需要调用全部子组件的提交函数，让子组件把表单信息提交给父组件。
+
+
+
+#### useMemo
+
+```js
+const memoizedValue = useMemo(() => { 
+  // function 
+}, deps);
+```
+
+性能优化。useMemo 会缓存一个 **引用**，这个引用可以是一个具体的值、对象、函数。在初始化组件时，会调用回调函数，并让 `memoizedValue` 缓存回调函数的返回值。当 deps 依赖项不发生变化时，即使发生多次 render，也不会重新执行回调函数，`memoizedValue` 会一直持相同的引用，从而节省相同代码的执行。
+
+- 如果不添加依赖，则 `useMemo` 在每次渲染时都会计算新的值。
+
+**使用场景**：
+
+1. 复杂计算，当创建一个值，会产生高昂的开销（比如计算上千次才会生成变量值），有必要使用 `useMemo`，当然这种场景少之又少。
+2. 通过 props ，父组件给子组件传递局部变量。父组件把这个局部变量通过 useMemo 传递给子组件。不论父组件如何 rerender，该变量不会发生改变。所以通过 `memo()` 的包裹的子组件，会对传入的变量 shallow equal，顺利的避免重新渲染。
+   - 如果传入变量在父组件中，没有通过 useMemo 包裹，仅使用 `memo()`包裹自组件是没用的。加入传入变量是一个对象 object，父组件每次 render 都会导致该 object 重新创建，子组件的 shallow equal 会发现前后 object 地址不一致，从而判定为 props 发生改变，而重新 render。
+
+
+
+#### useCallback
+
+和 useMemo 的功能、触发机制相同，在依赖项变化后，会让 `memoizedValue` 重新缓存引用。不同的是，useMemo 会执行回调函数，并缓存得到的函数返回值；而 useCallback 直接缓存这个回调函数，并不会执行。
+
+```jsx
+const memoizedValue = useCallback(() => { 
+  // function 
+}, deps);
+```
+
+- 这个回调函数并不会执行，而是直接缓存。
+- useCallback 是 useMemo 的一种特例，因为 useMemo 可以引用/缓存任何值（对象、函数），而 useCallback 只能引用/缓存函数。
+
+**使用场景**：父组件给子组件传递一个回调函数时，会把该回调函数通过 useCallback 包裹后再返回。原理同 useMemo 一样，子组件需要用 `memo()` 包裹。这样，即使父组件 render，但被 useCallback 包裹的回调函数不会发生改变，所以子组件通过 shallow equal，顺利避免重新渲染。
+
+
+
+useMemo 和 useCallback 的区别：
+
+相同：
+
+1. 从逻辑上来说，触发逻辑相同，两个 hooks 的返回值 `memoizedValue` 会对一个值保持引用(缓存)。在依赖项不变的情况下，不论组件 render 多少次，都不该引用(缓存)都不会更新。
+2. 从目的上来说，两者都是性能优化，尽可能减少子组件的 render。
+
+不同：
+
+1. 从代码上来说，useMemo 的回调函数会被执行，`memoizedValue` 缓存被执行的返回值；useCallback 的回调函数不会被执行，而是被 `memoizedValue` 直接缓存。
+2. 从效果上来说，useMemo 可以缓存任何值（基本值、对象、函数），而 useCallback 仅能缓存函数。
+3. 从原理上来说，useCallback 是 useMemo 的语法糖，是一个特例。useMemo 除了可以避免子组件重新渲染外，还可以包裹计算复杂的函数，减少复杂计算的执行次数。
+
+5. 
