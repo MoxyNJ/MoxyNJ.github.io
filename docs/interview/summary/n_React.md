@@ -1272,16 +1272,17 @@ useEffect(()=>{
 ```
 
 - 第一个参数为 callback，主体为 useEffect 的回调函数，当依赖发生变化时执行。
-- return destory 销毁函数，作为下一次 callback 执行之前调用，用于清除上一次 callback 产生的副作用。
+  - return 返回 销毁函数，作为下一次 callback 执行之前调用，用于清除上一次 callback 产生的副作用。
+
 - 第二个参数为依赖，是一个数组，当依赖项改变，就会执行上一次的销毁函数，新的回调函数。
   - 如果不添加任何依赖，组件 render 就会触发，挂载 / 更新都会触发；
   - 如果添加空数组 `[]`，组件只有在挂载时触发。
 
-useEffect 是 **异步调用** 的。关联知识：渲染（commit阶段工作流程）：
+useEffect 的执行时机是 **异步** 的，在微任务之后，宏任务之前。
 
-- before mutation：创建微任务，给 `useEffect` 的回调函数设定 normal Scheduler Priority，加入任务队列。
-- layout：绑定 useEffect 的销毁 + 回调函数。
-- commit 完成，等待主线程任务完成（DOM 更新，视图绘制完毕）。异步执行 useEffect 的（上一次）销毁函数 + （本次）回调函数。
+- render 阶段：执行组件函数 → 返回 JSX；
+- commit 阶段：主线程任务执行，将变更渲染到 DOM；
+- effect 阶段：异步执行 useEffect：上一次的销毁函数 + 本次的回调函数；
 
 **useEffect 回调函数不会阻塞浏览器绘制视图。**
 
@@ -1292,20 +1293,21 @@ useEffect 是 **异步调用** 的。关联知识：渲染（commit阶段工作�
 
 
 
-#### useLayoutEffect
+- #### useLayoutEffect
 
-参数逻辑和 useEffect 相同，只是触发时机不同，useLayoutEffect 同步调用。在渲染阶段：
+  参数逻辑和 useEffect 相同，但触发时机不同，useLayoutEffect 同步且阻塞渲染，在 DOM 更新之后、浏览器绘制前立即执行。
 
-- mutation 阶段：执行 useLayoutEffecta 的销毁函数；
-- layout 阶段：执行 useLayoutEffect 的回调函数。
+  - mutation 阶段：React 执行实际 DOM 变更（插入、更新、删除）；
+  - layout 阶段：执行 useLayoutEffect 的清理函数、回调函数（同步）；
+  - 最后执行浏览器的绘制 paint；
 
-**使用方式：**
+  **使用方式：**
 
-- 回调函数：在最后绘制 dom 前，需要对 dom 进行调整，注意不要死循环。
+  - 回调函数：在最后绘制 dom 前，需要对 dom 进行调整，注意不要死循环。
 
 
 
-useEffect 和 useLayoutEffect 的区别：
+**useEffect 和 useLayoutEffect 的区别：**
 
 1. 前者异步调用，后者同步调用（参考在 commit 阶段的处理流程）。
 2. 前者不会阻塞浏览器绘制，后者的回调函数会阻塞浏览器绘制。

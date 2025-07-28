@@ -31,18 +31,31 @@ React 内部实现了一个调度器（scheduler），它：
 
 -   React 运行有三个阶段：调度、协调、渲染
 
-1. 调度阶段：发起更新（setState、useState 等触发）
+1. Scheduler 调度阶段：发起更新（setState、useState 等触发）
     - 创建根节点 FiberRoot Node；创建应用根节点，每个 `render()`，对应 rootFiber。标记哪些 Fiber 节点需要更新。
     - 初始化事件。分配优先级，并放入任务队列中，等待浏览器空闲处理任务。
     - 可随时中断、延迟，并会丢弃低优先级任务。
-2. 协调阶段：从 current 指针指向的 Fiber tree 开始 DFS 递归遍历，构建新的 Fiber tree。
+2. Render 协调阶段：从 current 指针指向的 Fiber tree 开始 DFS 递归遍历，构建新的 Fiber tree。
     - 逐层执行函数组件，调用 Hook（注册 callback、通过链表记录依赖，不执行回调）；
     - 生成子节点，并通过 Diff 新旧 Fiber 节点，记录变更。
     - 遇到同级节点，会相互对比。发现不同则会丢弃包括子节点的所有节点，准备重新构建。
     - 可随时中断（时间切片），此时尚未改动真实 DOM。
-3. 渲染阶段：根据新的 Fiber tree，一次性更新到真实 DOM 上；
+3. Commit 渲染阶段：根据新的 Fiber tree，一次性更新到真实 DOM 上；
     - 并执行副作用触发 useEffect，触发回调等。更新后 current 指针指向新 fiber tree。
     - 不可中断，必须一次性完成，保持 DOM 一致性。
+
+补充：Commit 阶段内部过程：
+
+1. Mutation 阶段：应用 DOM 更改（插入、更新、删除）；
+2. Layout 阶段：同步执行 useLayoutEffect；
+3. Paint（浏览器阶段）：浏览器绘制；
+4. Passive 阶段：异步执行 useEffect；
+
+
+
+
+
+
 
 ### React fiber 的优势在哪里
 
@@ -77,7 +90,7 @@ React 事件系统可分为三个部分：
 
 事件绑定：React 事件会绑定在对应 DOM 元素的 fiber 对象上，具体是 fiber.memoizedProps 属性上。
 
-![截屏2022-08-09 20.44.13](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-09%2020.44.13.png)
+![截屏2022-08-09 20.44.13[30]](images/React_Note.assets/%E6%88%AA%E5%B1%8F2022-08-09%2020.44.13.png)
 
 （1）批量更新
 
@@ -203,7 +216,7 @@ React 用数组来存储多个 useState, useEffect 等 Hook 的状态记录，�
 
 如果写在 f 中，则调用顺序在运行时无法确保，于是造成渲染异常。
 
-### useCallback / useMemo 场景不适合
+### useCallback / useMemo 场景
 
 React 内部的缓存机制：在当前组件的多次 render 过程中缓存“某个值”或“某个函数引用”
 
@@ -216,18 +229,6 @@ React 内部的缓存机制：在当前组件的多次 render 过程中缓存“
 
 -   流程上，要先读取上次缓存的值，然后比较 deps 依赖是否发生变化。
 -   如果变化则执行并更新缓存；如果没有变化则返回上次缓存的值。
-
-### useLayoutEffect / useEffect
-
--   useEffect 是异步的副作用，在 DOM 更新 + 浏览器绘制后执行，不会阻塞页面渲染；
-    -   数据请求，事件监听。渲染优先，可以避免卡顿。
--   useLayoutEffect 是同步的副作用，在 DOM 更新后、浏览器绘制前执行，会阻塞渲染。
-    -   必须用的场景：当一个字组件尺寸变化，父组件需要跟着改变容器尺寸。需要阻塞当前绘制，否则会出现字组件容器撑开，父组件没来得及调整的瞬间，有页面抖动的问题。
-    -   会阻塞浏览器绘制，谨慎使用。
--   requestAnimationFrame 是浏览器提供的异步 api，在下一帧绘制前触发。
-    -   rAF 不会阻塞页面渲染，适合设置一些连续帧动画。
-
-
 
 ### state 的批量更新
 
@@ -294,23 +295,23 @@ HOC（高阶组件）是 React 中一种复用组件逻辑的技术。其本质�
 const [ state , setState ] = useState(initData);
 ```
 
-- state：目的提供给 UI ，作为渲染视图的数据源。
-- setState：改变 state 的函数，推动函数组件渲染的触发函数。
-- initData：获得 state 的初始值。有两种情况，如果是具体值，直接作为初始值。 如果是函数，执行函数的返回值做为初始化值。
+- state：作为渲染视图的数据源，提供给 UI。
+- setState：改变 state 的函数，推动组件 rerender 重新渲染的调度器。
+- initData：state 初始值。两种情况：如果是具体值，直接作为初始值；如果是函数，执行函数的返回值做为初始化值。
 
 **注意事项**：
 
-- **“所谓异步”**，在函数组件一次执行上下文中，state 的值是固定不变的。
-  - 且当前执行上下文中获取不到 setState 改变的值，只有在下一次 render 后才能获取到。
 - **浅对比**，如果 setState 传入了相同的值，组件就不会触发 render 更新。
+- **批处理**，在函数组件一次执行上下文中，state 的值是固定不变的。
+  - 且当前执行上下文中获取不到 setState 改变的值，只有在下一次 render 后才能获取到。
+  - setState 不是异步行为，而是 批处理 + 重渲染延迟。等当前函数调用结束之后，统一调度。会自动批量合并 setState。
+  - 可以通过 flushSync 强制同步触发渲染，立即刷新。
 
 
 
 #### useReducer
 
-useReducer 是 react-hooks 提供的能够在无状态组件中运行的，类似 redux 的功能 api。
-
-useReducer 是 useState hooks 的扩展。在逻辑相对复杂的情况下，可以用 reducer 的 switch 进行判断，通过 dispatch 达到对同一个 state 有不同的更新方法。
+useReducer 是 useState hooks 的扩展，用于处理复杂状态逻辑。用 reducer 的 switch 进行判断，通过 dispatch 达到对同一个 state 有不同的更新方法。
 
 ```js
 const [ state , dispatch ] = useReducer((state, action) => {
@@ -319,14 +320,15 @@ const [ state , dispatch ] = useReducer((state, action) => {
       return newState;
   }
 });
-
 // 使用：
 dispatch({ type: "increment" });
 ```
 
 - state：目的提供给 UI ，作为渲染视图的数据源。
 - dispatch：改变 state 的函数，推动函数组件渲染的触发函数。和 useState 的 setState 一样。
-- reducer：相当于 redux 的 reducer。是一个入参有 旧state + action、内部有 switch 的纯函数。函数内部实现了根据不同的 type，对 state 进行操作并返回，从而更新 state。
+- reducer：相当于 redux 的 reducer。是一个纯函数，入参有 旧state + action、内部有 switch。
+  - 函数内部实现了根据不同的 type，对 state 进行操作并返回，从而更新 state。
+
 
 使用方式：
 
@@ -345,16 +347,16 @@ useEffect(()=>{
 ```
 
 - 第一个参数为 callback，主体为 useEffect 的回调函数，当依赖发生变化时执行。
-- return destory 销毁函数，作为下一次 callback 执行之前调用，用于清除上一次 callback 产生的副作用。
+  - return 返回 销毁函数，作为下一次 callback 执行之前调用，用于清除上一次 callback 产生的副作用。
 - 第二个参数为依赖，是一个数组，当依赖项改变，就会执行上一次的销毁函数，新的回调函数。
   - 如果不添加任何依赖，组件 render 就会触发，挂载 / 更新都会触发；
   - 如果添加空数组 `[]`，组件只有在挂载时触发。
 
-useEffect 是 **异步调用** 的。关联知识：渲染（commit阶段工作流程）：
+useEffect 的执行时机是 **异步** 的，在微任务之后，宏任务之前。
 
-- before mutation：创建微任务，给 `useEffect` 的回调函数设定 normal Scheduler Priority，加入任务队列。
-- layout：绑定 useEffect 的销毁 + 回调函数。
-- commit 完成，等待主线程任务完成（DOM 更新，视图绘制完毕）。异步执行 useEffect 的（上一次）销毁函数 + （本次）回调函数。
+- render 阶段：执行组件函数 → 返回 JSX；
+- commit 阶段：主线程任务执行，将变更渲染到 DOM；
+- effect 阶段：异步执行 useEffect：上一次的销毁函数 + 本次的回调函数；
 
 **useEffect 回调函数不会阻塞浏览器绘制视图。**
 
@@ -367,10 +369,14 @@ useEffect 是 **异步调用** 的。关联知识：渲染（commit阶段工作�
 
 #### useLayoutEffect
 
-参数逻辑和 useEffect 相同，只是触发时机不同，useLayoutEffect 同步调用。在渲染阶段：
+参数逻辑和 useEffect 相同，但触发时机不同，useLayoutEffect 同步且阻塞渲染，在 DOM 更新之后、浏览器绘制前立即执行。
 
-- mutation 阶段：执行 useLayoutEffecta 的销毁函数；
-- layout 阶段：执行 useLayoutEffect 的回调函数。
+- mutation 阶段：React 执行实际 DOM 变更（插入、更新、删除）；
+- layout 阶段：执行 useLayoutEffect 的清理函数、回调函数（同步）；
+- 执行浏览器的绘制 paint 工作 -> 进入空闲阶段；
+  - 在正式绘制前，会触发 requestAnimationFrame。
+
+- 执行 useEffect（异步）；
 
 **使用方式：**
 
@@ -378,12 +384,16 @@ useEffect 是 **异步调用** 的。关联知识：渲染（commit阶段工作�
 
 
 
-useEffect 和 useLayoutEffect 的区别：
+**useEffect 和 useLayoutEffect 的区别**
 
 1. 前者异步调用，后者同步调用（参考在 commit 阶段的处理流程）。
 2. 前者不会阻塞浏览器绘制，后者的回调函数会阻塞浏览器绘制。
 
 所以，如果要对 DOM 进行修改，则不可以在 useEffect 中设置， useEffect 执行是在浏览器绘制视图之后，接下来又改 DOM ，会导致浏览器再次回流和重绘。而 useLayoutEffect 在 commit 阶段同步执行，阻塞浏览器的绘制，重新进入协调阶段，则页面不会发生画面闪现，抖动的问题。
+
+**requestAnimationFrame**：在浏览器当前帧完整结束（JS执行、DOM更新、Paint），下一帧开始之前执行。
+
+- 此时：当前帧已经结束，不再接受新DOM更新。
 
 
 
@@ -565,5 +575,3 @@ useMemo 和 useCallback 的区别：
 1. 从代码上来说，useMemo 的回调函数会被执行，`memoizedValue` 缓存被执行的返回值；useCallback 的回调函数不会被执行，而是被 `memoizedValue` 直接缓存。
 2. 从效果上来说，useMemo 可以缓存任何值（基本值、对象、函数），而 useCallback 仅能缓存函数。
 3. 从原理上来说，useCallback 是 useMemo 的语法糖，是一个特例。useMemo 除了可以避免子组件重新渲染外，还可以包裹计算复杂的函数，减少复杂计算的执行次数。
-
-5. 
