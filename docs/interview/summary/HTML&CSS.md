@@ -73,12 +73,11 @@ IE 的老标准是怪异盒模型，此时的总宽度是 `width`
 
     -   盒子不会主动换行，多个内联块盒子会并排排放，和正常流一样，只有达到边界才会 “被迫” 换行；
 
--   
-    -   如果设置了 width 内容宽度：则该盒子的宽度固定，盒内的文本一但过多，就会纵向溢出盒子。
+-   -   如果设置了 width 内容宽度：则该盒子的宽度固定，盒内的文本一但过多，就会纵向溢出盒子。
     -   如果没有设置 width 内容宽度：则该盒子的宽度随着文本内容的增多而撑开。但如果盒子边界达到容器宽度，文本内容也会在盒子中换行。
 -   总结：` inline-block` 内联块盒，也就是说，是盒子之间内联关系的，内部块级的盒子。
 
-#### 1.2 position 定位方式
+#### position 定位
 
 通过 position 确定盒子在环境中的具体位置、定位方式。参考包含块，通过 top, right, bottom, left 属性确定偏移量。
 
@@ -238,14 +237,14 @@ Block container box，放下一个正常流，那就是 block container box，�
 2. `container` 内失去了 `box1` 的占位，所以高度参考 `box2`，出现了高度坍塌。
     - `box1` 的包含块不是 `container`，而是根元素 `html`。`container` 自然无法包裹脱离正常流的 `box1`。
 
-#### 解决方式一：BFC
+#### 解决：BFC
 
 `container` 设置 `overflow：auto` 其内部创建了一个 BFC，根据规则 BFC 的高度计算需要参考 `float` 元素，所以元素会被撑开。
 
 -   只要让 `container` 成为 `box1` 的包含块即可撑开 `container` 的高度。
 -   因为 `container` 创建了一个 BFC，此时 `box1` 的包含块就是 `container` 了，所以 `container` 自然被 `box1` 撑开
 
-#### 解决方式二：clear float
+#### 解决：clear float
 
 `clear` 清除浮动，会让被清除浮动的元素移动到浮动元素的下方。那么我们通过 CSS 创建一个内容为空的伪元素，然后让他清除浮动，就可以解决这个
 
@@ -1020,7 +1019,7 @@ animation 是 8 个属性的简写：以下属性如果单独写，要加 `anima
 
 ## 问题
 
-### clientX/Y, screenX/Y, offsetX/Y
+### clientX, screenX, offsetX
 
 **这些值都是只读的**。都是检测鼠标位置的参数。
 
@@ -1031,7 +1030,7 @@ animation 是 8 个属性的简写：以下属性如果单独写，要加 `anima
 -   `MouseEvent.pageX / pageY`：鼠标位置与 **文档左上边缘的距离**（单位像素）。
     -   包括文档不可见的部分。
 
-## 判断页面滚动到底部并加载更多数据？
+## 页面滚动底部+加载数据
 
 ```javascript
 window.onscroll = function (e) {
@@ -1142,7 +1141,7 @@ CSS 有 4 种引入方式：
 
 [链接 🔗](/docs/frontEnd/HTML&CSS#5-%E8%AF%AD%E4%B9%89%E7%B1%BB%E6%A0%87%E7%AD%BE)
 
-## initial, inherit, unset, revert 代表什么
+## initial, inherit, unset, revert
 
 ❗️ 放在可继承属性的问题之后。
 
